@@ -1,0 +1,3 @@
+# Sample files are compared byte for byte (PDF xref offsets, duplicate xlsx).
+*.pdf binary
+*.xlsx binary

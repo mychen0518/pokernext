@@ -14,6 +14,8 @@ import type {
   PointsWorkbookSource,
   PointsWorkbookUpload,
 } from '../../index';
+import type {PointsWorkbookSampleName} from './samples/sample_definitions';
+import {loadPointsWorkbookSample} from './samples/sample_files';
 
 /** The format version the fake accepts unless told otherwise. */
 const DEFAULT_FORMAT_VERSION = 'v1';
@@ -47,6 +49,42 @@ export class FakePointsWorkbookSource implements PointsWorkbookSource {
   constructor(options: {acceptedFormatVersion?: string} = {}) {
     this.acceptedFormatVersion =
       options.acceptedFormatVersion ?? DEFAULT_FORMAT_VERSION;
+  }
+
+  /**
+   * Stores one of the committed .xlsx sample files under a file id, read from
+   * disk. A daily sample's data version becomes the file version; an opening
+   * sample, whose PRD format (R15-17-02) has no format version, is stored
+   * under the accepted one with its balance date as the file version.
+   */
+  async provideSample(
+    fileId: string,
+    name: PointsWorkbookSampleName,
+  ): Promise<void> {
+    const sample = await loadPointsWorkbookSample(name);
+    if (sample.kind === 'daily') {
+      this.provide(fileId, {
+        formatVersion: sample.batch.formatVersion,
+        fileVersion: String(sample.batch.dataVersion),
+        rows: sample.rows.map(row => ({
+          rowNumber: row.rowNumber,
+          venueMemberNo: row.venueMemberNo,
+          activityDate: row.activityDate,
+          points: row.addedPoints,
+        })),
+      });
+      return;
+    }
+    const {balanceDate} = sample.description;
+    this.provide(fileId, {
+      fileVersion: balanceDate,
+      rows: sample.rows.map(row => ({
+        rowNumber: row.rowNumber,
+        venueMemberNo: row.venueMemberNo,
+        activityDate: balanceDate,
+        points: row.remainingPoints,
+      })),
+    });
   }
 
   /** Stores a well-formed sample workbook under a file id. */
