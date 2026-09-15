@@ -1,0 +1,33 @@
+/* Page chrome for the dev-only kitchen-sink. Tokens only, like components. */
+
+body {
+  background-color: var(--pn-bg);
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  margin: 0;
+}
+
+.pn-kitchen-sink {
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 1440px;
+  padding: var(--pn-space-8);
+}
+
+.pn-kitchen-sink a {
+  color: var(--pn-text);
+}
+
+.pn-kitchen-sink a:focus-visible {
+  border-radius: var(--pn-radius-sm);
+  outline: var(--pn-focus-ring);
+  outline-offset: var(--pn-focus-offset);
+}
+
+@media (max-width: 768px) {
+  .pn-kitchen-sink {
+    padding: var(--pn-space-5) var(--pn-space-4);
+  }
+}
