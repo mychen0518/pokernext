@@ -10,17 +10,27 @@
     "lint": "gts lint",
     "lint:boundaries": "depcruise --config .dependency-cruiser.cjs apps packages tooling",
     "prepare": "husky",
-    "test": "vitest run --passWithNoTests",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "test:e2e": "pnpm -r --if-present run test:e2e",
+    "test:unit": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
+    "@playwright/test": "^1.63.0",
+    "@types/pg": "^8.23.1",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "dependency-cruiser": "^18.3.0",
     "eslint": "^9.39.5",
     "eslint-plugin-check-file": "^3.3.2",
     "gts": "^7.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.5.1",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
+    "tsx": "^4.23.13",
     "typescript": "~6.0.3",
     "vitest": "^5.0.0"
   }

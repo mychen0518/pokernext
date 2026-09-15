@@ -11,3 +11,8 @@ Thumbs.db
 tooling/demo/recordings/
 Coding Guide/
 .worktrees/
+.data/
+test-results/
+playwright-report/
+blob-report/
+tooling/demo/reports/

@@ -5,5 +5,13 @@
   "type": "module",
   "exports": {
     ".": "./index.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "embedded-postgres": "16.9.0-beta.15",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10"
   }
 }

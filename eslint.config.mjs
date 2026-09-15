@@ -26,6 +26,9 @@ const NO_DEFAULT_EXPORT = [
 // Anything not listed here must be snake_case with named exports only.
 const NEXT_SPECIAL_FILES =
   'apps/web/app/**/{page,layout,template,loading,error,default,not-found,global-error}.tsx';
+// CSS Modules are default-exported by Vite and Next.js; the ambient module
+// declaration has to say so.
+const CSS_MODULES_DECLARATION = 'css_modules.d.ts';
 const TOOL_CONFIG_FILES = [
   '{next,drizzle,playwright,vitest}.config.ts',
   '{apps,packages,tooling}/*/{next,drizzle,playwright,vitest}.config.ts',
@@ -74,6 +77,10 @@ export default [
       'check-file/filename-naming-convention': 'off',
       'no-restricted-syntax': ['error', NO_EXPORT_ASSIGNMENT],
     },
+  },
+  {
+    files: [CSS_MODULES_DECLARATION],
+    rules: {'no-restricted-syntax': ['error', NO_EXPORT_ASSIGNMENT]},
   },
   {
     files: TOOL_CONFIG_FILES,

@@ -38,6 +38,9 @@ exactly these paths; anything else is a finding:
   `template.tsx`, `loading.tsx`, `error.tsx`, `default.tsx`, `not-found.tsx`,
   `global-error.tsx`. The default export is a one-line re-export of a named
   component defined in a `snake_case` file.
+- The workspace-root ambient declaration `css_modules.d.ts`, whose
+  `declare module '*.module.css'` block default-exports the class map
+  because Vite and Next.js load CSS Modules that way.
 - Tool config files at a package or workspace root: `next.config.ts`,
   `drizzle.config.ts`, `playwright.config.ts`, `vitest.config.ts`.
 
