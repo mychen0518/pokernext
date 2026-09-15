@@ -1,0 +1,70 @@
+{
+  "pages": [
+    {
+      "id": "player_home",
+      "title": "玩家工作區首頁",
+      "formal": {
+        "host": "player",
+        "path": "/player",
+        "signInAs": {"workspace": "player"}
+      },
+      "prototype": {"route": "#/player/home"},
+      "viewports": ["mobile"]
+    },
+    {
+      "id": "venue_home",
+      "title": "場館工作區首頁",
+      "formal": {
+        "host": "work",
+        "path": "/venue",
+        "signInAs": {"workspace": "venue"}
+      },
+      "prototype": {"route": "#/venue/overview"},
+      "viewports": ["desktop"]
+    },
+    {
+      "id": "admin_home",
+      "title": "管理工作區首頁",
+      "formal": {
+        "host": "work",
+        "path": "/admin",
+        "signInAs": {"workspace": "admin"}
+      },
+      "prototype": {"route": "#/admin/dashboard"},
+      "viewports": ["desktop"]
+    },
+    {
+      "id": "platform_home",
+      "title": "平台治理工作區首頁",
+      "formal": {
+        "host": "work",
+        "path": "/platform",
+        "signInAs": {"workspace": "platform"}
+      },
+      "prototype": {"route": "#/platform/governance"},
+      "viewports": ["desktop"]
+    },
+    {
+      "id": "staff_home",
+      "title": "接待工作區首頁",
+      "formal": {
+        "host": "work",
+        "path": "/staff",
+        "signInAs": {"workspace": "staff"}
+      },
+      "prototype": {"route": "#/staff/tasks"},
+      "viewports": ["mobile"]
+    },
+    {
+      "id": "agent_home",
+      "title": "Agent 工作區首頁",
+      "formal": {
+        "host": "work",
+        "path": "/agent",
+        "signInAs": {"workspace": "agent"}
+      },
+      "prototype": {"route": "#/agent/customers"},
+      "viewports": ["desktop"]
+    }
+  ]
+}

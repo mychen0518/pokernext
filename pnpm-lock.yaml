@@ -305,6 +305,22 @@ importers:
       '@pokernext/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@pokernext/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@pokernext/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.63.0
+        version: 1.63.0
+      pixelmatch:
+        specifier: ^7.2.0
+        version: 7.2.0
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
 
 packages:
 
