@@ -34,6 +34,15 @@ const PG_CTL_TIMEOUT_SECONDS = 120;
 // otherwise pick a Big5 code page).
 const INITDB_LOCALE_FLAGS = ['--encoding=UTF8', '--locale=C'];
 
+/** The optional dependency holding the Postgres 16 binaries for Windows. */
+const WINDOWS_BINARIES_PACKAGE = '@embedded-postgres/windows-x64';
+
+/** The binary paths `@embedded-postgres/windows-x64` exports. */
+interface WindowsPostgresBinaries {
+  readonly initdb: string;
+  readonly pg_ctl: string;
+}
+
 /** A database server this process may have started. */
 export interface DatabaseServer {
   /** The URL of the purpose's database on this server. */
@@ -140,8 +149,13 @@ async function startOnWindows(
   initialised: boolean,
   log: string[],
 ): Promise<() => Promise<void>> {
-  const {initdb, pg_ctl: pgCtl} =
-    await import('@embedded-postgres/windows-x64');
+  // The package is an optional, Windows-only dependency, so it is absent (with
+  // its types) on other platforms; the variable specifier keeps TypeScript
+  // from resolving it there. Its exports are the binary paths described by
+  // WindowsPostgresBinaries, so the cast is safe.
+  const {initdb, pg_ctl: pgCtl} = (await import(
+    WINDOWS_BINARIES_PACKAGE
+  )) as WindowsPostgresBinaries;
   if (!initialised) {
     await runInitdb(initdb, settings, databaseDir, log);
   }

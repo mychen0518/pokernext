@@ -37,6 +37,16 @@ jobs:
         run: pnpm exec playwright install chromium
       - name: Check
         run: pnpm check
+      - name: Keep Playwright results of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-windows
+          path: |
+            **/test-results/
+            !**/node_modules/**
+          retention-days: 7
+          if-no-files-found: ignore
 
   check-linux:
     name: pnpm check (linux, Postgres service)
@@ -71,3 +81,13 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Check
         run: pnpm check
+      - name: Keep Playwright results of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-linux
+          path: |
+            **/test-results/
+            !**/node_modules/**
+          retention-days: 7
+          if-no-files-found: ignore
