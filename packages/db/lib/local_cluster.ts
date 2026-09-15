@@ -9,7 +9,7 @@ import {randomBytes} from 'node:crypto';
 import {existsSync} from 'node:fs';
 import {mkdir, readFile, rm, writeFile} from 'node:fs/promises';
 import {platform, tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import EmbeddedPostgres from 'embedded-postgres';
@@ -77,7 +77,10 @@ async function startLocalCluster(
     if (!initialised) {
       // initdb refuses a non-empty directory left by an interrupted init.
       await rm(databaseDir, {recursive: true, force: true});
-      await mkdir(databaseDir, {recursive: true});
+      // Only the parent: initdb creates the data directory itself. On an
+      // administrator account initdb runs with a restricted token, which may
+      // not change the permissions of a directory this process created.
+      await mkdir(dirname(databaseDir), {recursive: true});
     }
     if (platform() === 'win32') {
       return await startOnWindows(settings, databaseDir, initialised, log);
