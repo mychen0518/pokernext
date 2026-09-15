@@ -245,6 +245,9 @@ importers:
       '@playwright/test':
         specifier: ^1.63.0
         version: 1.63.0
+      '@pokernext/dev_process':
+        specifier: workspace:*
+        version: link:../../packages/dev_process
 
   packages/app:
     dependencies:
@@ -276,6 +279,8 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
+
+  packages/dev_process: {}
 
   packages/domain: {}
 
@@ -312,6 +317,9 @@ importers:
       '@pokernext/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@pokernext/dev_process':
+        specifier: workspace:*
+        version: link:../../packages/dev_process
       '@pokernext/domain':
         specifier: workspace:*
         version: link:../../packages/domain

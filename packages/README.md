@@ -43,7 +43,8 @@ rest in `lib/`.
 `apps/web` → `packages/app` → `packages/domain`, `packages/db`,
 `packages/ports`.
 
-- `apps/web` imports `packages/app` and `packages/ui` only.
+- `apps/web` imports `packages/app` and `packages/ui` only; its `tests/` may
+  also import `packages/dev_process`.
 - `packages/domain` imports no other workspace package and no React, Next or
   database library.
 - `packages/ui` imports no other workspace package.
@@ -79,6 +80,11 @@ rest in `lib/`.
   removes both outside `next dev` for Turbopack and webpack alike, and
   `apps/web/tests/production_bundles_exclude_dev_tools.test.ts` builds with
   both bundlers and checks the output.
+- `packages/dev_process` (wait until a local server answers, check a port,
+  stop a process tree) is development tooling: only `tooling/` and test code
+  may import it, and it imports no other workspace package. It exists because
+  `tooling/demo` and `apps/web/tests/support` both start and stop `next dev`
+  but may not import each other.
 - Nothing imports `apps/*` or `tooling/*`.
 
 ## Checking

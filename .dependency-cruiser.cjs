@@ -246,6 +246,22 @@ module.exports = {
       to: {path: '^packages/ui/kitchen_sink/'},
     },
     {
+      name: 'dev-process-only-in-tooling-and-tests',
+      comment:
+        'packages/dev_process (starting, waiting on and stopping local servers) is development tooling: only tooling/ and test code may import it, so it never reaches production code or a bundle.',
+      severity: 'error',
+      from: {pathNot: ['^tooling/', TEST_CODE, '^packages/dev_process/']},
+      to: {path: '^packages/dev_process/'},
+    },
+    {
+      name: 'dev-process-is-independent',
+      comment:
+        'packages/dev_process may not import any other workspace package, so tooling and every test layer can share it without new layering edges.',
+      severity: 'error',
+      from: {path: '^packages/dev_process/'},
+      to: {path: '^(apps|tooling)/|^packages/(?!dev_process/)[^/]+/'},
+    },
+    {
       name: 'nothing-imports-apps-or-tooling',
       comment:
         'apps/* and tooling/* are leaves: no other package may import them.',

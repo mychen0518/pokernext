@@ -6,20 +6,23 @@
  * `DATABASE_URL`, until Ctrl+C, which stops Next and Postgres.
  */
 
-import {type ChildProcess, spawn, spawnSync} from 'node:child_process';
+import {type ChildProcess, spawn} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {createConnection} from 'node:net';
 import {fileURLToPath} from 'node:url';
 
 import {ensureDemoAccounts} from '@pokernext/app/demo';
 import {LOCAL_CLUSTERS, startDatabaseServer} from '@pokernext/db/local_cluster';
 import {migrateDatabase} from '@pokernext/db/migrate';
+import {
+  isListening,
+  stopProcessTree,
+  waitUntilAnswering,
+} from '@pokernext/dev_process';
 
 import {STOP_MESSAGE, STOP_ON_IPC_ENV} from './demo_ipc';
 
 const WEB_ROOT = fileURLToPath(new URL('../../../apps/web/', import.meta.url));
 const DEFAULT_PORT = 3000;
-const READY_TIMEOUT_MILLISECONDS = 180_000;
 /** Next output of the demo, apart from e2e runs and the build test. */
 const DEMO_DIST_DIR = '.next/demo';
 
@@ -106,7 +109,10 @@ export async function runDemo(
       );
     }
     next = spawnNext(port, server.url);
-    await waitUntilReady(`http://127.0.0.1:${port}/api/health`, next);
+    await waitUntilAnswering(
+      {child: next, name: 'next dev'},
+      `http://127.0.0.1:${port}/api/health`,
+    );
   } catch (error: unknown) {
     await stop();
     throw error;
@@ -145,54 +151,6 @@ function spawnNext(port: number, databaseUrl: string): ChildProcess {
       stdio: ['ignore', 'inherit', 'inherit'],
     },
   );
-}
-
-/** Polls the URL until it answers 200, failing fast if Next exits. */
-async function waitUntilReady(url: string, next: ChildProcess): Promise<void> {
-  const deadline = Date.now() + READY_TIMEOUT_MILLISECONDS;
-  while (Date.now() < deadline) {
-    if (next.exitCode !== null) {
-      throw new Error(`next dev exited with code ${next.exitCode}.`);
-    }
-    try {
-      const response = await fetch(url);
-      if (response.status === 200) {
-        return;
-      }
-    } catch {
-      // Not listening yet.
-    }
-    await new Promise(resolve => {
-      setTimeout(resolve, 500);
-    });
-  }
-  throw new Error(
-    `${url} did not answer 200 within ${READY_TIMEOUT_MILLISECONDS} ms.`,
-  );
-}
-
-/** Stops a process and every process it started. */
-function stopProcessTree(child: ChildProcess): void {
-  if (child.pid === undefined || child.exitCode !== null) {
-    return;
-  }
-  if (process.platform === 'win32') {
-    spawnSync('taskkill', ['/pid', String(child.pid), '/t', '/f']);
-    return;
-  }
-  child.kill('SIGTERM');
-}
-
-/** Tells whether something accepts TCP connections on the address. */
-function isListening(host: string, port: number): Promise<boolean> {
-  return new Promise(resolve => {
-    const socket = createConnection({host, port});
-    socket.once('connect', () => {
-      socket.destroy();
-      resolve(true);
-    });
-    socket.once('error', () => resolve(false));
-  });
 }
 
 function log(message: string): void {

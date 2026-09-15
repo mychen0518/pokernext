@@ -21,6 +21,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0"
+    "@playwright/test": "^1.63.0",
+    "@pokernext/dev_process": "workspace:*"
   }
 }
