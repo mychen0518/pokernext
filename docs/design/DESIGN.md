@@ -104,6 +104,9 @@
 }
 ```
 
+Noto Sans TC 與 Noto Serif TC 由 `@pokernext/ui/fonts.css` 自帶（Fontsource
+字檔隨 app 打包，只載入下表用到的字重），不向任何外部字體主機請求。
+
 | Token | 用途 | 字體 | 大小 / 行高 / 字重 |
 |---|---|---|---|
 | `display-xl` | 手機 Hero 目的地標題 | serif | 64 / 1.1 / 700 |
