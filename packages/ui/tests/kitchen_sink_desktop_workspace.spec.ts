@@ -6,7 +6,12 @@
 
 import {expect, test} from '@playwright/test';
 
-import {openKitchenSinkPage} from './kitchen_sink';
+import {
+  openKitchenSinkPage,
+  skipScreenshotsWithoutBaselines,
+} from './kitchen_sink';
+
+skipScreenshotsWithoutBaselines();
 
 const PAGE_TYPES = ['overview', 'operation', 'case'] as const;
 const WIDTHS = [1440, 1280, 1024] as const;

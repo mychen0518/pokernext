@@ -91,6 +91,11 @@ Baselines live in `tests/screenshots/<spec file>/<name>-<project>-<platform>.png
 and are committed. A test fails when more than 200 pixels (or 1% of the
 image, whichever is smaller) differ by more than the per-pixel threshold.
 Fonts differ per operating system, so each platform keeps its own baselines.
+Baselines exist for `win32` only (`SCREENSHOT_BASELINE_PLATFORMS` in
+`tests/kitchen_sink.ts`). On any other OS the screenshot specs skip with
+that reason, so `pnpm test` stays green there while the keyboard, layout and
+accessibility specs still run; CI compares screenshots in its Windows job.
+To add an OS, list it there and run `test:e2e:update` on it.
 
 Updating baselines is always explicit: run `test:e2e:update`, look at every
 changed PNG in the diff, and commit them with the change that caused them.
@@ -107,7 +112,8 @@ changed PNG in the diff, and commit them with the change that caused them.
    catalogue padding and `<main>` wrapper.
 3. Add `tests/kitchen_sink_<name>.spec.ts`: open the page with
    `openKitchenSinkPage(page, '<id>', {state: 'empty'})` from
-   `tests/kitchen_sink.ts` and call `toHaveScreenshot('<name>.png')`. For
+   `tests/kitchen_sink.ts` and call `toHaveScreenshot('<name>.png')`; call
+   `skipScreenshotsWithoutBaselines()` at the top of the spec. For
    extra widths (1280, 1024), call `page.setViewportSize()` before the
    screenshot and give each width its own name, and skip the project that
    does not apply with `test.skip()`.

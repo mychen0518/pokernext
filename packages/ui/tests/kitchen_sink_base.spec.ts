@@ -8,7 +8,12 @@
 import {expect, test} from '@playwright/test';
 import type {Page} from '@playwright/test';
 
-import {openKitchenSinkPage} from './kitchen_sink';
+import {
+  openKitchenSinkPage,
+  skipScreenshotsWithoutBaselines,
+} from './kitchen_sink';
+
+skipScreenshotsWithoutBaselines();
 
 /** Pseudo-classes the Button section shows as columns of the same name. */
 const FORCED_STATES = ['hover', 'focus-visible'] as const;
