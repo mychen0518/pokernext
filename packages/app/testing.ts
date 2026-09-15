@@ -21,7 +21,8 @@ export type {
   TakesEffectOnceCheck,
 } from './lib/testing/concurrency';
 // For HTTP-level test servers that run the app on a cloned database: the same
-// demo account creation as `@pokernext/app/demo`.
+// demo account creation as `@pokernext/app/demo`. dependency-cruiser lets only
+// demo.ts and this test-only wiring reach lib/demo_accounts.ts.
 export {ensureDemoAccounts as ensureDemoAccountsInDatabase} from './lib/demo_accounts';
 export type {DemoAccountsEnsured} from './lib/demo_accounts';
 export {given, LegalOperations, PreconditionRefused} from './lib/testing/given';

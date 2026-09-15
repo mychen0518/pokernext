@@ -58,9 +58,10 @@ rest in `lib/`.
 - `packages/db/local_cluster.ts` (embedded Postgres) is imported only from
   `tooling/` and tests, so production code never loads embedded-postgres.
 - `packages/app/demo.ts` (demo account creation) is imported only from
-  `tooling/demo`; tests reach the same implementation through
-  `@pokernext/app/testing` (`given(app).demoAccount(…)`,
-  `ensureDemoAccountsInDatabase`).
+  `tooling/demo`. Its implementation `lib/demo_accounts.ts` is reachable
+  only through `demo.ts` and the test-only `@pokernext/app/testing` wiring,
+  so `index.ts` and production use-cases cannot create accounts; tests reach
+  it through `given(app).demoAccount(…)` and `ensureDemoAccountsInDatabase`.
 - `packages/app/dev.ts` (every account, no actor, for the role switcher) is
   imported only from `apps/web/dev_tools/role_switcher.tsx` and tests, never
   from the production stub; its implementation

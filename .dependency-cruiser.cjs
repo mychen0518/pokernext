@@ -158,6 +158,14 @@ module.exports = {
       to: {path: '^packages/app/demo\\.ts$'},
     },
     {
+      name: 'demo-accounts-behind-demo-entry',
+      comment:
+        'packages/app/lib/demo_accounts.ts (demo account creation) is reachable only through packages/app/demo.ts and the test-only @pokernext/app/testing wiring, never from index.ts or any production use-case.',
+      severity: 'error',
+      from: {pathNot: ['^packages/app/demo\\.ts$', APP_TEST_WIRING]},
+      to: {path: '^packages/app/lib/demo_accounts\\.ts$'},
+    },
+    {
       name: 'dev-entry-only-from-role-switcher',
       comment:
         'packages/app/dev.ts lists every account without an actor for the development role switcher: only the real switcher (apps/web/dev_tools/role_switcher.tsx, not its production stub) and test code may import it, so the listing never reaches the production App or bundle.',
