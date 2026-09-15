@@ -15,6 +15,7 @@ import {
 import {type App, createApp} from '../app';
 import {type AuditEntry, readAuditEntries} from '../audit_log';
 import {type DemoAccountsEnsured, ensureDemoAccountsOn} from '../demo_accounts';
+import type {HealthCheck} from '../health_check';
 
 /** How to set up a test app. */
 export interface TestAppOptions extends ControllableClockOptions {
@@ -45,6 +46,11 @@ export interface TestApp extends App {
    * observe the log through this instead of reading tables.
    */
   auditLog(): Promise<AuditEntry[]>;
+  /**
+   * Reads recorded health checks, oldest first, optionally for one request
+   * key. Test-only: the production `App` has no listing.
+   */
+  healthCheckRecords(filter?: {requestKey?: string}): Promise<HealthCheck[]>;
   /** Closes connections and drops the test's database. */
   close(): Promise<void>;
 }
@@ -71,6 +77,7 @@ export async function createTestApp(
     databaseUrl: testDatabase.url,
     ensureDemoAccounts: () => ensureDemoAccountsOn(database, clock),
     auditLog: () => readAuditEntries(database),
+    healthCheckRecords: filter => database.healthChecks.list(filter),
     close: async () => {
       await app.close();
       await testDatabase.drop();

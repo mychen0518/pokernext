@@ -19,7 +19,8 @@ export type {
   HealthCheckRecorded,
   HealthCheckRejected,
   HealthCheckUseCases,
-  ListHealthChecksRequest,
+  HealthProbeFailed,
+  HealthProbePassed,
   RecordHealthCheckRequest,
 } from './lib/health_check';
 export {parseAccountId, parseSessionToken} from './lib/identifiers';

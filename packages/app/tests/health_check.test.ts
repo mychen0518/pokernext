@@ -1,6 +1,6 @@
 /**
  * @fileoverview 健康檢查：請求經 use-case 層寫入真實資料庫並讀回；同一請求識別只留
- * 一筆紀錄，並行重送也一樣。
+ * 一筆紀錄，並行重送也一樣。對外的探測只回報寫入並讀回的結果，不帶出任何已存紀錄。
  */
 
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
@@ -24,7 +24,7 @@ describe('健康檢查', () => {
     await app.close();
   });
 
-  it('記錄一次健康檢查後，可以經應用服務讀回同一筆紀錄與記錄時間', async () => {
+  it('記錄一次健康檢查後，回傳從資料庫讀回的同一筆紀錄與記錄時間', async () => {
     const result = await app.healthCheck.record({requestKey: 'hc-1'});
 
     expect(result).toEqual({
@@ -34,7 +34,7 @@ describe('健康檢查', () => {
         recordedAt: new Date('2026-09-11T00:00:00Z'),
       },
     });
-    expect(await app.healthCheck.list({requestKey: 'hc-1'})).toEqual([
+    expect(await app.healthCheckRecords({requestKey: 'hc-1'})).toEqual([
       {requestKey: 'hc-1', recordedAt: new Date('2026-09-11T00:00:00Z')},
     ]);
   });
@@ -52,7 +52,7 @@ describe('健康檢查', () => {
         recordedAt: new Date('2026-09-11T00:00:00Z'),
       },
     });
-    expect(await app.healthCheck.list()).toHaveLength(1);
+    expect(await app.healthCheckRecords()).toHaveLength(1);
   });
 
   it('一天後以新的請求識別送出，記錄時間是推進後的時鐘時間', async () => {
@@ -61,7 +61,7 @@ describe('健康檢查', () => {
 
     await app.healthCheck.record({requestKey: 'hc-2'});
 
-    expect(await app.healthCheck.list()).toEqual([
+    expect(await app.healthCheckRecords()).toEqual([
       {requestKey: 'hc-1', recordedAt: new Date('2026-09-11T00:00:00Z')},
       {requestKey: 'hc-2', recordedAt: new Date('2026-09-12T00:00:00Z')},
     ]);
@@ -71,7 +71,7 @@ describe('健康檢查', () => {
     const result = await app.healthCheck.record({requestKey: '   '});
 
     expect(result).toEqual({status: 'rejected', reason: 'invalidRequestKey'});
-    expect(await app.healthCheck.list()).toEqual([]);
+    expect(await app.healthCheckRecords()).toEqual([]);
   });
 
   it('同一請求識別並行送出 20 次，只留下一筆紀錄，也只有一次回報為新紀錄', async () => {
@@ -79,7 +79,7 @@ describe('健康檢查', () => {
       times: 20,
       attempt: () => app.healthCheck.record({requestKey: 'hc-retry'}),
       countEffects: async () =>
-        (await app.healthCheck.list({requestKey: 'hc-retry'})).length,
+        (await app.healthCheckRecords({requestKey: 'hc-retry'})).length,
     });
 
     const statuses = attempts.fulfilled.map(result => result.status);
@@ -95,6 +95,52 @@ describe('健康檢查', () => {
       app.healthCheck.record({requestKey: `hc-${attempt}`}),
     );
 
-    expect(await app.healthCheck.list()).toHaveLength(5);
+    expect(await app.healthCheckRecords()).toHaveLength(5);
+  });
+});
+
+describe('健康檢查探測', () => {
+  let app: TestApp;
+
+  beforeEach(async () => {
+    app = await createTestApp({start: '2026-09-11T09:00:00+09:00'});
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('探測寫入一筆新紀錄並讀回，只回報健康與檢查時間，不帶出任何紀錄內容', async () => {
+    await given(app).healthCheckRecorded({requestKey: 'earlier-check'});
+
+    const probed = await app.healthCheck.probe();
+
+    expect(probed).toEqual({
+      status: 'healthy',
+      checkedAt: new Date('2026-09-11T00:00:00Z'),
+    });
+    expect(await app.healthCheckRecords()).toHaveLength(2);
+  });
+
+  it('連續探測兩次，各自寫入並讀回自己的紀錄', async () => {
+    await app.healthCheck.probe();
+    await app.clock.advanceMinutes(1);
+
+    const second = await app.healthCheck.probe();
+
+    expect(second).toEqual({
+      status: 'healthy',
+      checkedAt: new Date('2026-09-11T00:01:00Z'),
+    });
+    expect(await app.healthCheckRecords()).toHaveLength(2);
+  });
+});
+
+describe('資料庫無法使用時的健康檢查探測', () => {
+  it('資料庫連線已關閉時，探測回報不健康而不是丟出錯誤', async () => {
+    const app = await createTestApp();
+    await app.close();
+
+    expect(await app.healthCheck.probe()).toEqual({status: 'unhealthy'});
   });
 });

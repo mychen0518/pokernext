@@ -1,33 +1,20 @@
 /**
- * @fileoverview HTTP boundary of the health check: `POST /api/health` records
- * a health check for a request key and returns the stored record;
- * `GET /api/health[?requestKey=…]` lists recorded health checks.
+ * @fileoverview HTTP boundary of the health check: `GET /api/health` probes
+ * the application by writing a health check to the database and reading it
+ * back, and answers only whether that worked. It lists no stored record and
+ * accepts no input.
  */
 
 import {getRuntimeApp} from '../../../lib/runtime_app';
 
-/** Records a health check once per request key. */
-export async function POST(request: Request): Promise<Response> {
-  const body: unknown = await request.json().catch(() => undefined);
-  const requestKey =
-    typeof body === 'object' &&
-    body !== null &&
-    'requestKey' in body &&
-    typeof body.requestKey === 'string'
-      ? body.requestKey
-      : '';
-  const outcome = await getRuntimeApp().healthCheck.record({requestKey});
-  const status = {recorded: 201, alreadyRecorded: 200, rejected: 400}[
-    outcome.status
-  ];
-  return Response.json(outcome, {status});
-}
+// Every request probes the database; never prerender or cache the answer.
+export const dynamic = 'force-dynamic';
 
-/** Lists recorded health checks, optionally for one request key. */
-export async function GET(request: Request): Promise<Response> {
-  const requestKey = new URL(request.url).searchParams.get('requestKey');
-  const records = await getRuntimeApp().healthCheck.list({
-    requestKey: requestKey ?? undefined,
+/** Answers 200 when the database round trip worked, 503 otherwise. */
+export async function GET(): Promise<Response> {
+  const outcome = await getRuntimeApp().healthCheck.probe();
+  return Response.json(outcome, {
+    status: outcome.status === 'healthy' ? 200 : 503,
+    headers: {'Cache-Control': 'no-store'},
   });
-  return Response.json({records});
 }
