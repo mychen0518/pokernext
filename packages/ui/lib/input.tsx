@@ -3,6 +3,8 @@
  * optional prefix (such as a currency) and an error line.
  */
 
+'use client';
+
 import {useId} from 'react';
 import type {InputHTMLAttributes, ReactNode} from 'react';
 

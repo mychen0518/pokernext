@@ -5,6 +5,12 @@
 import {drizzle} from 'drizzle-orm/node-postgres';
 import pg from 'pg';
 
+import {
+  type AccountStore,
+  createAccountStore,
+  createSessionStore,
+  type SessionStore,
+} from './accounts';
 import {createHealthCheckStore, type HealthCheckStore} from './health_checks';
 
 /** How to connect. */
@@ -17,6 +23,8 @@ export interface ConnectOptions {
 /** A pooled connection to one database and the stores that use it. */
 export interface Database {
   readonly healthChecks: HealthCheckStore;
+  readonly accounts: AccountStore;
+  readonly sessions: SessionStore;
   /** Closes every pooled connection. */
   close(): Promise<void>;
 }
@@ -34,6 +42,8 @@ export function connectDatabase(options: ConnectOptions): Database {
   const db = drizzle({client: pool});
   return {
     healthChecks: createHealthCheckStore(db),
+    accounts: createAccountStore(db),
+    sessions: createSessionStore(db),
     close: () => pool.end(),
   };
 }

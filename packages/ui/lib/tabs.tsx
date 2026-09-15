@@ -4,6 +4,8 @@
  * arrow keys move and select).
  */
 
+'use client';
+
 import {useId, useRef} from 'react';
 import type {KeyboardEvent, ReactNode} from 'react';
 

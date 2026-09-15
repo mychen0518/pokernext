@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@pokernext/app": "workspace:*"
+    "@pokernext/app": "workspace:*",
+    "@pokernext/db": "workspace:*"
   }
 }

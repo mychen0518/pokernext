@@ -19,6 +19,10 @@ export type {
   ParallelAttempts,
   TakesEffectOnceCheck,
 } from './lib/testing/concurrency';
+// For HTTP-level test servers that run the app on a cloned database: the same
+// demo account creation as `@pokernext/app/demo`.
+export {ensureDemoAccounts as ensureDemoAccountsInDatabase} from './lib/demo_accounts';
+export type {DemoAccountsEnsured} from './lib/demo_accounts';
 export {given, LegalOperations, PreconditionRefused} from './lib/testing/given';
 export type {HealthCheckRecordedOptions} from './lib/testing/given';
 export {createTestApp} from './lib/testing/test_app';

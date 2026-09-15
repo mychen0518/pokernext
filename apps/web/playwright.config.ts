@@ -16,5 +16,7 @@ export default defineConfig({
   workers: 1,
   timeout: 60_000,
   reporter: process.env.CI ? 'github' : 'list',
+  // API tests use the address; workspace tests use the player and
+  // work-account hosts on the same port (tests/support/hosts.ts).
   use: {baseURL: `http://127.0.0.1:${PORT}`},
 });

@@ -93,6 +93,12 @@ frontier 預期：23、24、25、26、28、29、30。完成：劇本 13 步全�
 4. 確認這批每張票都補了自己那段 demo seed（呼叫 use-case，不直接寫 SQL），並解除 `demo:script` 裡對應步驟的 `test.fixme`。
 5. commit；`pnpm demo:script` 錄影存 `tooling/demo/recordings/<batch>.webm`。
 
+## `pnpm demo` 怎麼用
+
+- 在 repo 根目錄執行 `pnpm demo`：起本機 demo 資料庫（embedded Postgres 16，資料在 `.data/postgres-demo`、port 55433，與測試用的 `.data/postgres-test` 分開；設了 `DATABASE_URL` 就改用它）、跑 migration、確保六個 demo 帳號（重跑不重複建立），再啟動 `next dev`。
+- 開 `http://player.localhost:3000/`（玩家 host）或 `http://work.localhost:3000/`（工作帳號 host），按「切換角色」選帳號。port 以 `DEMO_PORT` 改，host 名以 `POKERNEXT_PLAYER_HOST`／`POKERNEXT_WORK_HOST` 改。
+- Ctrl+C 會停掉 Next.js 與 Postgres；資料保留到下次執行。
+
 ## 遇到問題時
 
 - 票寫得不夠 agent 動手：`/triage 把 <NN> 票 grill 到 ready-for-agent`，它會用 grilling + domain-modeling 問你。

@@ -5,6 +5,17 @@
  * entry points so production code never loads them.
  */
 
+export type {
+  AccountRecord,
+  AccountStore,
+  ActiveSessionRecord,
+  SessionEnding,
+  SessionRecord,
+  SessionStore,
+  StoredAccountKind,
+  StoredHostKind,
+  StoredWorkspace,
+} from './lib/accounts';
 export {connectDatabase} from './lib/database';
 export type {ConnectOptions, Database} from './lib/database';
 export {resolveDatabaseUrl} from './lib/config';

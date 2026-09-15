@@ -6,6 +6,7 @@
   "prettier": "gts/.prettierrc.json",
   "scripts": {
     "check": "pnpm typecheck && pnpm lint && pnpm lint:boundaries && pnpm test",
+    "demo": "tsx tooling/demo/main.ts",
     "fix": "gts fix",
     "lint": "gts lint",
     "lint:boundaries": "depcruise --config .dependency-cruiser.cjs apps packages tooling",

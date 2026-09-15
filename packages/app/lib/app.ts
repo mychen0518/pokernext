@@ -10,10 +10,12 @@ import {
 } from '@pokernext/db';
 import type {Clock, ExternalPorts} from '@pokernext/ports';
 
+import {type AccountUseCases, createAccountUseCases} from './accounts';
 import {
   createHealthCheckUseCases,
   type HealthCheckUseCases,
 } from './health_check';
+import {createSessionUseCases, type SessionUseCases} from './sessions';
 import {SYSTEM_CLOCK} from './system_clock';
 import {createUnconfiguredPorts} from './unconfigured_ports';
 
@@ -27,6 +29,8 @@ export interface AppDependencies {
 /** The application: every use-case, grouped by capability. */
 export interface App {
   readonly healthCheck: HealthCheckUseCases;
+  readonly accounts: AccountUseCases;
+  readonly sessions: SessionUseCases;
   /** Releases the database connections. */
   close(): Promise<void>;
 }
@@ -36,6 +40,8 @@ export function createApp(dependencies: AppDependencies): App {
   const {database, clock} = dependencies;
   return {
     healthCheck: createHealthCheckUseCases(database, clock),
+    accounts: createAccountUseCases(database),
+    sessions: createSessionUseCases(database, clock),
     close: () => database.close(),
   };
 }

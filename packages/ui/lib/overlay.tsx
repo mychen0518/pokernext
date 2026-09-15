@@ -3,6 +3,8 @@
  * with the only shadow in the system, title row, body and action row.
  */
 
+'use client';
+
 import {X} from 'lucide-react';
 import {useEffect, useId} from 'react';
 import type {ReactNode} from 'react';

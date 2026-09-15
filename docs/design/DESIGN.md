@@ -162,6 +162,12 @@
 
 - 尚無版面先例。沿用 §2 全部 token 與玩家端的手機視口規則（≤ 768px、觸控區 ≥ 44×44），但**不**沿用玩家端的 `BottomNav` 五項、`HeroTripCard` 與玩家端文案規則。
 - 第一張接待端 UI 票（第 22 票）實作前先跑 `/prototype`（UI 分支，2–3 個 `?variant=`），選定後補寫本節的結構與頁型，並把選擇記在該票 `## Comments`。
+- 在那之前（00d 空殼）：接待工作區首頁只用 `PlayerShell` 的 480px 置中框（`navigation` 為空，不放 `BottomNav`）＋`EmptyState`，沒有導覽與頂列。
+
+### 3.4 拒絕頁（兩個 host 共用）
+
+- 以沒有 session、屬於其他工作區或其他 host 的 session 進入工作區時顯示。版面同 §3.3 的空殼：`PlayerShell` 置中框（無導覽）＋`EmptyState`（icon `shield-alert`、一句拒絕原因，原因以 `role="alert"` 宣告）＋`Button/secondary` 動作（「前往〇〇工作區」、「登出」）。不顯示被拒絕工作區的任何資料或框架。
+- 開發模式的角色切換列（`Button/secondary`「切換角色」＋`Drawer`，每個工作區一張 `Card`）是開發工具，不屬於 §4 元件目錄，production build 中不存在。
 
 ---
 

@@ -57,7 +57,14 @@ rest in `lib/`.
 - A package's `lib/testing/` is reachable only through its own `testing.ts`.
 - `packages/db/local_cluster.ts` (embedded Postgres) is imported only from
   `tooling/` and tests, so production code never loads embedded-postgres.
-- `packages/app/demo.ts` is imported only from `tooling/demo`.
+- `packages/app/demo.ts` (demo account creation) is imported only from
+  `tooling/demo`; tests reach the same implementation through
+  `@pokernext/app/testing` (`given(app).demoAccount(…)`,
+  `ensureDemoAccountsInDatabase`).
+- `apps/web/dev_tools/` (the role switcher) is reached only through the
+  `#role_switcher` import and `app/dev/**/route.dev.ts`; `next.config.ts`
+  removes both outside `next dev`, and
+  `apps/web/tests/production_build.test.ts` checks the build output.
 - Nothing imports `apps/*` or `tooling/*`.
 
 ## Checking

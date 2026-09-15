@@ -4,6 +4,8 @@
  * empty, error and ready states.
  */
 
+'use client';
+
 import type {LucideIcon} from 'lucide-react';
 import {Children, useId} from 'react';
 import type {ReactNode} from 'react';
