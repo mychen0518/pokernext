@@ -12,7 +12,11 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
-tooling/demo/recordings/
+# Batch recordings (DEMO_BATCH=<batch> pnpm demo:script) are committed;
+# the unnamed default run and anything else in the folder stay local.
+tooling/demo/recordings/*
+!tooling/demo/recordings/*.webm
+tooling/demo/recordings/latest.webm
 Coding Guide/
 .worktrees/
 .data/

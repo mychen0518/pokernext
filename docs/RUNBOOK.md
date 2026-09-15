@@ -92,7 +92,7 @@ frontier 預期：23、24、25、26、28、29、30。完成：劇本 13 步全�
 3. 更新 `docs/design/DESIGN.md`（若元件有新增）與 `.scratch/.../issues/*.md` 的 `## Comments`（截圖、決策）。
 4. 確認這批每張票都補了自己那段 demo seed（呼叫 use-case，不直接寫 SQL），並解除 `demo:script` 裡對應步驟的 `test.fixme`（做法見下方「解除劇本步驟」）。
 5. 這批新增或改動了畫面時，在 `tooling/demo/diff_pages.json` 補上對照表列（見下方「新增對照表列」），跑 `pnpm demo:diff` 看報告，把差異最大的幾頁寫進票的 `## Comments`。
-6. commit；`DEMO_BATCH=<batch> pnpm demo:script`，錄影存 `tooling/demo/recordings/<batch>.webm`。
+6. commit；`DEMO_BATCH=<batch> pnpm demo:script`，錄影存 `tooling/demo/recordings/<batch>.webm`；把這支影片 commit 進 repo（`*.webm` 在 `.gitattributes` 標為二進位，`<batch>.webm` 不被 `.gitignore` 忽略），維護者不在電腦前也能直接看這批做到哪。
 
 兩個指令都會自己處理 demo：`http://work.localhost:3000/api/health` 有回應就沿用正在跑的 `pnpm demo`（跑完不關）；沒有就啟動一個（與 `pnpm demo` 同一個入口），跑完停掉 Next.js 與 Postgres。`DEMO_PORT`、`POKERNEXT_PLAYER_HOST`、`POKERNEXT_WORK_HOST` 與 `pnpm demo` 相同。
 
@@ -131,7 +131,7 @@ frontier 預期：23、24、25、26、28、29、30。完成：劇本 13 步全�
 2. 在步驟內容用 `openWorkspace(scriptPage, '<工作區>')` 以該工作區的 demo 帳號進入，接著像使用者一樣操作並用 `expect` 驗證畫面；需要的資料來自票自己補的 demo seed。
 3. 不改 `playwright.config.ts`。步驟依序執行並共用同一個頁面，所以前一步留下的狀態下一步看得到；某步失敗時後面的步驟會被跳過。
 
-錄影是整段劇本一支影片，存到 `tooling/demo/recordings/<DEMO_BATCH>.webm`（未設 `DEMO_BATCH` 時為 `latest.webm`，gitignored）；全部步驟都還是 fixme 時不產生影片。
+錄影是整段劇本一支影片，存到 `tooling/demo/recordings/<DEMO_BATCH>.webm`（未設 `DEMO_BATCH` 時為 `latest.webm`，只留在本機、gitignored；`<batch>.webm` 要 commit，見「每批固定收尾」第 6 步）；全部步驟都還是 fixme 時不產生影片。
 
 ## `pnpm demo` 怎麼用
 
