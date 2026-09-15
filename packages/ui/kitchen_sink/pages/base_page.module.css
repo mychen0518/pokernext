@@ -1,0 +1,47 @@
+/* Layout of the base kitchen-sink page. */
+
+.cards {
+  display: grid;
+  gap: var(--pn-space-6);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.fill {
+  width: 100%;
+}
+
+.paragraph {
+  margin: 0;
+}
+
+.form-grid {
+  display: grid;
+  gap: var(--pn-space-8);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.form-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-5);
+  min-width: 0;
+}
+
+.overlays {
+  display: grid;
+  gap: var(--pn-space-6);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+/*
+ * A transformed ancestor becomes the containing block for position: fixed,
+ * so each open overlay renders inside its frame instead of over the page.
+ */
+.overlay-frame {
+  border: 1px dashed var(--pn-border-strong);
+  border-radius: var(--pn-radius-md);
+  height: 440px;
+  overflow: hidden;
+  transform: translateZ(0);
+  width: 100%;
+}

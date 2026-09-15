@@ -1,0 +1,8 @@
+/* Textarea (DESIGN.md §4). */
+
+.textarea {
+  height: auto;
+  min-height: 96px;
+  padding: var(--pn-space-3) var(--pn-space-4);
+  resize: vertical;
+}

@@ -1,0 +1,10 @@
+/* DateInput (DESIGN.md §4). */
+
+.date {
+  color-scheme: dark;
+}
+
+.date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}

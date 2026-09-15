@@ -65,6 +65,9 @@
   --pn-danger:        #9e5e60;   --pn-danger-tint:  #291d1f;
   --pn-info:          #4f6ea3;   --pn-info-tint:    #191f2d;
   --pn-neutral:       #7d8087;   --pn-neutral-tint: #1d1f20;   /* 未開始、無須、已撤回 */
+
+  /* 遮罩：Modal / Drawer 背後 */
+  --pn-scrim:         rgba(0, 0, 0, 0.7);
 }
 ```
 
@@ -80,7 +83,7 @@
 :root {
   --pn-font-sans:    "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
   --pn-font-serif:   "Noto Serif TC", "Songti TC", "PMingLiU", Georgia, serif;   /* 數字、Hero 標題 */
-  --pn-font-mono:    ui-monospace, "SF Mono", Menlo, monospace;                    /* UUID、編號 */
+  --pn-font-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;          /* UUID、編號 */
 }
 ```
 
@@ -98,6 +101,8 @@
 | `overline` | 英文副標、section eyebrow | sans | 11 / 1 / 500，全大寫，`letter-spacing: .25em`，顏色 `--pn-gold-dim` |
 | `mono` | UUID、編號 | mono | 14 / 1.5 / 400 |
 
+字級以 CSS custom properties 表達：每個字級 token `<name>` 對應四個屬性 `--pn-type-<name>-family`、`-size`、`-line`（無單位行高）、`-weight`，例如 `--pn-type-title-md-size: 20px`；`overline` 另有 `--pn-type-overline-tracking: 0.25em`。實作見 `packages/ui/tokens.css`。
+
 手機端 body 不小於 16px；玩家端所有主要流程在文字放大 200% 時仍完整（第 13 票驗收條件）。
 
 ### 2.3 間距、圓角、邊框
@@ -110,8 +115,13 @@
   --pn-radius-sm: 4px;   /* Badge、輸入框、小按鈕 */
   --pn-radius-md: 6px;   /* 卡片、主要按鈕、面板 */
   --pn-radius-lg: 8px;   /* 手機 Hero 按鈕、Modal（上限） */
+  --pn-radius-round: 50%; /* 只用於圓形元素（StatusDot 圓點、頭像），不用於容器 */
 
-  --pn-shadow: none;     /* 不用陰影；Modal 例外：0 8px 32px rgba(0,0,0,.6) */
+  --pn-shadow: none;     /* 不用陰影 */
+  --pn-shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.6);  /* 唯一例外：Modal、Drawer */
+
+  --pn-focus-ring: 2px solid var(--pn-gold);  /* focus-visible 外框（§6） */
+  --pn-focus-offset: 2px;
 }
 ```
 

@@ -1,0 +1,28 @@
+/* Input prefix adornment (DESIGN.md §4, 帶前綴版本). */
+
+.prefixed {
+  display: flex;
+  min-width: 0;
+}
+
+.prefix {
+  align-items: center;
+  background-color: var(--pn-surface-2);
+  border: 1px solid var(--pn-border-strong);
+  border-radius: var(--pn-radius-sm) 0 0 var(--pn-radius-sm);
+  border-right-width: 0;
+  box-sizing: border-box;
+  color: var(--pn-text-2);
+  display: flex;
+  flex: none;
+  height: 48px;
+  padding: 0 var(--pn-space-4);
+}
+
+.prefix-invalid {
+  border-color: var(--pn-danger);
+}
+
+.with-prefix {
+  border-radius: 0 var(--pn-radius-sm) var(--pn-radius-sm) 0;
+}

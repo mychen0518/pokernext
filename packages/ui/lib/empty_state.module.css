@@ -1,0 +1,26 @@
+/* EmptyState (DESIGN.md §4). */
+
+.empty-state {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-4);
+  justify-content: center;
+  min-height: 240px;
+  padding: var(--pn-space-8) var(--pn-space-6);
+  text-align: center;
+}
+
+.icon {
+  color: var(--pn-text-3);
+}
+
+.reason {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  margin: 0;
+  max-width: 40ch;
+}

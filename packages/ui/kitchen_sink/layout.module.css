@@ -1,0 +1,108 @@
+/* Kitchen-sink catalogue layout. */
+
+.page-header {
+  border-bottom: 1px solid var(--pn-border);
+  margin-bottom: var(--pn-space-8);
+  padding-bottom: var(--pn-space-6);
+}
+
+.page-title {
+  font-family: var(--pn-type-title-lg-family);
+  font-size: var(--pn-type-title-lg-size);
+  font-weight: var(--pn-type-title-lg-weight);
+  line-height: var(--pn-type-title-lg-line);
+  margin: 0;
+}
+
+.page-description {
+  color: var(--pn-text-2);
+  margin: var(--pn-space-1) 0 0;
+}
+
+.section {
+  border-bottom: 1px solid var(--pn-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-6);
+  margin-bottom: var(--pn-space-8);
+  padding-bottom: var(--pn-space-8);
+}
+
+.section-header {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-3);
+}
+
+.section-title {
+  font-family: var(--pn-type-title-md-family);
+  font-size: var(--pn-type-title-md-size);
+  font-weight: var(--pn-type-title-md-weight);
+  line-height: var(--pn-type-title-md-line);
+  margin: 0;
+}
+
+.section-source {
+  color: var(--pn-text-3);
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  line-height: var(--pn-type-label-line);
+}
+
+.row {
+  display: grid;
+  gap: var(--pn-space-4);
+  grid-template-columns: 160px minmax(0, 1fr);
+}
+
+.row-label {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-mono-family);
+  font-size: var(--pn-type-mono-size);
+  line-height: 44px;
+}
+
+.row-items {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-6);
+  min-width: 0;
+}
+
+.specimen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-2);
+  margin: 0;
+  min-width: 0;
+}
+
+.specimen-body {
+  align-items: center;
+  display: flex;
+  min-height: 44px;
+}
+
+.caption {
+  color: var(--pn-text-3);
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  line-height: var(--pn-type-label-line);
+}
+
+@media (max-width: 768px) {
+  .row {
+    gap: var(--pn-space-2);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .row-label {
+    line-height: var(--pn-type-mono-line);
+  }
+
+  .row-items {
+    gap: var(--pn-space-4);
+  }
+}

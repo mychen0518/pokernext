@@ -150,6 +150,14 @@ module.exports = {
       to: {path: '^(apps|tooling)/|^packages/(?!ui/)[^/]+/'},
     },
     {
+      name: 'kitchen-sink-is-dev-only',
+      comment:
+        "packages/ui/kitchen_sink/ is the dev-only component catalogue: only its own files may import it, not even packages/ui's entry points or lib/, so it never reaches a production bundle.",
+      severity: 'error',
+      from: {pathNot: '^packages/ui/kitchen_sink/'},
+      to: {path: '^packages/ui/kitchen_sink/'},
+    },
+    {
       name: 'nothing-imports-apps-or-tooling',
       comment:
         'apps/* and tooling/* are leaves: no other package may import them.',

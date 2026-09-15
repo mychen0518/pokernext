@@ -1,0 +1,40 @@
+/* Badge (DESIGN.md §4). */
+
+.badge {
+  align-items: center;
+  border: 1px solid currentcolor;
+  border-radius: var(--pn-radius-sm);
+  box-sizing: border-box;
+  display: inline-flex;
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  height: 22px;
+  line-height: 1;
+  padding: 0 var(--pn-space-2);
+  white-space: nowrap;
+}
+
+.success {
+  background-color: var(--pn-success-tint);
+  color: var(--pn-success);
+}
+
+.warning {
+  background-color: var(--pn-warning-tint);
+  color: var(--pn-warning);
+}
+
+.danger {
+  background-color: var(--pn-danger-tint);
+  color: var(--pn-danger);
+}
+
+.info {
+  background-color: var(--pn-info-tint);
+  color: var(--pn-info);
+}
+
+.neutral {
+  background-color: var(--pn-neutral-tint);
+  color: var(--pn-neutral);
+}

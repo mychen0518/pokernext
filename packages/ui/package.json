@@ -4,7 +4,13 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./tokens.css": "./tokens.css"
+  },
+  "scripts": {
+    "kitchen-sink": "tsx kitchen_sink/serve.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "lucide-react": "^1.45.0",

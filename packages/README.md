@@ -46,6 +46,8 @@ rest in `lib/`.
 - `packages/domain` imports no other workspace package and no React, Next or
   database library.
 - `packages/ui` imports no other workspace package.
+- `packages/ui/kitchen_sink/` (dev-only component catalogue) is imported only
+  from inside itself, never from `packages/ui`'s entry points or `lib/`.
 - `packages/ports/testing.ts` (fakes) is imported only from `tests/` folders,
   never from `apps/web`.
 - `packages/app/demo.ts` is imported only from `tooling/demo`.

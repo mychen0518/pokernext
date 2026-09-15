@@ -1,0 +1,134 @@
+/*
+ * POKERNEXT design tokens. Values are copied verbatim from
+ * docs/design/DESIGN.md §2; change DESIGN.md first, then this file.
+ * Import once per app: `import '@pokernext/ui/tokens.css';`.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* 2.1 Colour: background brightness steps, darkest first. */
+  --pn-bg: #0b0c0d;
+  --pn-surface: #121314;
+  --pn-surface-2: #1a1c1e;
+  --pn-surface-3: #202325;
+  --pn-border: #25292d;
+  --pn-border-strong: #393c3f;
+
+  /* 2.1 Colour: text. */
+  --pn-text: #f2f2f2;
+  --pn-text-2: #a0a2a9;
+  --pn-text-3: #6a6c72;
+  --pn-text-inverse: #141418;
+
+  /* 2.1 Colour: brand gold, the only accent. */
+  --pn-gold: #c8a86f;
+  --pn-gold-bright: #e7c076;
+  --pn-gold-dim: #9c8758;
+  --pn-gold-tint: #23211b;
+
+  /* 2.1 Colour: semantic, for StatusDot, Badge and hints only. */
+  --pn-success: #5e9f6c;
+  --pn-success-tint: #17211a;
+  --pn-warning: #e3bd69;
+  --pn-warning-tint: #26221a;
+  --pn-danger: #9e5e60;
+  --pn-danger-tint: #291d1f;
+  --pn-info: #4f6ea3;
+  --pn-info-tint: #191f2d;
+  --pn-neutral: #7d8087;
+  --pn-neutral-tint: #1d1f20;
+
+  /* 2.1 Colour: overlay scrim behind Modal and Drawer. */
+  --pn-scrim: rgba(0, 0, 0, 0.7);
+
+  /* 2.2 Font families. */
+  --pn-font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui,
+    sans-serif;
+  --pn-font-serif: 'Noto Serif TC', 'Songti TC', 'PMingLiU', Georgia, serif;
+  --pn-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /*
+   * 2.2 Type scale. Each DESIGN.md type token `<name>` is four properties:
+   * --pn-type-<name>-family, -size, -line (unitless line height), -weight.
+   */
+  --pn-type-display-xl-family: var(--pn-font-serif);
+  --pn-type-display-xl-size: 64px;
+  --pn-type-display-xl-line: 1.1;
+  --pn-type-display-xl-weight: 700;
+
+  --pn-type-display-lg-family: var(--pn-font-serif);
+  --pn-type-display-lg-size: 48px;
+  --pn-type-display-lg-line: 1.1;
+  --pn-type-display-lg-weight: 700;
+
+  --pn-type-display-md-family: var(--pn-font-serif);
+  --pn-type-display-md-size: 32px;
+  --pn-type-display-md-line: 1.2;
+  --pn-type-display-md-weight: 700;
+
+  --pn-type-title-lg-family: var(--pn-font-sans);
+  --pn-type-title-lg-size: 28px;
+  --pn-type-title-lg-line: 1.3;
+  --pn-type-title-lg-weight: 700;
+
+  --pn-type-title-md-family: var(--pn-font-sans);
+  --pn-type-title-md-size: 20px;
+  --pn-type-title-md-line: 1.4;
+  --pn-type-title-md-weight: 600;
+
+  --pn-type-title-sm-family: var(--pn-font-sans);
+  --pn-type-title-sm-size: 16px;
+  --pn-type-title-sm-line: 1.5;
+  --pn-type-title-sm-weight: 600;
+
+  --pn-type-body-family: var(--pn-font-sans);
+  --pn-type-body-size: 15px;
+  --pn-type-body-line: 1.6;
+  --pn-type-body-weight: 400;
+
+  --pn-type-body-sm-family: var(--pn-font-sans);
+  --pn-type-body-sm-size: 13px;
+  --pn-type-body-sm-line: 1.5;
+  --pn-type-body-sm-weight: 400;
+
+  --pn-type-label-family: var(--pn-font-sans);
+  --pn-type-label-size: 12px;
+  --pn-type-label-line: 1.4;
+  --pn-type-label-weight: 400;
+
+  --pn-type-overline-family: var(--pn-font-sans);
+  --pn-type-overline-size: 11px;
+  --pn-type-overline-line: 1;
+  --pn-type-overline-weight: 500;
+  --pn-type-overline-tracking: 0.25em;
+
+  --pn-type-mono-family: var(--pn-font-mono);
+  --pn-type-mono-size: 14px;
+  --pn-type-mono-line: 1.5;
+  --pn-type-mono-weight: 400;
+
+  /* 2.3 Spacing. */
+  --pn-space-1: 4px;
+  --pn-space-2: 8px;
+  --pn-space-3: 12px;
+  --pn-space-4: 16px;
+  --pn-space-5: 20px;
+  --pn-space-6: 24px;
+  --pn-space-8: 32px;
+  --pn-space-10: 40px;
+
+  /* 2.3 Radius. 8px is the ceiling for containers. */
+  --pn-radius-sm: 4px;
+  --pn-radius-md: 6px;
+  --pn-radius-lg: 8px;
+  --pn-radius-round: 50%;
+
+  /* 2.3 Shadow: none, except the overlay panels (Modal, Drawer). */
+  --pn-shadow: none;
+  --pn-shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+  /* 2.3 Focus ring (DESIGN.md §6): 2px gold outline on focus-visible. */
+  --pn-focus-ring: 2px solid var(--pn-gold);
+  --pn-focus-offset: 2px;
+}

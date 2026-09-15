@@ -1,0 +1,21 @@
+/* Toast (DESIGN.md §4). No shadow: only Modal and Drawer have one. */
+
+.toast {
+  background-color: var(--pn-surface-3);
+  border: 1px solid var(--pn-border-strong);
+  border-radius: var(--pn-radius-md);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-1);
+  max-width: 360px;
+  padding: var(--pn-space-3) var(--pn-space-4);
+}
+
+.message {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  line-height: var(--pn-type-body-sm-line);
+  padding-left: var(--pn-space-4);
+}
