@@ -131,6 +131,26 @@ function findLiteralDesignValues(css: string): Violation[] {
   return violations;
 }
 
+const COLOUR_LITERAL =
+  /#[0-9a-f]{3,8}\b|\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(/gi;
+const COLOUR_ATTRIBUTE =
+  /\b(fill|stroke|stop-color|flood-color|lighting-color|color)\s*[=:]\s*["'{]*\s*([a-z]+)/gi;
+
+/**
+ * Lists the colour literals in markup or script source: hex and functional
+ * colours anywhere, and named colours in colour attributes such as
+ * `fill="white"`.
+ */
+function findColourLiterals(source: string): string[] {
+  const literals = Array.from(source.matchAll(COLOUR_LITERAL), m => m[0]);
+  for (const match of source.matchAll(COLOUR_ATTRIBUTE)) {
+    if (NAMED_COLOURS.has(match[2].toLowerCase())) {
+      literals.push(match[0]);
+    }
+  }
+  return literals;
+}
+
 /** Lists every stylesheet under `dir` ending in `suffix`, recursively. */
 function listStylesheets(dir: string, suffix = '.module.css'): string[] {
   return readdirSync(dir, {recursive: true, encoding: 'utf8'})
@@ -163,6 +183,20 @@ describe('component styles', () => {
     ]);
   });
 
+  it('reports colour literals in markup and script', () => {
+    const source = `
+      <rect fill="#121314"/><g fill='white'/>
+      const style = {color: 'rgb(0, 0, 0)'};
+      <path fill="currentColor" stroke="var(--pn-gold)"/>
+      <a href="?page=player-home#top">
+    `;
+    expect(findColourLiterals(source)).toEqual([
+      '#121314',
+      'rgb(',
+      "fill='white",
+    ]);
+  });
+
   it('accepts tokens, zero, keywords and 1px borders', () => {
     const css = `
       .a { color: var(--pn-text); background: transparent; margin: 0; }
@@ -189,6 +223,25 @@ describe('component styles', () => {
     const violations = files.flatMap(file =>
       findLiteralDesignValues(readFileSync(file, 'utf8')).map(
         v => `${file}: ${v.reason} in "${v.declaration}"`,
+      ),
+    );
+    expect(violations).toEqual([]);
+  });
+
+  it('paint components and kitchen-sink markup and images with tokens, never a colour literal', () => {
+    const files = [
+      ...listStylesheets(LIB_DIR, '.tsx'),
+      ...listStylesheets(LIB_DIR, '.ts'),
+      ...[/\.tsx?$/, /\.svg$/, /\.html$/].flatMap(pattern =>
+        readdirSync(KITCHEN_SINK_DIR, {recursive: true, encoding: 'utf8'})
+          .filter(file => pattern.test(file))
+          .map(file => join(KITCHEN_SINK_DIR, file)),
+      ),
+    ];
+    expect(files.length).toBeGreaterThan(0);
+    const violations = files.flatMap(file =>
+      findColourLiterals(readFileSync(file, 'utf8')).map(
+        literal => `${file}: ${literal}`,
       ),
     );
     expect(violations).toEqual([]);

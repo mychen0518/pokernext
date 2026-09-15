@@ -20,18 +20,13 @@ import {
 } from '../../index';
 import type {BottomNavItem} from '../../index';
 import type {KitchenSinkPageProps} from '../page_types';
+import {jejuNightPlaceholderSrc} from './jeju_night_placeholder';
 import {
   PLAYER_HOME_COMMON,
   PLAYER_HOME_EMPTY,
   PLAYER_HOME_READY,
 } from './player_home_copy';
 import styles from './player_home_page.module.css';
-
-// Local stand-in for a destination photo: no network at runtime.
-const HERO_IMAGE_SRC = new URL(
-  '../assets/jeju_night_placeholder.svg',
-  import.meta.url,
-).href;
 
 // Links stay on this page; the real routes belong to ticket 13.
 const NAV_HREFS: Readonly<Record<BottomNavItem, string>> = {
@@ -54,7 +49,8 @@ function ReadyHome() {
         destinationEn={copy.destinationEn}
         dates={copy.dates}
         actionLabel={copy.tripAction}
-        image={{src: HERO_IMAGE_SRC, alt: ''}}
+        // Local stand-in for a destination photo: no network at runtime.
+        image={{src: jejuNightPlaceholderSrc(), alt: ''}}
       />
       <StatusStrip
         place={copy.hotel}
