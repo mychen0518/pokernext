@@ -69,27 +69,42 @@ merger 合回 → 下一批 frontier → `/code-review` → 修 → 標 ready。
 review 報告裡的 finding 哪些要修。完成：第 01 票驗收條件全綠；`pnpm demo`
 起得來、角色切換列能以六個 demo 帳號切換工作區、`pnpm demo:diff` 產出報告。
 
-## 5. 批次 A 的 tracer bullet（先窄後寬）
+## 5. 批次 A 開頭：選型驗證與 tracer bullet（先窄後寬）
 
-先只做一條線，把工具鏈磨順：
+foundation 與第 01 票完成後，frontier 只有第 02 票；其餘每張票都經
+02 → 03 這條鏈才解鎖（依各票 `Blocked by`）。
 
-```
-/implement 只做 .scratch/pokernext-platform/issues/13-player-navigation-account-center.md。用 /tdd，seam 依票；畫面必須用 packages/ui，完成前 Playwright 截圖 390×844 五個頁面各 empty／ready 兩態，並與原型 #/player/home 並排自查，截圖路徑寫進票的 ## Comments。本票需要的 demo seed 以呼叫 use-case 的方式補進 tooling/demo。
-```
+1. 第 02 票（RPO 0／跨區 RTO 2 小時可行性驗證）。spec 明文「驗證未過前不擴展功
+   能」，所以先做。維護者決定先在本機證明可行性（Postgres 16 同步複寫、本機模擬
+   AZ／區域故障），真實雲端演練留到上線前（G14）。
 
-完成：`pnpm demo` 後切到玩家工作區能看到與原型一致的首頁與空狀態。跑
-`/code-review main`，修完 commit。
+   ```
+   /implement 只做 .scratch/pokernext-platform/issues/02-rpo0-rto-feasibility.md，以本機測試環境證明可行性（不選雲端）。用 /tdd，seam 依票。
+   ```
 
-## 6. 批次 A 整批（`/triage` → `/implement-spec`）
+2. tracer bullet：第 03 票（工作帳號邀請、密碼＋TOTP、備援碼與 AuditLog）。它
+   擴充 00d 建立的帳號、session 與 AuditLog，一條線穿過 domain、app、db、web
+   與 demo seed，用來磨順工具鏈。
+
+   ```
+   /implement 只做 .scratch/pokernext-platform/issues/03-staff-accounts-totp-auditlog.md。用 /tdd，seam 依票；擴充 00d 的帳號、session 與 AuditLog，不另建一套。畫面必須用 packages/ui，完成前依票內 **UI:** 段截圖並與參考圖並排，路徑寫進票的 ## Comments。本票需要的 demo seed 以呼叫 use-case 的方式補進 tooling/demo。
+   ```
+
+完成：兩張票驗收條件全綠；`pnpm demo` 仍可切換六個工作區。跑
+`/code-review <步驟 4 完成時的 commit>`，修完 commit。
+
+## 6. 批次 A 其餘（`/triage` → `/implement-spec`）
 
 ```
 /triage 列出 .scratch/pokernext-platform/issues/ 中 ready-for-agent 且阻擋已全部完成的票（frontier）
 ```
 
-確認 frontier 是 03、05、07、08、09、10、11 後：
+批次 A 是 04、05、07、08、09、10、11、13。它們大多是一條鏈：03 之後 04 與 05
+可並行，接著 07 → 08 → 09 → 10 → 11 → 13（08、10 另被 04 擋）。第 13 票寫明
+「此票完成即 M 批次可驗收」，所以放在批次 A 最後。確認 frontier 符合後：
 
 ```
-/implement-spec .scratch/pokernext-platform/spec.md 只處理批次 A：03、05、07、08、09、10、11。其餘票不動。implementer 規則同步驟 4。
+/implement-spec .scratch/pokernext-platform/spec.md 只處理批次 A：04、05、07、08、09、10、11、13。依阻擋關係逐步推進 frontier，其餘票不動。implementer 規則同步驟 4。
 ```
 
 完成：申請 → 審核 → OTP 登入 → 玩家首頁 全程可在 `pnpm demo` 走；
@@ -97,19 +112,18 @@ review 報告裡的 finding 哪些要修。完成：第 01 票驗收條件全綠
 
 ## 7. 批次 B（行程主線前半）
 
-frontier 預期：04、12、15、16、17、18、19、20、21、22。04（被 03 擋）與
-12（被 09 擋）在批次 A 後即解鎖，放在這批是為了讓批次 C 的第 14 票不被擋。第
-27 票被第 26 票擋（批次 C），不在這批。同步驟 6。完成：依
-`tooling/demo/tests/demo_script.spec.ts` 每步的 `ticket` 註記，劇本第 1–3 步
-與第 7–9 步綠；第 4、5 步（第 27 票）與第 6 步（第 20、22、30 票）留到批次 C。
-影片已 commit，可看。
+frontier 預期：12、15、16、17、18、19、20、21、22。12（被 09 擋）要先做，因
+為它擋住第 15 票；第 15 票另被批次 A 的 13 擋。第 27 票被第 26 票擋（批次 C），
+不在這批。同步驟 6。完成：依 `tooling/demo/tests/demo_script.spec.ts` 每步的
+`ticket` 註記，劇本第 1–3 步與第 7–9 步綠；第 4、5 步（第 27 票）與第 6 步（第
+20、22、30 票）留到批次 C。影片已 commit，可看。
 
 ## 8. 批次 C（積分與結算）
 
 frontier 預期：14、23、24、25、26、27、28、29、30；27 要等 26 完成、30 要等
-27 完成才進 frontier。28、29 被第 14 票擋（14 被批次 B 的 04、12 擋），所以
-14 先做，再做 28、29。完成：劇本第 4–6 步與第 10–13 步解除，13 步全綠；影片已
-commit。
+27 完成才進 frontier。28、29 被第 14 票擋（14 被批次 A 的 04 與批次 B 的 12
+擋），所以 14 先做，再做 28、29。完成：劇本第 4–6 步與第 10–13 步解除，13 步全
+綠；影片已 commit。
 
 ## 9. 批次 D（其餘）
 

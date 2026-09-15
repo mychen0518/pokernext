@@ -9,6 +9,6 @@ RUNBOOK 各步驟的啟動器。雙擊 `.cmd` 即可；每個都會開一個 Pow
 | `step2-to-tickets.cmd` | 2 | `/to-tickets` foundation spec（要你核可拆法） |
 | `step3-skeleton.cmd` | 3 | `/setup-ts-deep-modules` + gts + `/setup-pre-commit` |
 | `step4-foundation.cmd` | 4 | `/implement` foundation 00a–00e 與第 01 票（依阻擋關係並行），然後 `/code-review` |
-| `step5-tracer.cmd` | 5 | `/implement` 第 13 票 tracer bullet，然後 `/code-review` |
+| `step5-tracer.cmd` | 5 | `/implement` 第 02 票（本機可行性驗證），再做第 03 票 tracer bullet，然後 `/code-review` |
 
 Claude Code 在互動中問你的問題要由你回答；Cowork 端的 Claude 只能看螢幕、不能打字進終端機。
