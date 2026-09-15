@@ -6,7 +6,8 @@ behind a small interface. dependency-cruiser enforces the rules below;
 
 ## Layout
 
-Copy `packages/example/` to start a package:
+Start a package in this shape (`packages/ports/` is a small working
+example):
 
 ```text
 packages/<name>/

@@ -225,6 +225,8 @@ module.exports = {
     // Shared dev tooling (vitest, …) is declared once in the workspace root.
     combinedDependencies: true,
     doNotFollow: {path: 'node_modules'},
+    // Next.js build output and its generated type references.
+    exclude: {path: '(^|/)\\.next/|(^|/)next-env\\.d\\.ts$'},
     tsPreCompilationDeps: true,
     tsConfig: {fileName: 'tsconfig.json'},
     enhancedResolveOptions: {

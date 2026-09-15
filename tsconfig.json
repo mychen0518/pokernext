@@ -9,5 +9,5 @@
     "tooling/**/*.ts",
     "tooling/**/*.tsx"
   ],
-  "exclude": ["**/node_modules"]
+  "exclude": ["**/node_modules", "**/.next", "**/next-env.d.ts"]
 }

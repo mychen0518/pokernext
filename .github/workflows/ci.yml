@@ -1,0 +1,42 @@
+# Runs every check on each push and pull request. Tests use a Postgres 16
+# service container through DATABASE_URL instead of embedded-postgres
+# (ADR-0001: Postgres 16 locally, in CI and in production).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck, lint, boundaries and unit tests
+        run: pnpm typecheck && pnpm lint && pnpm lint:boundaries && pnpm test:unit
+      - name: HTTP tests of apps/web
+        run: pnpm --filter @pokernext/web test:e2e

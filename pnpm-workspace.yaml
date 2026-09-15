@@ -3,5 +3,6 @@ packages:
   - packages/*
   - tooling/*
 allowBuilds:
+  '@embedded-postgres/linux-x64': true
   '@embedded-postgres/windows-x64': true
   esbuild: true
