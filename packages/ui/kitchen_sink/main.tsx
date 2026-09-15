@@ -4,6 +4,7 @@
  */
 
 import '../tokens.css';
+import '../base.css';
 import './kitchen_sink.css';
 
 import {StrictMode} from 'react';

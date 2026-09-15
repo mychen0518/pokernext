@@ -1,8 +1,8 @@
 /**
  * @fileoverview Enforces DESIGN.md §1 and §2 in component and kitchen-sink
  * styles: every colour, font, font size, spacing, radius, shadow and letter
- * spacing in `lib/**\/*.module.css` and `kitchen_sink/**\/*.module.css` is a
- * `var(--pn-*)` token, never a literal; gradients only fade to the dark
+ * spacing in `lib/**\/*.module.css`, `kitchen_sink/**\/*.css` and `base.css`
+ * is a `var(--pn-*)` token, never a literal; gradients only fade to the dark
  * background; only Modal and Drawer use the overlay shadow.
  */
 
@@ -16,6 +16,7 @@ const LIB_DIR = fileURLToPath(new URL('../lib', import.meta.url));
 const KITCHEN_SINK_DIR = fileURLToPath(
   new URL('../kitchen_sink', import.meta.url),
 );
+const BASE_STYLESHEET = fileURLToPath(new URL('../base.css', import.meta.url));
 
 // DESIGN.md §2.3: Modal and Drawer are the only components with a shadow;
 // both are styled by this one stylesheet.
@@ -130,10 +131,10 @@ function findLiteralDesignValues(css: string): Violation[] {
   return violations;
 }
 
-/** Lists every CSS Module under `dir`, recursively. */
-function listCssModules(dir: string): string[] {
+/** Lists every stylesheet under `dir` ending in `suffix`, recursively. */
+function listStylesheets(dir: string, suffix = '.module.css'): string[] {
   return readdirSync(dir, {recursive: true, encoding: 'utf8'})
-    .filter(file => file.endsWith('.module.css'))
+    .filter(file => file.endsWith(suffix))
     .map(file => join(dir, file));
 }
 
@@ -180,8 +181,9 @@ describe('component styles', () => {
 
   it('use only design tokens for colour, font, spacing, radius, shadow and tracking', () => {
     const files = [
-      ...listCssModules(LIB_DIR),
-      ...listCssModules(KITCHEN_SINK_DIR),
+      ...listStylesheets(LIB_DIR),
+      ...listStylesheets(KITCHEN_SINK_DIR, '.css'),
+      BASE_STYLESHEET,
     ];
     expect(files.length).toBeGreaterThan(0);
     const violations = files.flatMap(file =>
@@ -193,7 +195,7 @@ describe('component styles', () => {
   });
 
   it('give a shadow only to Modal and Drawer', () => {
-    const shadowed = listCssModules(LIB_DIR).filter(file =>
+    const shadowed = listStylesheets(LIB_DIR).filter(file =>
       /box-shadow\s*:\s*var\(--pn-shadow-overlay\)/.test(
         readFileSync(file, 'utf8'),
       ),

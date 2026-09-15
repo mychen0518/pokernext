@@ -1,0 +1,14 @@
+/*
+ * POKERNEXT document base: page background, text colour and body type from
+ * the DESIGN.md §2 tokens. Import once per app, after the tokens:
+ * `import '@pokernext/ui/tokens.css'; import '@pokernext/ui/base.css';`.
+ */
+
+body {
+  background-color: var(--pn-bg);
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  margin: 0;
+}

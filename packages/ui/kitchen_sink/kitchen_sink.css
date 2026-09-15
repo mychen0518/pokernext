@@ -1,13 +1,7 @@
-/* Page chrome for the dev-only kitchen-sink. Tokens only, like components. */
-
-body {
-  background-color: var(--pn-bg);
-  color: var(--pn-text);
-  font-family: var(--pn-type-body-family);
-  font-size: var(--pn-type-body-size);
-  line-height: var(--pn-type-body-line);
-  margin: 0;
-}
+/*
+ * Page chrome for the dev-only kitchen-sink. Tokens only, like components;
+ * the body itself comes from `base.css`.
+ */
 
 .pn-kitchen-sink {
   box-sizing: border-box;

@@ -8,11 +8,15 @@ component library. It imports no other workspace package.
 
 ```tsx
 import '@pokernext/ui/tokens.css'; // once, in the app root
+import '@pokernext/ui/base.css'; // once, after the tokens
 import {Button, StatusDot} from '@pokernext/ui';
 ```
 
 - `tokens.css` defines every token as a `--pn-*` custom property. Type tokens
   are split into `--pn-type-<name>-family`, `-size`, `-line` and `-weight`.
+- `base.css` styles the document `body` (background, text colour, body type)
+  from the tokens. apps/web's root layout and the kitchen-sink both import
+  it, so neither keeps its own copy.
 - `index.ts` exports each component and its props type by name.
 - Components that use React hooks start with `'use client'`, so Next.js
   server components can import `@pokernext/ui`. Components that take an
@@ -27,6 +31,7 @@ import {Button, StatusDot} from '@pokernext/ui';
 ```text
 index.ts          public entry: named exports of every component
 tokens.css        public entry: design tokens
+base.css          public entry: document body styles from the tokens
 lib/              components, one snake_case .tsx + .module.css each
 kitchen_sink/     dev-only catalogue page (never imported by index.ts)
 tests/            Vitest *.test.ts and Playwright *.spec.ts
