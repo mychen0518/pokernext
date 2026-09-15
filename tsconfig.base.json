@@ -1,0 +1,14 @@
+{
+  "extends": "gts/tsconfig-google.json",
+  "compilerOptions": {
+    "composite": false,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "verbatimModuleSyntax": true
+  }
+}

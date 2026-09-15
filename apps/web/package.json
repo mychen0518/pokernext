@@ -1,0 +1,10 @@
+{
+  "name": "@pokernext/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@pokernext/app": "workspace:*",
+    "@pokernext/ui": "workspace:*"
+  }
+}

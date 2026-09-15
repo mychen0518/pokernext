@@ -1,0 +1,2 @@
+# Prettier (via gts) expects LF; keep it regardless of core.autocrlf.
+* text=auto eol=lf

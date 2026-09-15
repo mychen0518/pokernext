@@ -1,0 +1,15 @@
+{
+  "name": "@pokernext/app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./demo": "./demo.ts"
+  },
+  "dependencies": {
+    "@pokernext/db": "workspace:*",
+    "@pokernext/domain": "workspace:*",
+    "@pokernext/ports": "workspace:*"
+  }
+}

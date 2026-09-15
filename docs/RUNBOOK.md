@@ -39,7 +39,7 @@ agent 會先給你一份編號清單（已核可五張：00a token 與基礎元�
 在 workspace 根目錄安裝並初始化 gts（Google TypeScript Style）：pnpm add -D gts typescript，npx gts init 後把產生的 eslint／prettier／tsconfig 設定改成 workspace 共用（tsconfig.base.json、根 .eslintrc）。檔名規則 snake_case、named export only、no any 要能被 lint 擋。用一個故意違規的檔案證明會擋，然後刪掉它。
 ```
 
-完成：`pnpm -w typecheck`、`pnpm -w lint`（gts）、`pnpm -w depcruise` 都綠；還沒有任何業務程式碼。commit。
+完成：`pnpm -w typecheck`、`pnpm -w lint`（gts）、`pnpm -w lint:boundaries`（dependency-cruiser）都綠；還沒有任何業務程式碼。commit。
 
 ## 4. foundation 五張票與第 01 票（`/implement`）
 

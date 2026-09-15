@@ -10,6 +10,10 @@ Issues are tracked as local markdown files under `.scratch/<feature>/`. See `doc
 
 Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`. Stack and repo shape: `docs/adr/0001-stack-and-repo-shape.md`.
 
+### Package boundaries
+
+Packages are deep modules with ADR-0001 layering, enforced by dependency-cruiser: see [packages/README.md](./packages/README.md) before adding or importing one.
+
 ### Coding standards
 
 `docs/CODING_STANDARDS.md` — read by `/code-review`, not by implementers. Base style is the Google Style Guides (TypeScript via `gts`, HTML/CSS, Markdown, JSON); implementers get them through lint, reviewers through the standards file.

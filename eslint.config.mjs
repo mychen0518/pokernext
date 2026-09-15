@@ -1,0 +1,82 @@
+// @ts-check
+// Workspace-wide ESLint config: the gts (Google TypeScript Style) preset plus
+// the repo rules from docs/CODING_STANDARDS.md that gts leaves out. Every
+// package lints against this one file; do not add per-package configs.
+
+import checkFile from 'eslint-plugin-check-file';
+import gts from 'gts';
+
+const NO_EXPORT_ASSIGNMENT = {
+  selector: 'TSExportAssignment',
+  message: 'Use named ES exports, not `export =`.',
+};
+const NO_DEFAULT_EXPORT = [
+  {
+    selector: 'ExportDefaultDeclaration',
+    message: 'Use named exports only (docs/CODING_STANDARDS.md).',
+  },
+  {
+    selector: "ExportSpecifier[exported.name='default']",
+    message: 'Use named exports only (docs/CODING_STANDARDS.md).',
+  },
+  NO_EXPORT_ASSIGNMENT,
+];
+
+// Framework-forced exceptions, listed exactly as in docs/CODING_STANDARDS.md.
+// Anything not listed here must be snake_case with named exports only.
+const NEXT_SPECIAL_FILES =
+  'apps/web/app/**/{page,layout,template,loading,error,default,not-found,global-error}.tsx';
+const TOOL_CONFIG_FILES = [
+  '{next,drizzle,playwright,vitest}.config.ts',
+  '{apps,packages,tooling}/*/{next,drizzle,playwright,vitest}.config.ts',
+];
+
+export default [
+  {
+    ignores: [
+      '**/node_modules/',
+      '**/.next/',
+      '**/dist/',
+      '**/coverage/',
+      'docs/design/prototype/',
+    ],
+  },
+  ...gts,
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {'check-file': checkFile},
+    rules: {
+      'check-file/filename-naming-convention': [
+        'error',
+        {'**/*.{ts,tsx}': 'SNAKE_CASE'},
+        {ignoreMiddleExtensions: true},
+      ],
+      'no-restricted-syntax': ['error', ...NO_DEFAULT_EXPORT],
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        {'ts-expect-error': true, 'ts-ignore': true, 'ts-nocheck': true},
+      ],
+      '@typescript-eslint/array-type': ['error', {default: 'array-simple'}],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/consistent-type-imports': 'error',
+    },
+  },
+  {
+    files: [NEXT_SPECIAL_FILES],
+    rules: {
+      'check-file/filename-naming-convention': 'off',
+      'no-restricted-syntax': ['error', NO_EXPORT_ASSIGNMENT],
+    },
+  },
+  {
+    files: TOOL_CONFIG_FILES,
+    rules: {'no-restricted-syntax': ['error', NO_EXPORT_ASSIGNMENT]},
+  },
+];
