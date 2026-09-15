@@ -38,6 +38,7 @@ export default [
   {
     ignores: [
       '**/node_modules/',
+      '.claude/worktrees/',
       '**/.next/',
       '**/dist/',
       '**/coverage/',
