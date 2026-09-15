@@ -1,0 +1,29 @@
+/* Layout of the desktop data container states page. */
+
+.grid {
+  display: grid;
+  gap: var(--pn-space-6);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.columns {
+  display: grid;
+  gap: var(--pn-space-6);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid > *,
+.columns > * {
+  min-width: 0;
+}
+
+.fill {
+  width: 100%;
+}
+
+.list-frame,
+.todo-frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

@@ -148,8 +148,8 @@
 
 ### 3.2 合作端 / 管理端（Partner / Admin，桌面）
 
-- 設計目標 1440×1024；最小支援 1280；≤ 1024 時側欄收合為 icon 列，右側欄下移到主內容下方。
-- 結構：固定左 `Sidebar` 232px（品牌 + 副標、導覽項、底部使用者 + 登出）→ 頂部 `Topbar` 64px（overline 麵包屑「JEJU · PARTNER WORKSPACE」，右側日期時間與時區）→ `PageHeader`（`title-lg` + 一句說明，右側最多一顆 `Button/primary`）→ 內容區。
+- 設計目標 1440×1024；最小支援 1280；≤ 1024 時側欄收合為 icon 列（72px，只留 icon，文字保留給輔助科技），總覽頁右側欄下移到主內容下方；作業頁與案件頁維持雙欄。
+- 結構：固定左 `Sidebar` 232px（品牌 + 副標、導覽項、底部使用者 + 登出）→ 頂部 `Topbar` 64px（overline 麵包屑「JEJU · PARTNER WORKSPACE」，右側日期時間與時區）→ `PageHeader`（`title-lg` + 一句說明，右側最多一顆 `Button/primary`）→ 內容區。整個框架是 `WorkspaceShell`；頁型欄位是 `PageGrid`（`overview` / `operation` / `case`）。
 - 內容區內距 `--pn-space-8`；卡片之間間距 `--pn-space-6`。
 - 三種頁型：
   1. **總覽頁**（`partner-overview.png`）：`KpiRow`（4 格，垂直分隔線）→ 左 2/3：`Tabs` + `SearchInput` + `DataTable` + `ActivityTimeline`；右 1/3：`TodoPanel`（`TodoCard` 堆疊）。
@@ -171,31 +171,33 @@
 
 | 元件 | 變體 | 規格重點 |
 |---|---|---|
-| `Button` | `primary`（金底深字）、`secondary`（透明底 + `--pn-border-strong` 邊框、白字）、`outline-gold`（透明底 + 金邊金字，手機 Hero 用）、`ghost`（純文字，金色，右側 chevron）、`danger`（透明底紅字） | 高 44px（手機 52px）、內距 0 24px、`--pn-radius-md`、字重 600。狀態：default / hover（底色提亮 6%）/ focus-visible（2px 金色外框）/ disabled（40% 不透明）/ loading（spinner 取代文字）。一個區塊最多一顆 `primary`。 |
-| `Sidebar` | — | 232px、`--pn-bg`；導覽項高 64px，icon 24 + 文字 `body`；目前項底 `--pn-gold-tint`、左側 3px 金色條、文字與 icon `--pn-gold-bright`。底部 `UserChip` + 登出。 |
+| `Button` | `primary`（金底深字）、`secondary`（透明底 + `--pn-border-strong` 邊框、白字）、`outline-gold`（透明底 + 金邊金字，手機 Hero 用）、`ghost`（純文字，金色，右側 chevron）、`danger`（透明底紅字） | 高 44px（手機 52px）、內距 0 24px、`--pn-radius-md`、字重 600。狀態：default / hover（底色提亮 6%）/ focus-visible（2px 金色外框）/ disabled（40% 不透明）/ loading（spinner 取代文字）。一個區塊最多一顆 `primary`。可在文字前加一個 20px 線性 icon（例：掃碼報到）。 |
+| `WorkspaceShell` | — | 合作端／管理端桌面框架：左 `Sidebar`、上 `Topbar`、下方內容區（內距 `--pn-space-8`，區塊間距 `--pn-space-6`），整體底 `--pn-bg`。五個桌面工作區共用，只換 `Sidebar` 副標、導覽項與麵包屑。 |
+| `PageGrid` | `overview`（左 2/3 右 1/3，≤ 1024 單欄）、`operation`（雙欄 1:1，等高）、`case`（左 380px + 右彈性，等高） | §3.2 三種頁型的欄位；欄距 `--pn-space-6`。 |
+| `Sidebar` | — | 232px、`--pn-bg`；導覽項高 64px，icon 24 + 文字 `body`；目前項底 `--pn-gold-tint`、左側 3px 金色條、文字與 icon `--pn-gold-bright`。底部 `UserChip` + 登出。副標（工作區名稱）同時是側欄的無障礙名稱。≤ 1024：72px icon 列，品牌縮為「PN」，導覽文字、使用者文字與「登出」只留給輔助科技。 |
 | `BottomNav` | — | 手機端固定底部（在 `PlayerShell` 內以 sticky 貼底，內容不被遮住），高至少 72px + `env(safe-area-inset-bottom)`；五項固定順序：首頁、我的行程、到場碼、我的積分、我的帳戶，每項 icon 24 + label `label` 字級，平分寬度、觸控區 ≥ 44×44；非目前項 `--pn-text-2`，目前項 icon + label `--pn-gold-bright` 並標 `aria-current="page"`。 |
 | `AppHeader` | — | 玩家端頂列，高至少 64px、透明底、左右內距 `--pn-space-6`。左品牌字標：`POKER` `--pn-text` + `NEXT` `--pn-gold-bright`，`title-sm` 700、字距 `overline` tracking；下方副標 `TRAVEL · PLAY · BELONG` `overline` 字級 `--pn-text-3`。右通知鈴：icon 24 `--pn-text`、44×44 按鈕；有未讀時右上 8px `--pn-gold-bright` 圓點，且按鈕名稱帶「有未讀通知」文字。有行程時放在 `HeroTripCard` 頂部，否則是頁面第一列。 |
 | `PlayerShell` | — | 玩家端頁框：`--pn-bg` 底、寬 100%，視口 > 480px 時 480px 置中且左右 1px `--pn-border`；最小高度一個視口；內容在上、`BottomNav` 在最底。 |
 | `Topbar` | — | 64px；左 `overline` 麵包屑；右日期／時區 `body-sm` `--pn-text-2`。 |
 | `PageHeader` | — | `title-lg` + `body` 說明（`--pn-text-2`）；右側 action slot。 |
-| `Card` | `default`、`elevated`（`--pn-surface-2`） | `--pn-surface`、1px `--pn-border`、`--pn-radius-md`；可選 `CardHeader`（`title-md` + 右側狀態 slot，底下 1px 分隔線）。 |
+| `Card` | `default`、`elevated`（`--pn-surface-2`） | `--pn-surface`、1px `--pn-border`、`--pn-radius-md`；可選 `CardHeader`（`title-md` + 右側狀態 slot，底下 1px 分隔線）；可選底部 meta 列（上方 1px 分隔線、`label` `--pn-text-3`，左右兩端對齊，例：掃碼時間、接待人 + `Button/ghost`）。 |
 | `KpiRow` / `KpiTile` | — | icon 32 金色 + label `body-sm` + 數字 `display-md`；tile 之間 1px 垂直分隔線；不用卡片底。 |
 | `StatusDot` | `success` / `warning` / `danger` / `info` / `neutral` | 8px 圓點 + 文字（同色）；文字必備。 |
 | `Badge` | 同 StatusDot 五色 | 高 22px、`--pn-radius-sm`、1px 同色邊框、底色用對應 `-tint`、字 12px。 |
-| `Tabs` | `underline`（頁內）、`segmented`（僅手機） | 高 48px；目前項文字 `--pn-gold-bright` + 2px 金底線；可帶計數（`body-sm`）。 |
+| `Tabs` | `underline`（頁內）、`segmented`（僅手機） | 高 48px；目前項文字 `--pn-gold-bright` 600 + 2px 金底線；可帶計數（`body-sm` 600，與標籤同色）。鍵盤：整列只佔一個 Tab 停點（目前項），← → 切換並選取（頭尾循環），Home / End 到第一／最後一項。 |
 | `SearchInput` | — | 高 48px、`--pn-surface-2` 底、1px `--pn-border-strong`、左 icon、右清除鍵；placeholder `--pn-text-3`。 |
 | `Input` / `Select` / `DateInput` / `Textarea` | 帶前綴（如貨幣）版本 | 同 SearchInput 規格；label 在左（桌面 label/value 表單）或在上（手機）；錯誤狀態邊框 `--pn-danger` + 底下一行錯誤文字；Textarea 右下字數 `label`。 |
 | `Checkbox` | — | 20px、選取時金底深色勾；用於「本人核對一致」這類確認。 |
-| `DataTable` | `dense`（48px 列）、`regular`（64px 列） | 表頭 `--pn-surface-2`、`body-sm` `--pn-text-2`；列之間 1px `--pn-border`；hover `--pn-surface-3`；第一欄粗體；狀態欄用 `StatusDot`；操作欄用 `Button/secondary` 小尺寸（高 32px）。狀態：loading（骨架列 ×5）/ empty（`EmptyState` 佔滿）/ error。 |
-| `KeyValueList` | `stacked`（label 上值下）、`inline`（label 左值右） | inline：label 寬 160px `body` `--pn-text-2`，值 `body` `--pn-text`；每列 40px，1px 分隔線；編號／UUID 用 `mono`，長 UUID 可換行並附複製鍵。 |
+| `DataTable` | `dense`（48px 列）、`regular`（64px 列） | 表頭 `--pn-surface-2`、`body-sm` `--pn-text-2`；列之間 1px `--pn-border`；hover `--pn-surface-3`；第一欄粗體；狀態欄用 `StatusDot`；操作欄用 `Button/secondary` 小尺寸（高 32px）。狀態：loading（表頭 + 骨架列 ×5）/ empty（`EmptyState` 佔滿，不顯示表頭；ready 但沒有列時同樣顯示 empty）/ error（§5 錯誤態）。欄內距 0 12px，第一欄左內距 16px；表頭列 48px。 |
+| `KeyValueList` | `stacked`（label 上值下）、`inline`（label 左值右）、`compact`（「label：值」一行） | inline：label 寬 160px `body` `--pn-text-2`，值 `body` `--pn-text`；每列 40px，1px 分隔線；編號／UUID 用 `mono`，長 UUID 可換行並附複製鍵；列尾可放一個 `Button/ghost`（例：檢視確認單）。stacked：label `label` 在上、值 `body` 在下，無分隔線。compact：`body-sm`，label `--pn-text-2` + 全形冒號，值 `--pn-text`，列距 4px，用於 `TodoCard` 這類窄卡。 |
 | `ResultBanner` | `success` / `error` / `info` | 高 56px、`--pn-surface`、左 icon + 狀態文字、中間關聯編號、右側 `StatusDot`。 |
 | `InfoBox` | — | `--pn-surface-2`、`--pn-radius-md`、左 info icon；標題 `body` 600 + 說明 `body-sm` `--pn-text-2`。 |
 | `AmountDisplay` | — | 幣別 `body` + 金額 `display-md` `--pn-gold-bright`；label 在左。 |
-| `ListPanel` / `ListItem` | — | 項高 104px；標題 `title-sm` + 右上 `Badge`，第二行人名，第三行編號 `mono` + 時間 `label`；選取時底 `--pn-gold-tint`、左側 3px 金條、右側 chevron。 |
-| `DetailPanel` | — | `Card`；標題列 `title-md` + `Badge`；`KeyValueList/inline`；可含 `Stepper`、表單、底部動作列（`primary` + `secondary` 並排，右側 meta）。 |
+| `ListPanel` / `ListItem` | — | 項高 104px；標題 `title-sm` + 右上 `Badge`，第二行人名，第三行編號 `mono` + 時間 `label`（帶時區標記）；每項右側 chevron，選取時底 `--pn-gold-tint`、左側 3px 金條、chevron 轉 `--pn-gold-bright`。面板底 `--pn-surface`、1px 邊框，頂部可放 `SearchInput`。鍵盤：清單只佔一個 Tab 停點（選取項，無選取時第一項），↑ ↓ / Home / End 移動焦點，Enter 或 Space 選取。四態同 `DataTable`（loading 為骨架項 ×3）。 |
+| `DetailPanel` | — | `Card`；標題列 `title-md` + `Badge`，下一行「案件編號」`body-sm` `--pn-text-2` + 編號 `mono`；`KeyValueList/inline`；可含 `Stepper`、表單、底部動作列（`primary` + `secondary` 並排，右側 meta）。 |
 | `Stepper` | 水平 3–5 步 | 節點 24px：完成＝金底勾、進行中＝金色外圈、未開始＝灰外圈；完成段實線金、未完成段虛線灰；每步下方名稱 + 時間／經手人 `label`。 |
-| `ActivityTimeline` | — | 左側綠點連線；每列：時間 `body-sm` 600、事件名 `body` 600、關聯編號 `mono`、說明 `body-sm` `--pn-text-2`。 |
-| `TodoPanel` / `TodoCard` | — | 側欄堆疊；每卡 icon + 標題 `title-sm` + `Badge`，`KeyValueList/stacked` 兩三行，底部一顆 `Button/primary` 全寬。 |
+| `ActivityTimeline` | — | 左側綠點連線；每列：時間 `body-sm` 600、事件名 `body` 600、關聯編號 `mono`、說明 `body-sm` `--pn-text-2`；列高至少 52px，列間 1px 分隔線；只寫時間時由所在區塊標明時區。四態同 `DataTable`（loading 為骨架列 ×3）。 |
+| `TodoPanel` / `TodoCard` | — | 側欄堆疊；面板 `--pn-surface` + 1px 邊框，標題 `title-md` + 右側 `Button/ghost`，底部可放 `label` meta（最新資料時間與時區）。每卡 1px 邊框；icon 24 `--pn-gold-bright` + 標題 `title-sm` + `Badge`，下一行關聯編號 `mono`，`KeyValueList/compact` 兩三行，底部一顆 `Button/primary` 全寬。四態同 `DataTable`（loading 為骨架卡 ×2）。 |
 | `HeroTripCard` | — | 手機首頁全幅圖（`object-fit: cover`，純裝飾圖 `alt=""`；沒有圖時為 `--pn-surface-2` 平面底，不用彩色漸層）；底部 40% 由透明到 `--pn-bg` 的黑色漸層；頂部可放 `AppHeader`；可選問候 `title-md`；內容靠底、內距 `--pn-space-6`；目的地 `display-xl` 白 + 英文 `overline`；日期 `title-sm`；`Button/outline-gold` 高 52px 全寬、右側 chevron，是本屏唯一主要動作。高度隨內容增長（文字 200% 不裁切）。 |
 | `StatusStrip` | 3 格 | 手機；可選上方地點列（map-pin icon 24 金色 + 住宿名稱 `title-sm`，底下 1px 分隔線）；三格固定順序住宿／接送／行程（bed、car、file-text icon 24 `--pn-gold-bright`）+ 狀態文字 `body` 置中；格間 1px 垂直分隔線，底部 1px 分隔線。 |
 | `PointsPanel` | — | 手機；左「可用積分」`display-lg` `--pn-text`，右「已保留」`display-md` `--pn-text-2`；中間 1px 垂直分隔線；label `body-sm` `--pn-text-2` 在數字上方；數字後接單位「分」（`body`），格式 `25,000 分`。沒有積分紀錄時不渲染，改用 `EmptyState`（不顯示 0）。 |
@@ -210,6 +212,8 @@
 ## 5. 狀態與文案規則
 
 - 每個資料容器（表格、列表、面板）都要實作四態：**loading / empty / error / ready**。empty 一定給原因（「本次行程尚未建立」），不是「沒有資料」。
+  - loading：骨架列，灰條 `--pn-surface-3`、高 12px、`--pn-radius-sm`，列高與 ready 相同；緩慢明暗脈動（`prefers-reduced-motion` 時停止）；另附「載入中」給輔助科技。
+  - error：與 `EmptyState` 同版面（置中、至少 240px）：icon 32 `--pn-text-3` + `StatusDot/danger`「載入失敗」+ 一句原因 `body` `--pn-text-2` + 可選 `Button/secondary`「重新載入」；`role="alert"`。
 - 玩家端禁止「再打多久就能免費住宿」等促打文案（第 13 票）；文案資源集中管理以便測試檢查。
 - 時間一律顯示時區標記（例：`2026/09/11 11:08 · 韓國時間`）。
 - 金額格式 `KRW 300,000`（幣別前綴 + 千分位）；積分 `25,000 分`。

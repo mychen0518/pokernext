@@ -1,19 +1,25 @@
 /**
- * @fileoverview Enforces DESIGN.md §1 and §2 in component styles: every
- * colour, font, font size, spacing, radius, letter spacing and shadow in
- * `lib/**\/*.module.css` and the kitchen-sink page styles is a `var(--pn-*)`
- * token, never a literal, and gradients only fade to the dark background.
+ * @fileoverview Enforces DESIGN.md §1 and §2 in component and kitchen-sink
+ * styles: every colour, font, font size, spacing, radius, shadow and letter
+ * spacing in `lib/**\/*.module.css` and `kitchen_sink/**\/*.module.css` is a
+ * `var(--pn-*)` token, never a literal; gradients only fade to the dark
+ * background; only Modal and Drawer use the overlay shadow.
  */
 
 import {readdirSync, readFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {basename, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {describe, expect, it} from 'vitest';
 
-const STYLE_DIRS = ['../lib', '../kitchen_sink'].map(dir =>
-  fileURLToPath(new URL(dir, import.meta.url)),
+const LIB_DIR = fileURLToPath(new URL('../lib', import.meta.url));
+const KITCHEN_SINK_DIR = fileURLToPath(
+  new URL('../kitchen_sink', import.meta.url),
 );
+
+// DESIGN.md §2.3: Modal and Drawer are the only components with a shadow;
+// both are styled by this one stylesheet.
+const OVERLAY_STYLESHEET = 'overlay.module.css';
 
 // CSS Color Module Level 4 named colours. `transparent` and `currentcolor`
 // are keywords, not palette colours, and stay allowed.
@@ -167,12 +173,16 @@ describe('component styles', () => {
       .f { letter-spacing: var(--pn-type-overline-tracking); }
       .g { box-shadow: var(--pn-shadow-overlay); text-shadow: none; }
       .h { background: linear-gradient(180deg, transparent, var(--pn-bg)); }
+      .i { box-shadow: var(--pn-shadow); letter-spacing: 0; }
     `;
     expect(findLiteralDesignValues(css)).toEqual([]);
   });
 
-  it('use only design tokens for colour, font, spacing and radius', () => {
-    const files = STYLE_DIRS.flatMap(listCssModules);
+  it('use only design tokens for colour, font, spacing, radius, shadow and tracking', () => {
+    const files = [
+      ...listCssModules(LIB_DIR),
+      ...listCssModules(KITCHEN_SINK_DIR),
+    ];
     expect(files.length).toBeGreaterThan(0);
     const violations = files.flatMap(file =>
       findLiteralDesignValues(readFileSync(file, 'utf8')).map(
@@ -180,5 +190,14 @@ describe('component styles', () => {
       ),
     );
     expect(violations).toEqual([]);
+  });
+
+  it('give a shadow only to Modal and Drawer', () => {
+    const shadowed = listCssModules(LIB_DIR).filter(file =>
+      /box-shadow\s*:\s*var\(--pn-shadow-overlay\)/.test(
+        readFileSync(file, 'utf8'),
+      ),
+    );
+    expect(shadowed.map(file => basename(file))).toEqual([OVERLAY_STYLESHEET]);
   });
 });

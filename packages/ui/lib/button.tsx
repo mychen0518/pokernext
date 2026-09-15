@@ -4,6 +4,7 @@
  */
 
 import {ChevronRight, LoaderCircle} from 'lucide-react';
+import type {LucideIcon} from 'lucide-react';
 import type {ButtonHTMLAttributes, ReactNode} from 'react';
 
 import styles from './button.module.css';
@@ -28,6 +29,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
   /** Replaces the label with a spinner and blocks further presses. */
   loading?: boolean;
+  /** Optional outline icon from `lucide-react`, drawn before the label. */
+  icon?: LucideIcon;
   children: ReactNode;
 }
 
@@ -41,6 +44,7 @@ export function Button({
   size = 'md',
   fullWidth = false,
   loading = false,
+  icon: Icon,
   disabled,
   type = 'button',
   className,
@@ -63,6 +67,15 @@ export function Button({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
     >
+      {Icon === undefined ? undefined : (
+        <Icon
+          className={styles['icon']}
+          aria-hidden="true"
+          size={20}
+          strokeWidth={ICON_STROKE_WIDTH}
+          absoluteStrokeWidth
+        />
+      )}
       <span className={styles['label']}>{children}</span>
       {variant === 'ghost' ? (
         <ChevronRight

@@ -1,0 +1,31 @@
+/* PageGrid (DESIGN.md §3.2 page types). */
+
+.page-grid {
+  display: grid;
+  gap: var(--pn-space-6);
+}
+
+.page-grid > * {
+  min-width: 0;
+}
+
+.overview {
+  align-items: start;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.operation {
+  align-items: stretch;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.case {
+  align-items: stretch;
+  grid-template-columns: 380px minmax(0, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

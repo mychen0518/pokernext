@@ -1,0 +1,52 @@
+/*
+ * SearchInput (DESIGN.md §4). The box itself is the shared form control
+ * (field.module.css); this adds the icon and the clear button.
+ */
+
+.search {
+  align-items: center;
+  display: flex;
+  min-width: 0;
+  position: relative;
+}
+
+.icon {
+  color: var(--pn-text-3);
+  inset-inline-start: var(--pn-space-4);
+  pointer-events: none;
+  position: absolute;
+}
+
+.search .input {
+  padding-inline: calc(var(--pn-space-4) + var(--pn-space-8))
+    var(--pn-space-10);
+}
+
+.search .input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.clear {
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--pn-radius-sm);
+  color: var(--pn-text-2);
+  cursor: pointer;
+  display: flex;
+  height: 32px;
+  inset-inline-end: var(--pn-space-2);
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  width: 32px;
+}
+
+.clear:hover {
+  color: var(--pn-text);
+}
+
+.clear:focus-visible {
+  outline: var(--pn-focus-ring);
+  outline-offset: 0;
+}

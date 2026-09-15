@@ -45,6 +45,21 @@
   padding: var(--pn-space-6);
 }
 
+.meta {
+  align-items: center;
+  border-top: 1px solid var(--pn-border);
+  color: var(--pn-text-3);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  gap: var(--pn-space-3);
+  justify-content: space-between;
+  line-height: var(--pn-type-label-line);
+  min-height: 48px;
+  padding: var(--pn-space-2) var(--pn-space-6);
+}
+
 @media (max-width: 768px) {
   .header {
     padding: var(--pn-space-4) var(--pn-space-5);
@@ -52,5 +67,9 @@
 
   .body {
     padding: var(--pn-space-5);
+  }
+
+  .meta {
+    padding: var(--pn-space-2) var(--pn-space-5);
   }
 }

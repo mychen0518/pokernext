@@ -1,0 +1,62 @@
+/* UserChip (DESIGN.md §4). */
+
+.user-chip {
+  align-items: flex-start;
+  color: var(--pn-text);
+  display: flex;
+  gap: var(--pn-space-3);
+  min-width: 0;
+}
+
+.icon {
+  color: var(--pn-text-2);
+  flex: none;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-2);
+  min-width: 0;
+}
+
+.identity {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--pn-space-2);
+  margin: 0;
+}
+
+.name {
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+}
+
+.role {
+  color: var(--pn-text-3);
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  line-height: var(--pn-type-label-line);
+}
+
+.badge {
+  display: flex;
+}
+
+/* Collapsed Sidebar rail (DESIGN.md §3.2): the icon only. */
+@media (max-width: 1024px) {
+  .user-chip {
+    justify-content: center;
+  }
+
+  .text {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+}
