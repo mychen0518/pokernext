@@ -1,11 +1,13 @@
 /**
  * @fileoverview 帳號 session 與工作區進入：以某帳號開的 session 只能進該帳號所屬的
  * 工作區；會員的 session 只在玩家 host 有效，工作帳號的 session 只在工作帳號 host
- * 有效；結束的 session 不再有效。全部經 use-case 與真實資料庫。
+ * 有效；結束的 session 不再有效；每一次被拒都在 AuditLog 留下一筆紀錄（PRD 2.1、
+ * 7 SEC-01）。全部經 use-case 與真實資料庫。
  */
 
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
+import {parseAccountId, parseSessionToken} from '../index';
 import {createTestApp, given, type TestApp} from '../testing';
 
 const WORK_WORKSPACES = [
@@ -15,6 +17,12 @@ const WORK_WORKSPACES = [
   'staff',
   'agent',
 ] as const;
+
+/** The instant the test clock starts at, in UTC. */
+const START = new Date('2026-09-11T00:00:00Z');
+
+/** A well-formed token that no session was ever started with. */
+const UNKNOWN_TOKEN = parseSessionToken('A'.repeat(43));
 
 describe('帳號 session 與工作區進入', () => {
   let app: TestApp;
@@ -187,7 +195,7 @@ describe('帳號 session 與工作區進入', () => {
     });
   });
 
-  it('另一個 host 不能結束這個 host 的 session', async () => {
+  it('另一個 host 不能結束這個 host 的 session：被拒，session 仍然有效', async () => {
     const platform = await given(app).demoAccount('platform');
     const {token} = await given(app).sessionStarted({
       accountId: platform.id,
@@ -195,7 +203,8 @@ describe('帳號 session 與工作區進入', () => {
     });
 
     expect(await app.sessions.end({token, host: 'player'})).toEqual({
-      status: 'notActive',
+      status: 'refused',
+      reason: 'sessionFromOtherHost',
     });
     expect(
       await app.sessions.resolve({token, host: 'work', workspace: 'platform'}),
@@ -210,7 +219,7 @@ describe('帳號 session 與工作區進入', () => {
     ).toEqual({status: 'refused', reason: 'noSession'});
     expect(
       await app.sessions.resolve({
-        token: 'forged-token',
+        token: UNKNOWN_TOKEN,
         host: 'player',
         workspace: 'player',
       }),
@@ -219,7 +228,7 @@ describe('帳號 session 與工作區進入', () => {
 
   it('不存在的帳號不能開 session', async () => {
     const started = await app.sessions.start({
-      accountId: '6f0e2f5e-2a1b-4c3d-9e8f-0a1b2c3d4e5f',
+      accountId: unknownAccountId(),
       host: 'work',
     });
 
@@ -245,3 +254,146 @@ describe('帳號 session 與工作區進入', () => {
     });
   });
 });
+
+describe('被拒的 session 與工作區請求寫入 AuditLog', () => {
+  let app: TestApp;
+
+  beforeEach(async () => {
+    app = await createTestApp({start: '2026-09-11T09:00:00+09:00'});
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('會員在工作帳號 host 開 session 被拒，AuditLog 留下一筆：該會員、工作帳號 host、開 session、對象帳號、拒絕與原因、當下時間', async () => {
+    const member = await given(app).demoAccount('player');
+
+    await app.sessions.start({accountId: member.id, host: 'work'});
+
+    expect(await app.auditLog()).toEqual([
+      {
+        occurredAt: START,
+        actorAccountId: member.id,
+        host: 'work',
+        action: 'session.start',
+        target: `account:${member.id}`,
+        outcome: 'refused',
+        reason: 'accountNotAllowedOnHost',
+      },
+    ]);
+  });
+
+  it('不存在的帳號開 session 被拒，AuditLog 的紀錄沒有操作者，對象是要求的帳號', async () => {
+    const accountId = unknownAccountId();
+
+    await app.sessions.start({accountId, host: 'player'});
+
+    expect(await app.auditLog()).toEqual([
+      {
+        occurredAt: START,
+        host: 'player',
+        action: 'session.start',
+        target: `account:${accountId}`,
+        outcome: 'refused',
+        reason: 'accountNotFound',
+      },
+    ]);
+  });
+
+  it('場館帳號進管理工作區被拒時留下一筆紀錄；進自己的場館工作區不留拒絕紀錄', async () => {
+    const venueAccount = await given(app).demoAccount('venue');
+    const {token} = await given(app).sessionStarted({
+      accountId: venueAccount.id,
+      host: 'work',
+    });
+    await app.clock.advanceMinutes(5);
+
+    await app.sessions.resolve({token, host: 'work', workspace: 'venue'});
+    await app.sessions.resolve({token, host: 'work', workspace: 'admin'});
+
+    expect(await app.auditLog()).toEqual([
+      {
+        occurredAt: new Date('2026-09-11T00:05:00Z'),
+        actorAccountId: venueAccount.id,
+        host: 'work',
+        action: 'workspace.enter',
+        target: 'workspace:admin',
+        outcome: 'refused',
+        reason: 'otherWorkspace',
+      },
+    ]);
+  });
+
+  it('沒有 session 的請求進工作區被拒，AuditLog 的紀錄沒有操作者', async () => {
+    await app.sessions.resolve({host: 'player', workspace: 'player'});
+
+    expect(await app.auditLog()).toEqual([
+      {
+        occurredAt: START,
+        host: 'player',
+        action: 'workspace.enter',
+        target: 'workspace:player',
+        outcome: 'refused',
+        reason: 'noSession',
+      },
+    ]);
+  });
+
+  it('從另一個 host 結束 session 被拒，AuditLog 記下該 session 的帳號與被拒原因', async () => {
+    const platform = await given(app).demoAccount('platform');
+    const {token} = await given(app).sessionStarted({
+      accountId: platform.id,
+      host: 'work',
+    });
+
+    await app.sessions.end({token, host: 'player'});
+
+    expect(await app.auditLog()).toEqual([
+      expect.objectContaining({
+        actorAccountId: platform.id,
+        host: 'player',
+        action: 'session.end',
+        outcome: 'refused',
+        reason: 'sessionFromOtherHost',
+      }),
+    ]);
+  });
+
+  it('允許的開 session、進工作區與結束 session 不寫拒絕紀錄', async () => {
+    const admin = await given(app).demoAccount('admin');
+    const {token} = await given(app).sessionStarted({
+      accountId: admin.id,
+      host: 'work',
+    });
+
+    await app.sessions.resolve({token, host: 'work', workspace: 'admin'});
+    await app.sessions.end({token, host: 'work'});
+
+    expect(await app.auditLog()).toEqual([]);
+  });
+});
+
+describe('邊界上的識別碼', () => {
+  it('形狀不像 session token 的 cookie 值在邊界就不被當成 token', () => {
+    expect(parseSessionToken('forged-token')).toBeUndefined();
+    expect(parseSessionToken(undefined)).toBeUndefined();
+    expect(parseSessionToken('A'.repeat(43))).toBe('A'.repeat(43));
+  });
+
+  it('不是 UUID 的帳號識別在邊界就不被當成帳號；大寫 UUID 視為同一個帳號', () => {
+    expect(parseAccountId('not-an-account')).toBeUndefined();
+    expect(parseAccountId('6F0E2F5E-2A1B-4C3D-9E8F-0A1B2C3D4E5F')).toBe(
+      '6f0e2f5e-2a1b-4c3d-9e8f-0a1b2c3d4e5f',
+    );
+  });
+});
+
+/** An account id that no demo account uses. */
+function unknownAccountId() {
+  const accountId = parseAccountId('6f0e2f5e-2a1b-4c3d-9e8f-0a1b2c3d4e5f');
+  if (accountId === undefined) {
+    throw new Error('The fixed unknown account id must parse.');
+  }
+  return accountId;
+}

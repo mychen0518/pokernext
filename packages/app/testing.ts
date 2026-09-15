@@ -10,6 +10,7 @@ export {
   startTestDatabaseServer,
 } from '@pokernext/db/testing';
 export type {TestDatabase, TestDatabaseServer} from '@pokernext/db/testing';
+export type {AuditEntry} from './lib/audit_log';
 export {
   ConcurrencyViolation,
   expectTakesEffectOnce,

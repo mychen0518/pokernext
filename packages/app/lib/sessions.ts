@@ -1,37 +1,40 @@
 /**
  * @fileoverview Session use-cases: the one path that starts a session
  * (ADR-0001), ending it, and resolving a session token into an actor allowed
- * into a workspace. Every resolve re-reads the session and account and asks
- * the domain rule again; nothing is cached. Ticket 03 adds the AuditLog entry
- * on refusal; tickets 03 and 10 put credentials in front of `start`.
+ * into a workspace. Every call re-reads the session and account and asks the
+ * domain rule again; nothing is cached. Every refusal writes one AuditLog
+ * entry (PRD 7 SEC-01). Tickets 03 and 10 put credentials in front of `start`
+ * and extend the audited flows.
  */
 
-import {createHash, randomBytes} from 'node:crypto';
+import {createHash} from 'node:crypto';
 
-import type {Database} from '@pokernext/db';
+import type {ActiveSessionRecord, Database} from '@pokernext/db';
 import {
+  decideSessionEnd,
   decideSessionStart,
   decideWorkspaceEntry,
   type HostKind,
+  type SessionEndRefusal,
   type SessionStartRefusal,
   type Workspace,
+  type WorkspaceEntryDecision,
   type WorkspaceEntryRefusal,
 } from '@pokernext/domain';
 import type {Clock} from '@pokernext/ports';
 
 import {type AccountSummary, toAccountSummary} from './accounts';
-
-/** Bytes of randomness in a session token. */
-const TOKEN_BYTES = 32;
-/** Accepts only tokens shaped like the ones {@link SessionUseCases.start} issues. */
-const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
-/** Accepts only account ids shaped like a UUID. */
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import {createAuditTrail} from './audit_log';
+import {
+  type AccountId,
+  issueSessionToken,
+  storedAccountId,
+  type SessionToken,
+} from './identifiers';
 
 /** Asks to start a session for an account on a host. */
 export interface StartSessionRequest {
-  readonly accountId: string;
+  readonly accountId: AccountId;
   readonly host: HostKind;
 }
 
@@ -39,7 +42,7 @@ export interface StartSessionRequest {
 export interface SessionStarted {
   readonly status: 'started';
   /** Opaque bearer token; only its hash is stored. */
-  readonly token: string;
+  readonly token: SessionToken;
   readonly account: AccountSummary;
   readonly startedAt: Date;
 }
@@ -52,7 +55,8 @@ export interface SessionStartRefused {
 
 /** Asks to end the session behind a token on a host. */
 export interface EndSessionRequest {
-  readonly token?: string;
+  /** The cookie token, or undefined when the request carries none. */
+  readonly token?: SessionToken;
   readonly host: HostKind;
 }
 
@@ -61,17 +65,23 @@ export interface SessionEndOutcome {
   readonly status: 'ended' | 'notActive';
 }
 
+/** The session exists but this request may not end it. */
+export interface SessionEndRefused {
+  readonly status: 'refused';
+  readonly reason: SessionEndRefusal;
+}
+
 /** Asks whether the session behind a token may enter a workspace. */
 export interface ResolveSessionRequest {
   /** The cookie token, or undefined when the request carries none. */
-  readonly token?: string;
+  readonly token?: SessionToken;
   readonly host: HostKind;
   readonly workspace: Workspace;
 }
 
 /** Who is acting in an allowed workspace request. */
 export interface WorkspaceActorSummary {
-  readonly accountId: string;
+  readonly accountId: AccountId;
   readonly kind: AccountSummary['kind'];
   readonly displayName: string;
   readonly roleLabel: string;
@@ -92,7 +102,7 @@ export interface WorkspaceEntryRefused {
 
 /** Asks where the session behind a token belongs on a host. */
 export interface SessionHomeRequest {
-  readonly token?: string;
+  readonly token?: SessionToken;
   readonly host: HostKind;
 }
 
@@ -113,13 +123,19 @@ export interface SessionUseCases {
   start(
     request: StartSessionRequest,
   ): Promise<SessionStarted | SessionStartRefused>;
-  /** Ends the active session behind the token on that host. */
-  end(request: EndSessionRequest): Promise<SessionEndOutcome>;
+  /** Ends the active session behind the token, if this host may end it. */
+  end(
+    request: EndSessionRequest,
+  ): Promise<SessionEndOutcome | SessionEndRefused>;
   /** Resolves a token into an actor allowed into the workspace, or a refusal. */
   resolve(
     request: ResolveSessionRequest,
   ): Promise<WorkspaceEntryAllowed | WorkspaceEntryRefused>;
-  /** Tells which workspace the session on this host may enter. */
+  /**
+   * Tells which workspace the session on this host may enter. It grants
+   * nothing and only words a redirect or a refusal page, so a signed-out
+   * answer is not audited; the refused workspace request itself is.
+   */
   home(request: SessionHomeRequest): Promise<SignedIn | SignedOut>;
 }
 
@@ -128,26 +144,41 @@ export function createSessionUseCases(
   database: Database,
   clock: Clock,
 ): SessionUseCases {
-  async function findActive(token: string | undefined) {
-    if (token === undefined || !TOKEN_PATTERN.test(token)) {
-      return undefined;
-    }
-    return database.sessions.findActive(hashToken(token));
+  const audit = createAuditTrail(database, clock);
+
+  function findActive(
+    token: SessionToken | undefined,
+  ): Promise<ActiveSessionRecord | undefined> {
+    return token === undefined
+      ? Promise.resolve(undefined)
+      : database.sessions.findActive(hashToken(token));
   }
 
   return {
     async start({accountId, host}) {
-      const record = UUID_PATTERN.test(accountId)
-        ? await database.accounts.findById(accountId)
-        : undefined;
+      const target = `account:${accountId}`;
+      const record = await database.accounts.findById(accountId);
       if (record === undefined) {
+        await audit.recordRefusal({
+          host,
+          action: 'session.start',
+          target,
+          reason: 'accountNotFound',
+        });
         return {status: 'refused', reason: 'accountNotFound'};
       }
       const decision = decideSessionStart(record, host);
       if (!decision.allowed) {
+        await audit.recordRefusal({
+          actorAccountId: accountId,
+          host,
+          action: 'session.start',
+          target,
+          reason: decision.reason,
+        });
         return {status: 'refused', reason: decision.reason};
       }
-      const token = randomBytes(TOKEN_BYTES).toString('base64url');
+      const token = issueSessionToken();
       const startedAt = clock.now();
       await database.sessions.insert({
         tokenHash: hashToken(token),
@@ -164,8 +195,23 @@ export function createSessionUseCases(
     },
 
     async end({token, host}) {
-      if (token === undefined || !TOKEN_PATTERN.test(token)) {
+      const active = await findActive(token);
+      if (token === undefined || active === undefined) {
         return {status: 'notActive'};
+      }
+      const decision = decideSessionEnd({
+        sessionHost: active.session.hostKind,
+        requestHost: host,
+      });
+      if (!decision.allowed) {
+        await audit.recordRefusal({
+          actorAccountId: storedAccountId(active.account.id),
+          host,
+          action: 'session.end',
+          target: `session:${active.session.id}`,
+          reason: decision.reason,
+        });
+        return {status: 'refused', reason: decision.reason};
       }
       const ended = await database.sessions.end({
         tokenHash: hashToken(token),
@@ -176,24 +222,32 @@ export function createSessionUseCases(
     },
 
     async resolve({token, host, workspace}) {
+      const refuse = async (
+        reason: WorkspaceEntryRefused['reason'],
+        actorAccountId?: AccountId,
+      ): Promise<WorkspaceEntryRefused> => {
+        await audit.recordRefusal({
+          ...(actorAccountId === undefined ? {} : {actorAccountId}),
+          host,
+          action: 'workspace.enter',
+          target: `workspace:${workspace}`,
+          reason,
+        });
+        return {status: 'refused', reason};
+      };
       const active = await findActive(token);
       if (active === undefined) {
-        return {status: 'refused', reason: 'noSession'};
+        return refuse('noSession');
       }
-      const {session, account} = active;
-      const decision = decideWorkspaceEntry({
-        actor: account,
-        sessionHost: session.hostKind,
-        requestHost: host,
-        workspace,
-      });
+      const decision = decideEntry(active, host, workspace);
       if (!decision.allowed) {
-        return {status: 'refused', reason: decision.reason};
+        return refuse(decision.reason, storedAccountId(active.account.id));
       }
+      const {account} = active;
       return {
         status: 'allowed',
         actor: {
-          accountId: account.id,
+          accountId: storedAccountId(account.id),
           kind: account.kind,
           displayName: account.displayName,
           roleLabel: account.roleLabel,
@@ -207,20 +261,29 @@ export function createSessionUseCases(
       if (active === undefined) {
         return {status: 'signedOut'};
       }
-      const decision = decideWorkspaceEntry({
-        actor: active.account,
-        sessionHost: active.session.hostKind,
-        requestHost: host,
-        workspace: active.account.workspace,
-      });
-      return decision.allowed
-        ? {status: 'signedIn', workspace: active.account.workspace}
+      const {workspace} = active.account;
+      return decideEntry(active, host, workspace).allowed
+        ? {status: 'signedIn', workspace}
         : {status: 'signedOut'};
     },
   };
 }
 
+/** Asks the domain rule whether an active session may enter the workspace. */
+function decideEntry(
+  active: ActiveSessionRecord,
+  host: HostKind,
+  workspace: Workspace,
+): WorkspaceEntryDecision {
+  return decideWorkspaceEntry({
+    actor: active.account,
+    sessionHost: active.session.hostKind,
+    requestHost: host,
+    workspace,
+  });
+}
+
 /** Hashes a token for storage; the token itself is never stored. */
-function hashToken(token: string): string {
+function hashToken(token: SessionToken): string {
   return createHash('sha256').update(token).digest('hex');
 }

@@ -6,6 +6,7 @@
   "exports": {
     ".": "./index.ts",
     "./demo": "./demo.ts",
+    "./dev": "./dev.ts",
     "./testing": "./testing.ts"
   },
   "dependencies": {

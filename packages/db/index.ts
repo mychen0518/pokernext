@@ -12,7 +12,13 @@ export type {
   SessionEnding,
   SessionRecord,
   SessionStore,
+  StoredSessionRecord,
 } from './lib/accounts';
+export type {
+  AuditEntryRecord,
+  AuditLogStore,
+  AuditOutcome,
+} from './lib/audit_log';
 export {connectDatabase} from './lib/database';
 export type {ConnectOptions, Database} from './lib/database';
 export {resolveDatabaseUrl} from './lib/config';

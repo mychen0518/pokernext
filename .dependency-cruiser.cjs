@@ -158,6 +158,33 @@ module.exports = {
       to: {path: '^packages/app/demo\\.ts$'},
     },
     {
+      name: 'dev-entry-only-from-role-switcher',
+      comment:
+        'packages/app/dev.ts lists every account without an actor for the development role switcher: only the real switcher (apps/web/dev_tools/role_switcher.tsx, not its production stub) and test code may import it, so the listing never reaches the production App or bundle.',
+      severity: 'error',
+      from: {pathNot: [TEST_CODE, '^apps/web/dev_tools/role_switcher\\.tsx$']},
+      to: {path: '^packages/app/dev\\.ts$'},
+    },
+    {
+      name: 'role-switcher-accounts-behind-dev-entry',
+      comment:
+        "The role switcher's account listing (packages/app/lib/role_switcher_accounts.ts) is reachable only through packages/app/dev.ts.",
+      severity: 'error',
+      from: {pathNot: '^packages/app/dev\\.ts$'},
+      to: {path: '^packages/app/lib/role_switcher_accounts\\.ts$'},
+    },
+    {
+      name: 'unauthorized-account-listing-not-in-app',
+      comment:
+        'packages/app/lib/account_listing.ts lists accounts with no authorization: only the role switcher listing and the demo account implementation may import it, never index.ts or a production use-case.',
+      severity: 'error',
+      from: {
+        pathNot:
+          '^packages/app/lib/(role_switcher_accounts|demo_accounts)\\.ts$',
+      },
+      to: {path: '^packages/app/lib/account_listing\\.ts$'},
+    },
+    {
       name: 'app-no-upward-deps',
       comment:
         'packages/app sits below apps/web: it may not import apps, tooling or packages/ui.',

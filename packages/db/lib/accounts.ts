@@ -31,9 +31,14 @@ export interface SessionRecord {
   readonly createdAt: Date;
 }
 
+/** A session as stored, with the id the database assigned it. */
+export interface StoredSessionRecord extends SessionRecord {
+  readonly id: string;
+}
+
 /** An active session together with its account. */
 export interface ActiveSessionRecord {
-  readonly session: SessionRecord;
+  readonly session: StoredSessionRecord;
   readonly account: AccountRecord;
 }
 
@@ -129,6 +134,7 @@ export function createSessionStore(db: NodePgDatabase): SessionStore {
     async findActive(tokenHash) {
       const [row] = await db
         .select({
+          id: sessions.id,
           tokenHash: sessions.tokenHash,
           accountId: sessions.accountId,
           hostKind: sessions.hostKind,
@@ -145,6 +151,7 @@ export function createSessionStore(db: NodePgDatabase): SessionStore {
       }
       return {
         session: {
+          id: row.id,
           tokenHash: row.tokenHash,
           accountId: row.accountId,
           // Safe: the sessions_host_kind_known constraint admits only these.

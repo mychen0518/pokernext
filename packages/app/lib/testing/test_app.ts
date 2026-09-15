@@ -13,6 +13,7 @@ import {
 } from '@pokernext/ports/testing';
 
 import {type App, createApp} from '../app';
+import {type AuditEntry, readAuditEntries} from '../audit_log';
 import {type DemoAccountsEnsured, ensureDemoAccountsOn} from '../demo_accounts';
 
 /** How to set up a test app. */
@@ -29,10 +30,21 @@ export interface TestApp extends App {
   readonly clock: ControllableClock;
   readonly ports: FakeExternalPorts;
   /**
+   * The URL of this test's own database, for entry points that connect by
+   * themselves (`@pokernext/app/dev`, an HTTP test server).
+   */
+  readonly databaseUrl: string;
+  /**
    * Creates any missing demo account with the demo entry point's
    * implementation. Tests reach it through `given(app).demoAccount(…)`.
    */
   ensureDemoAccounts(): Promise<DemoAccountsEnsured>;
+  /**
+   * Reads every AuditLog entry, oldest first. Test-only: the production `App`
+   * has no AuditLog query yet (ticket 03 adds an authorized one), and tests
+   * observe the log through this instead of reading tables.
+   */
+  auditLog(): Promise<AuditEntry[]>;
   /** Closes connections and drops the test's database. */
   close(): Promise<void>;
 }
@@ -56,7 +68,9 @@ export async function createTestApp(
     ...app,
     clock,
     ports,
+    databaseUrl: testDatabase.url,
     ensureDemoAccounts: () => ensureDemoAccountsOn(database, clock),
+    auditLog: () => readAuditEntries(database),
     close: async () => {
       await app.close();
       await testDatabase.drop();

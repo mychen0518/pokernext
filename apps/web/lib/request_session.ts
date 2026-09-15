@@ -3,7 +3,11 @@
  * in server components, server actions and route handlers.
  */
 
-import type {HostKind} from '@pokernext/app';
+import {
+  type HostKind,
+  parseSessionToken,
+  type SessionToken,
+} from '@pokernext/app';
 import {cookies, headers} from 'next/headers';
 
 import {hostKindOf} from './hosts';
@@ -15,8 +19,8 @@ export interface RequestSession {
   readonly host?: HostKind;
   /** The raw `Host` header, for building links with the same port. */
   readonly hostHeader: string;
-  /** The session cookie of this host, if any. */
-  readonly token?: string;
+  /** The session cookie of this host, if it holds a well-formed token. */
+  readonly token?: SessionToken;
 }
 
 /** Reads the current request's host kind and that host's session token. */
@@ -26,6 +30,8 @@ export async function readRequestSession(): Promise<RequestSession> {
   if (host === undefined) {
     return {hostHeader};
   }
-  const token = (await cookies()).get(sessionCookieName(host))?.value;
+  const token = parseSessionToken(
+    (await cookies()).get(sessionCookieName(host))?.value,
+  );
   return {host, hostHeader, token};
 }

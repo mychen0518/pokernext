@@ -61,6 +61,12 @@ rest in `lib/`.
   `tooling/demo`; tests reach the same implementation through
   `@pokernext/app/testing` (`given(app).demoAccount(…)`,
   `ensureDemoAccountsInDatabase`).
+- `packages/app/dev.ts` (every account, no actor, for the role switcher) is
+  imported only from `apps/web/dev_tools/role_switcher.tsx` and tests, never
+  from the production stub; its implementation
+  `lib/role_switcher_accounts.ts` only through `dev.ts`, and the
+  unauthorized `lib/account_listing.ts` only from that implementation and the
+  demo account implementation.
 - `apps/web/dev_tools/` (the role switcher) is reached only through the
   `#role_switcher` import and `app/dev/**/route.dev.ts`; `next.config.ts`
   removes both outside `next dev`, and
