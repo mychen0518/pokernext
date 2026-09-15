@@ -25,7 +25,7 @@
 /to-tickets .scratch/pokernext-foundation/spec.md
 ```
 
-agent 會先給你一份編號清單（預期兩張：00a 設計系統套件、00b 示範工具鏈；00b blocked by 00a 與 platform 第 01 票）並問粒度與阻擋邊。你核可後它寫到 `.scratch/pokernext-foundation/issues/`。完成：兩個 issue 檔存在，`Status: ready-for-agent`。業務規則不預先移植，由各業務票自己寫進 `packages/domain`。
+agent 會先給你一份編號清單（已核可五張：00a token 與基礎元件、00b 桌面工作區元件、00c 玩家端手機元件、00d `pnpm demo` 與角色切換列、00e `demo:diff` 與劇本骨架；依賴 `00a → (00b ‖ 00c) → 00d → 00e`，00d 另被 platform 第 01 票擋）並問粒度與阻擋邊。你核可後它寫到 `.scratch/pokernext-foundation/issues/`。完成：五個 issue 檔存在，`Status: ready-for-agent`。業務規則不預先移植，由各業務票自己寫進 `packages/domain`。
 
 ## 3. 建 repo 骨架（`/setup-ts-deep-modules`）
 
@@ -41,13 +41,13 @@ agent 會先給你一份編號清單（預期兩張：00a 設計系統套件、0
 
 完成：`pnpm -w typecheck`、`pnpm -w lint`（gts）、`pnpm -w depcruise` 都綠；還沒有任何業務程式碼。commit。
 
-## 4. 00a 與第 01 票並行，再做 00b（`/implement`）
+## 4. foundation 五張票與第 01 票（`/implement`）
 
 ```
-/implement 分兩段：(1) 並行做 .scratch/pokernext-foundation/issues/ 的 00a 設計系統套件，與 .scratch/pokernext-platform/issues/01-project-skeleton-test-infra.md（用 /tdd，seam 依票）；(2) 兩者合回後做 foundation 00b 示範工具鏈。測試 seam 依 foundation spec「Testing Decisions」。implementer 必讀 docs/design/DESIGN.md 與 docs/design/prototype/pokernext-prototype.html（作為視覺與示範資料規格，不得複製其 JS，不移植其業務規則）。00a 完成前用 Playwright 對 kitchen-sink 頁截圖並與原型 #/venue/checkin/TR-260911-028、#/player/home 並排。
+/implement 依阻擋關係做 .scratch/pokernext-foundation/issues/ 的 00a–00e 與 .scratch/pokernext-platform/issues/01-project-skeleton-test-infra.md：先並行 00a 與 01；00a 合回後並行 00b、00c；00b、00c、01 都合回後做 00d；最後 00e。用 /tdd，seam 依票與 foundation spec「Testing Decisions」。implementer 必讀 docs/design/DESIGN.md 與 docs/design/prototype/pokernext-prototype.html（作為視覺與示範資料規格，不得複製其 JS，不移植其業務規則）。每張 UI 票完成前依票內 **UI:** 段截圖並與參考圖並排，路徑寫進票的 ## Comments。
 ```
 
-agent 會：建 branch → 開 implementer subagent 各自 worktree 做 00a、01（並行）→ merger 合回 → 00b → `/code-review` → 修 → 標 ready。你要決定的：review 報告裡的 finding 哪些要修。完成：第 01 票驗收條件全綠；`pnpm demo` 起得來、角色切換列能以六個 demo 帳號切換工作區、`pnpm demo:diff` 產出報告。
+agent 會：建 branch → 開 implementer subagent 各自 worktree 依 frontier 並行 → merger 合回 → 下一批 frontier → `/code-review` → 修 → 標 ready。你要決定的：review 報告裡的 finding 哪些要修。完成：第 01 票驗收條件全綠；`pnpm demo` 起得來、角色切換列能以六個 demo 帳號切換工作區、`pnpm demo:diff` 產出報告。
 
 ## 5. 批次 A 的 tracer bullet（先窄後寬）
 
