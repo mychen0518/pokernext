@@ -12,7 +12,10 @@ import type {
 import {InjectedBehaviours, type InjectionOptions} from './injection';
 
 const SECOND = 1_000;
-const MINUTE = 60 * SECOND;
+/** PRD 16.19 R16-19-10: after 30 s the player may fill fields by hand. */
+const MANUAL_FILL_WINDOW = 30 * SECOND;
+/** PRD 16.19 R16-19-10: after 2 min this attempt times out and may be retried. */
+const ATTEMPT_TIMEOUT = 120 * SECOND;
 
 /** How one recognition call behaves. */
 interface OcrBehaviour {
@@ -46,30 +49,44 @@ export class FakeOcrProvider implements OcrProvider {
     this.fields = {...fields};
   }
 
-  /** Answers successfully, but only after 31 s: past the manual-fill mark. */
-  injectResponseAfter30Seconds(options?: InjectionOptions): void {
-    this.behaviours.inject(
-      {delay: 31 * SECOND, outcome: 'recognized'},
-      options,
-    );
+  /**
+   * 逾時 >30s: answers successfully only after the 30-second window in which
+   * the caller waits before offering manual fill, but within the 2-minute
+   * attempt (default 45 s; `afterMilliseconds` must be in (30 s, 2 min]).
+   */
+  injectTimeoutOver30Seconds(
+    options: InjectionOptions & {afterMilliseconds?: number} = {},
+  ): void {
+    const delay = options.afterMilliseconds ?? 45 * SECOND;
+    if (delay <= MANUAL_FILL_WINDOW || delay > ATTEMPT_TIMEOUT) {
+      throw new Error(
+        `A timeout over 30 s answers after more than 30 s and within 2 min, got ${delay} ms.`,
+      );
+    }
+    this.behaviours.inject({delay, outcome: 'recognized'}, options);
   }
 
-  /** Never answers, so the 2-minute timeout is what ends the attempt. */
+  /**
+   * 逾時 >2min: gives no result and no failure within the 2-minute attempt or
+   * ever after, so only the caller's own 2-minute wait on the clock ends the
+   * attempt. Use {@link injectLateResult} for a result that still arrives.
+   */
   injectTimeoutOver2Minutes(options?: InjectionOptions): void {
     this.behaviours.inject({outcome: 'recognized'}, options);
   }
 
-  /** Answers successfully after the 2-minute timeout (default 2 min 30 s). */
+  /**
+   * 晚到結果: answers successfully only after the 2-minute attempt has timed
+   * out (default 2 min 30 s; `afterMilliseconds` must be over 2 min).
+   */
   injectLateResult(
     options: InjectionOptions & {afterMilliseconds?: number} = {},
   ): void {
-    this.behaviours.inject(
-      {
-        delay: options.afterMilliseconds ?? 2 * MINUTE + 30 * SECOND,
-        outcome: 'recognized',
-      },
-      options,
-    );
+    const delay = options.afterMilliseconds ?? ATTEMPT_TIMEOUT + 30 * SECOND;
+    if (delay <= ATTEMPT_TIMEOUT) {
+      throw new Error(`A late result arrives after 2 min, got ${delay} ms.`);
+    }
+    this.behaviours.inject({delay, outcome: 'recognized'}, options);
   }
 
   /** Answers at once that the document could not be recognised. */
