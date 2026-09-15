@@ -78,10 +78,11 @@ export function createHealthCheckUseCases(
 
   async function recordAndReadBack(
     requestKey: string,
+    recordedAt: Date,
   ): Promise<HealthCheckRecorded> {
     const {created} = await database.healthChecks.recordOnce({
       requestKey,
-      recordedAt: clock.now(),
+      recordedAt,
     });
     const [record] = await database.healthChecks.list({requestKey});
     if (record === undefined) {
@@ -95,14 +96,17 @@ export function createHealthCheckUseCases(
       if (!isValidRequestKey(requestKey)) {
         return {status: 'rejected', reason: 'invalidRequestKey'};
       }
-      return recordAndReadBack(requestKey);
+      return recordAndReadBack(requestKey, clock.now());
     },
 
     async probe() {
       try {
         const checkedAt = clock.now();
+        // The same instant is written and compared: reading the clock twice
+        // would differ by a millisecond on the system clock.
         const {status, record} = await recordAndReadBack(
           `probe-${randomUUID()}`,
+          checkedAt,
         );
         return status === 'recorded' && sameInstant(record, checkedAt)
           ? {status: 'healthy', checkedAt}

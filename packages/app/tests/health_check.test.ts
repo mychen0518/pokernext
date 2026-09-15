@@ -3,8 +3,10 @@
  * 一筆紀錄，並行重送也一樣。對外的探測只回報寫入並讀回的結果，不帶出任何已存紀錄。
  */
 
+import {connectDatabase} from '@pokernext/db';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
+import {createApp} from '../index';
 import {
   createTestApp,
   expectTakesEffectOnce,
@@ -133,6 +135,36 @@ describe('健康檢查探測', () => {
       checkedAt: new Date('2026-09-11T00:01:00Z'),
     });
     expect(await app.healthCheckRecords()).toHaveLength(2);
+  });
+});
+
+describe('真實時鐘下的健康檢查探測', () => {
+  it('每次讀時鐘都已過了一毫秒，探測仍回報健康，檢查時間是寫入並讀回的時間', async () => {
+    const testApp = await createTestApp({start: '2026-09-11T09:00:00+09:00'});
+    let ticks = 0;
+    const tickingClock = {
+      now: () => new Date(Date.UTC(2026, 8, 11) + ticks++),
+      wait: () => Promise.resolve(),
+    };
+    const database = connectDatabase({url: testApp.databaseUrl});
+    const app = createApp({
+      database,
+      clock: tickingClock,
+      ports: testApp.ports,
+    });
+    try {
+      const probed = await app.healthCheck.probe();
+
+      expect(probed.status).toBe('healthy');
+      expect(await testApp.healthCheckRecords()).toEqual([
+        expect.objectContaining({
+          recordedAt: probed.status === 'healthy' ? probed.checkedAt : null,
+        }),
+      ]);
+    } finally {
+      await app.close();
+      await testApp.close();
+    }
   });
 });
 
