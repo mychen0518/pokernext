@@ -72,4 +72,5 @@ Markdown rules for tickets and docs: ATX headings, one `#` per file, `-` bullets
 - Deep modules per `/setup-ts-deep-modules`: import a package only through its root files.
 - Prototype code (`docs/design/prototype/`) is a reference, never copied into `apps/` or `packages/`. Demo data literals from its `seed()` may be transcribed into test fixtures and the demo seed; state transitions, calculations and rendering logic may not.
 - Authorization rules are pure functions in `packages/domain`; every `packages/app` use-case calls them on every read and write and writes AuditLog on denial. A permission check that exists only in Next.js middleware, a route handler or the UI is a finding.
+- Demo seed calls `packages/app` use-cases; a seed that writes SQL or Drizzle inserts directly is a finding. The only exception is demo account creation through `packages/app/demo.ts`, importable only from `tooling/demo`.
 - Fake ports come only from `packages/ports/testing.ts`; importing it from `apps/web` or non-test code is a finding (dependency-cruiser also blocks it).

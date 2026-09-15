@@ -26,3 +26,8 @@
 - [ ] 取消案件的「已完成」按鈕在未勾選「已在天城系統完成取消」時 disabled；一般異動沒有「已完成」按鈕，只有「送出回報」
 
 **Notes:** 5 晚只訂成 3 晚的保留釋放與退分屬第 25 票。
+
+原型的異動案件階段（參考，不是期望值來源；與上方驗收條件衝突時以驗收條件為準）：
+`pending → in_progress → reported → done`、`pending → withdrawn`；取消類
+`in_progress → done` 直接產生「已取消」的來源事件，不經管理者。案件流程用
+`packages/domain` 的 `transition(state, event)`（ADR-0001）。

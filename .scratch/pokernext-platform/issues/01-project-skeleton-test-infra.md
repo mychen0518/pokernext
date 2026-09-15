@@ -2,7 +2,7 @@
 
 **What to build:** 建立可以跑起來的最小應用：一個從 HTTP 邊界進、經 use-case 層、落到真實資料庫、再回應的「健康檢查」請求，並且用它把整個專案後續都要沿用的測試基礎設施立起來。之後每一張票都用這套設施寫測試，不各自發明。
 
-**Blocked by:** `.scratch/pokernext-foundation/`（00a 設計系統套件、00b 領域核心、00c 示範工具鏈）；`docs/adr/0001-stack-and-repo-shape.md` 須為 accepted
+**Blocked by:** RUNBOOK 步驟 3 的 repo 骨架；`docs/adr/0001-stack-and-repo-shape.md` 須為 accepted。可與 foundation 00a（設計系統套件）並行；foundation 00b（示範工具鏈）blocked by 本票。
 
 **Status:** ready-for-agent
 

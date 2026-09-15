@@ -25,12 +25,12 @@
 /to-tickets .scratch/pokernext-foundation/spec.md
 ```
 
-agent 會先給你一份編號清單（預期三張：00a 設計系統套件、00b 領域核心、00c 示範工具鏈）並問粒度與阻擋邊。你核可後它寫到 `.scratch/pokernext-foundation/issues/`。完成：三個 issue 檔存在，`Status: ready-for-agent`。
+agent 會先給你一份編號清單（預期兩張：00a 設計系統套件、00b 示範工具鏈；00b blocked by 00a 與 platform 第 01 票）並問粒度與阻擋邊。你核可後它寫到 `.scratch/pokernext-foundation/issues/`。完成：兩個 issue 檔存在，`Status: ready-for-agent`。業務規則不預先移植，由各業務票自己寫進 `packages/domain`。
 
 ## 3. 建 repo 骨架（`/setup-ts-deep-modules`）
 
 ```
-/setup-ts-deep-modules 依 ADR-0001 建立 pnpm workspace：apps/web、packages/ui、packages/domain、packages/app、packages/db、packages/ports、tooling/demo；分層 apps/web → app → domain, db, ports，並禁止 apps/web 引用 packages/ports/testing.ts。每個 package 依深模組規則（根目錄為公開介面、lib/ 與 tests/ 私有），裝好 dependency-cruiser 並證明規則會擋。
+/setup-ts-deep-modules 依 ADR-0001 建立 pnpm workspace：apps/web、packages/ui、packages/domain、packages/app、packages/db、packages/ports、tooling/demo；分層 apps/web → app → domain, db, ports，禁止 apps/web 引用 packages/ports/testing.ts，packages/app/demo.ts 只允許 tooling/demo 引用。每個 package 依深模組規則（根目錄為公開介面、lib/ 與 tests/ 私有），裝好 dependency-cruiser 並證明規則會擋。
 ```
 
 接著在同一個 session 貼：
@@ -41,24 +41,23 @@ agent 會先給你一份編號清單（預期三張：00a 設計系統套件、0
 
 完成：`pnpm -w typecheck`、`pnpm -w lint`（gts）、`pnpm -w depcruise` 都綠；還沒有任何業務程式碼。commit。
 
-## 4. 實作 foundation（`/implement-spec`）
+## 4. 00a 與第 01 票並行，再做 00b（`/implement`）
 
 ```
-/implement-spec .scratch/pokernext-foundation/spec.md
-測試 seam 依 spec「Testing Decisions」。implementer 必讀 docs/design/DESIGN.md 與 docs/design/prototype/pokernext-prototype.html（作為行為與視覺規格，不得複製其 JS）。00a 完成前用 Playwright 對 kitchen-sink 頁截圖並與原型 #/venue/checkin/TR-260911-028、#/player/home 並排。
+/implement 分兩段：(1) 並行做 .scratch/pokernext-foundation/issues/ 的 00a 設計系統套件，與 .scratch/pokernext-platform/issues/01-project-skeleton-test-infra.md（用 /tdd，seam 依票）；(2) 兩者合回後做 foundation 00b 示範工具鏈。測試 seam 依 foundation spec「Testing Decisions」。implementer 必讀 docs/design/DESIGN.md 與 docs/design/prototype/pokernext-prototype.html（作為視覺與示範資料規格，不得複製其 JS，不移植其業務規則）。00a 完成前用 Playwright 對 kitchen-sink 頁截圖並與原型 #/venue/checkin/TR-260911-028、#/player/home 並排。
 ```
 
-agent 會：建 branch 與 draft PR（本地 repo 無 remote 時它會只建 branch）→ 開 implementer subagent 各自 worktree 做 00a、00b（並行）→ merger 合回 → 00c → `/code-review` → 修 → 標 ready。你要決定的：review 報告裡的 finding 哪些要修。完成：`pnpm demo` 起得來、角色切換列可用、`pnpm demo:diff` 產出報告。
+agent 會：建 branch → 開 implementer subagent 各自 worktree 做 00a、01（並行）→ merger 合回 → 00b → `/code-review` → 修 → 標 ready。你要決定的：review 報告裡的 finding 哪些要修。完成：第 01 票驗收條件全綠；`pnpm demo` 起得來、角色切換列能以六個 demo 帳號切換工作區、`pnpm demo:diff` 產出報告。
 
 ## 5. 批次 A 的 tracer bullet（先窄後寬）
 
 先只做一條線，把工具鏈磨順：
 
 ```
-/implement 只做 .scratch/pokernext-platform/issues/01-project-skeleton-test-infra.md 與 13-player-navigation-account-center.md。用 /tdd，seam 依票；13 票的畫面必須用 packages/ui，完成前 Playwright 截圖 390×844 五個頁面各 empty／ready 兩態，並與原型 #/player/home 並排自查，截圖路徑寫進票的 ## Comments。
+/implement 只做 .scratch/pokernext-platform/issues/13-player-navigation-account-center.md。用 /tdd，seam 依票；畫面必須用 packages/ui，完成前 Playwright 截圖 390×844 五個頁面各 empty／ready 兩態，並與原型 #/player/home 並排自查，截圖路徑寫進票的 ## Comments。本票需要的 demo seed 以呼叫 use-case 的方式補進 tooling/demo。
 ```
 
-完成：`pnpm demo` 後切到玩家端能看到與原型一致的首頁與空狀態。跑 `/code-review main`，修完 commit。
+完成：`pnpm demo` 後切到玩家工作區能看到與原型一致的首頁與空狀態。跑 `/code-review main`，修完 commit。
 
 ## 6. 批次 A 整批（`/triage` → `/implement-spec`）
 
@@ -91,7 +90,8 @@ frontier 預期：23、24、25、26、28、29、30。完成：劇本 13 步全�
 1. `/code-review <上一批的 commit>`：兩軸報告，只修你同意的。
 2. `/retro`：把摩擦回寫成 CLAUDE.md 導航指標、`docs/CODING_STANDARDS.md` 規則或 lint。
 3. 更新 `docs/design/DESIGN.md`（若元件有新增）與 `.scratch/.../issues/*.md` 的 `## Comments`（截圖、決策）。
-4. commit；`pnpm demo:script` 錄影存 `tooling/demo/recordings/<batch>.webm`。
+4. 確認這批每張票都補了自己那段 demo seed（呼叫 use-case，不直接寫 SQL），並解除 `demo:script` 裡對應步驟的 `test.fixme`。
+5. commit；`pnpm demo:script` 錄影存 `tooling/demo/recordings/<batch>.webm`。
 
 ## 遇到問題時
 

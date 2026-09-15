@@ -8,7 +8,7 @@ RUNBOOK 各步驟的啟動器。雙擊 `.cmd` 即可；每個都會開一個 Pow
 | `step1-grill.cmd` | 1 | 開 Claude Code 跑 `/grill-with-docs` 接受 ADR-0001（要你回答問題） |
 | `step2-to-tickets.cmd` | 2 | `/to-tickets` foundation spec（要你核可拆法） |
 | `step3-skeleton.cmd` | 3 | `/setup-ts-deep-modules` + gts + `/setup-pre-commit` |
-| `step4-foundation.cmd` | 4 | `/implement-spec` foundation（00a／00b／00c） |
-| `step5-tracer.cmd` | 5 | `/implement` 01 + 13 tracer bullet，然後 `/code-review` |
+| `step4-foundation.cmd` | 4 | `/implement` foundation 00a 與第 01 票並行，再做 00b 示範工具鏈，然後 `/code-review` |
+| `step5-tracer.cmd` | 5 | `/implement` 第 13 票 tracer bullet，然後 `/code-review` |
 
 Claude Code 在互動中問你的問題要由你回答；Cowork 端的 Claude 只能看螢幕、不能打字進終端機。

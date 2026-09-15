@@ -16,7 +16,7 @@ Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/
 
 ### How we run the process
 
-`docs/RUNBOOK.md` — the step-by-step order of skills for this repo. Foundation work (design-system package, domain core, demo toolchain) is `.scratch/pokernext-foundation/` and blocks `.scratch/pokernext-platform/issues/01`.
+`docs/RUNBOOK.md` — the step-by-step order of skills for this repo. Foundation work (00a design-system package, 00b demo toolchain) is `.scratch/pokernext-foundation/`; 00a runs in parallel with `.scratch/pokernext-platform/issues/01`, and 00b is blocked by both. Business rules are not ported ahead of time: each business ticket adds its own rules to `packages/domain` and its own demo seed via use-cases.
 
 ## Code style
 

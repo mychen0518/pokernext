@@ -9,8 +9,8 @@ status: accepted
 紀錄（PRD 8.2）。我們決定用**一個 Next.js（App Router、TypeScript）app、一個
 部署單元，以 route group 分六個工作區**，而不是六個前端專案；玩家工作區與以工作
 帳號登入的其餘五個工作區**以不同 host 提供**。業務規則與權限規則放在**與框架
-無關的 `packages/domain`**（行程階段、異動案件、押金四軸、逐晚退款、任務範本、
-授權判定）；**授權執行、版本重查、交易與資料庫約束的組合放在 `packages/app` 的
+無關的 `packages/domain`**，由各業務票以 TDD 逐步加入（例如第 20 票的客觀狀態
+衍生、第 21 票的異動案件、第 27 票的押金四軸），不預先移植；**授權執行、版本重查、交易與資料庫約束的組合放在 `packages/app` 的
 use-case**；Next.js 只做 session 解析與投影。資料庫用 **Postgres 16
 （Drizzle）**，因為第 09、16、19、26、27 票要求「資料庫層唯一約束」與併發測試，
 SQLite 無法忠實驗證。session 與認證自建，不用認證函式庫或外部 IdP。設計系統
@@ -81,7 +81,9 @@ SQLite 無法忠實驗證。session 與認證自建，不用認證函式庫或�
   `tooling/demo` 的 seed 建立；正式環境的 migration 不含任何帳號（第 03 票：
   初始 Platform admin 只經一次性入口建立，不留工程師後門）。開發模式以角色切換列
   開啟 session，走與真實登入同一條 session 建立路徑；切換列在 production build
-  中以建置期條件整段移除，而非執行期隱藏。OTP／TOTP 依第 03、10 票補齊；UI 票
+  中以建置期條件整段移除，而非執行期隱藏。建立 demo 帳號的 use-case 放在
+  `packages/app` 的獨立入口 `demo.ts`，dependency-cruiser 只允許 `tooling/demo`
+  引用；其餘 demo seed 一律呼叫正式 use-case。OTP／TOTP 依第 03、10 票補齊；UI 票
   不必等這兩張票完成才開始。
 - 程式風格採 Google Style Guides（TypeScript／HTML-CSS／Markdown／JSON），
   TypeScript 以 `gts` 落地為 eslint + prettier 設定並進 pre-commit。檔名
