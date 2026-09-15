@@ -193,6 +193,14 @@ module.exports = {
       to: {path: '^packages/app/lib/account_listing\\.ts$'},
     },
     {
+      name: 'routing-entry-stays-light',
+      comment:
+        'packages/app/routing.ts is loaded by apps/web/next.config.ts and proxy.ts: it re-exports packages/domain only, so config evaluation and the proxy bundle never load the database, the ports or any use-case.',
+      severity: 'error',
+      from: {path: '^packages/app/routing\\.ts$'},
+      to: {pathNot: '^packages/domain/'},
+    },
+    {
       name: 'app-no-upward-deps',
       comment:
         'packages/app sits below apps/web: it may not import apps, tooling or packages/ui.',

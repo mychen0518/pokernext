@@ -6,10 +6,11 @@
  * `app.sessions.resolve`.
  */
 
+import {hostOfWorkspace} from '@pokernext/app/routing';
 import {type NextRequest, NextResponse} from 'next/server';
 
 import {hostKindOf} from './lib/hosts';
-import {WORKSPACE_ROUTES, workspaceOfPath} from './lib/workspace_routes';
+import {workspaceOfPath} from './lib/workspace_routes';
 
 /** A path no route serves, so Next renders its 404 page. */
 const UNREACHABLE_PATH = '/_unreachable';
@@ -21,7 +22,7 @@ export function proxy(request: NextRequest): NextResponse {
     return NextResponse.next();
   }
   const host = hostKindOf(request.headers.get('host'));
-  if (host !== WORKSPACE_ROUTES[workspace].host) {
+  if (host !== hostOfWorkspace(workspace)) {
     return NextResponse.rewrite(new URL(UNREACHABLE_PATH, request.url));
   }
   return NextResponse.next();
