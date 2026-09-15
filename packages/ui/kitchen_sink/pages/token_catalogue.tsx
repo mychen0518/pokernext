@@ -6,6 +6,7 @@
 
 import {useEffect, useState} from 'react';
 
+import {classNames} from '../../lib/class_names';
 import {CatalogueSection} from '../layout';
 import styles from './token_catalogue.module.css';
 
@@ -122,7 +123,10 @@ export function TokenCatalogue() {
                 {group.tokens.map(token => (
                   <figure key={token} className={styles['swatch']}>
                     <div
-                      className={`${styles['chip']} ${styles[`fill-${token}`]}`}
+                      className={classNames(
+                        styles['chip'],
+                        styles[`fill-${token}`],
+                      )}
                     />
                     <figcaption>
                       <div className={styles['token-name']}>--pn-{token}</div>
@@ -160,7 +164,10 @@ export function TokenCatalogue() {
                 <span className={styles['token-value']}>{token.use}</span>
               </dt>
               <dd
-                className={`${styles['type-sample']} ${styles[`type-${token.name}`]}`}
+                className={classNames(
+                  styles['type-sample'],
+                  styles[`type-${token.name}`],
+                )}
               >
                 {token.sample}
               </dd>
@@ -178,7 +185,10 @@ export function TokenCatalogue() {
                 <TokenValue name={`--pn-space-${step}`} />
               </span>
               <div
-                className={`${styles['space-bar']} ${styles[`space-${step}`]}`}
+                className={classNames(
+                  styles['space-bar'],
+                  styles[`space-${step}`],
+                )}
               />
             </div>
           ))}
@@ -190,7 +200,10 @@ export function TokenCatalogue() {
           {RADIUS_TOKENS.map(radius => (
             <figure key={radius} className={styles['swatch']}>
               <div
-                className={`${styles['radius-box']} ${styles[`radius-${radius}`]}`}
+                className={classNames(
+                  styles['radius-box'],
+                  styles[`radius-${radius}`],
+                )}
               />
               <figcaption>
                 <div className={styles['token-name']}>--pn-radius-{radius}</div>
@@ -208,7 +221,10 @@ export function TokenCatalogue() {
         <div className={styles['swatches']}>
           <figure className={styles['swatch']}>
             <div
-              className={`${styles['elevation-box']} ${styles['shadow-none']}`}
+              className={classNames(
+                styles['elevation-box'],
+                styles['shadow-none'],
+              )}
             >
               Card
             </div>
@@ -219,7 +235,10 @@ export function TokenCatalogue() {
           </figure>
           <figure className={styles['swatch']}>
             <div
-              className={`${styles['elevation-box']} ${styles['shadow-overlay']}`}
+              className={classNames(
+                styles['elevation-box'],
+                styles['shadow-overlay'],
+              )}
             >
               Modal / Drawer
             </div>

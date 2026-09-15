@@ -23,7 +23,7 @@ test.skip(
   'desktop workspace only',
 );
 
-test('at 1440px the sidebar is 232px, the topbar 64px and the case list 380px', async ({
+test('on a 1440px screen a partner sees a 232px sidebar, a 64px topbar and a 380px case list', async ({
   page,
 }) => {
   await page.setViewportSize({width: 1440, height: 1024});
@@ -43,7 +43,7 @@ test('at 1440px the sidebar is 232px, the topbar 64px and the case list 380px', 
   expect(detail.x).toBeGreaterThan(list.x + list.width);
 });
 
-test('at 1440px the overview splits two thirds to one third, side by side', async ({
+test('on a 1440px screen the overview shows the to-do column beside the main column, one third to two thirds', async ({
   page,
 }) => {
   await page.setViewportSize({width: 1440, height: 1024});
@@ -56,7 +56,9 @@ test('at 1440px the overview splits two thirds to one third, side by side', asyn
   expect(main.width / todo.width).toBeCloseTo(2, 1);
 });
 
-test('at 1440px the operation page has two equal columns', async ({page}) => {
+test('on a 1440px screen the operation page shows two equal columns with equal actions', async ({
+  page,
+}) => {
   await page.setViewportSize({width: 1440, height: 1024});
   await openKitchenSinkPage(page, 'operation');
 
@@ -70,7 +72,7 @@ test('at 1440px the operation page has two equal columns', async ({page}) => {
   expect(collect.width).toBe(confirm.width);
 });
 
-test('at 1024px the sidebar is an icon rail and the to-do column moves below', async ({
+test('on a 1024px screen the sidebar shrinks to an icon rail and the to-do column moves below', async ({
   page,
 }) => {
   await page.setViewportSize({width: 1024, height: 1024});
@@ -91,7 +93,7 @@ test('at 1024px the sidebar is an icon rail and the to-do column moves below', a
   expect(todo.width).toBe(main.width);
 });
 
-test('at 1280px the sidebar is still fully expanded', async ({page}) => {
+test('on a 1280px screen the sidebar stays fully expanded', async ({page}) => {
   await page.setViewportSize({width: 1280, height: 1024});
   await openKitchenSinkPage(page, 'overview');
 

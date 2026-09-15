@@ -82,7 +82,7 @@ export type {StatusStripProps} from './lib/status_strip';
 export {Stepper} from './lib/stepper';
 export type {StepStatus, StepperProps, StepperStep} from './lib/stepper';
 export {Tabs} from './lib/tabs';
-export type {TabItem, TabsProps} from './lib/tabs';
+export type {TabItem, TabsProps, TabsVariant} from './lib/tabs';
 export {Textarea} from './lib/textarea';
 export type {TextareaProps} from './lib/textarea';
 export {Toast} from './lib/toast';

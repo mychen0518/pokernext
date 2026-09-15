@@ -1,2 +1,7 @@
 # Prettier (via gts) expects LF; keep it regardless of core.autocrlf.
 * text=auto eol=lf
+
+# Binary artefacts that are committed: screenshot baselines and ticket
+# screenshots, and the demo:script recording of each batch (RUNBOOK).
+*.png binary
+*.webm binary

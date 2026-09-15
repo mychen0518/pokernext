@@ -1,8 +1,8 @@
 /**
  * @fileoverview Enforces DESIGN.md §1 and §2 in component and kitchen-sink
  * styles: every colour, font, font size, spacing, radius, shadow and letter
- * spacing in `lib/**\/*.module.css` and `kitchen_sink/**\/*.module.css` is a
- * `var(--pn-*)` token, never a literal; gradients only fade to the dark
+ * spacing in `lib/**\/*.module.css`, `kitchen_sink/**\/*.css` and `base.css`
+ * is a `var(--pn-*)` token, never a literal; gradients only fade to the dark
  * background; only Modal and Drawer use the overlay shadow.
  */
 
@@ -16,6 +16,7 @@ const LIB_DIR = fileURLToPath(new URL('../lib', import.meta.url));
 const KITCHEN_SINK_DIR = fileURLToPath(
   new URL('../kitchen_sink', import.meta.url),
 );
+const BASE_STYLESHEET = fileURLToPath(new URL('../base.css', import.meta.url));
 
 // DESIGN.md §2.3: Modal and Drawer are the only components with a shadow;
 // both are styled by this one stylesheet.
@@ -130,15 +131,35 @@ function findLiteralDesignValues(css: string): Violation[] {
   return violations;
 }
 
-/** Lists every CSS Module under `dir`, recursively. */
-function listCssModules(dir: string): string[] {
+const COLOUR_LITERAL =
+  /#[0-9a-f]{3,8}\b|\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(/gi;
+const COLOUR_ATTRIBUTE =
+  /\b(fill|stroke|stop-color|flood-color|lighting-color|color)\s*[=:]\s*["'{]*\s*([a-z]+)/gi;
+
+/**
+ * Lists the colour literals in markup or script source: hex and functional
+ * colours anywhere, and named colours in colour attributes such as
+ * `fill="white"`.
+ */
+function findColourLiterals(source: string): string[] {
+  const literals = Array.from(source.matchAll(COLOUR_LITERAL), m => m[0]);
+  for (const match of source.matchAll(COLOUR_ATTRIBUTE)) {
+    if (NAMED_COLOURS.has(match[2].toLowerCase())) {
+      literals.push(match[0]);
+    }
+  }
+  return literals;
+}
+
+/** Lists every file under `dir` ending in `suffix`, recursively. */
+function listFiles(dir: string, suffix = '.module.css'): string[] {
   return readdirSync(dir, {recursive: true, encoding: 'utf8'})
-    .filter(file => file.endsWith('.module.css'))
+    .filter(file => file.endsWith(suffix))
     .map(file => join(dir, file));
 }
 
-describe('component styles', () => {
-  it('reports hard-coded colours, fonts, spacing and radii', () => {
+describe('Design tokens in the design system', () => {
+  it('a stylesheet that hard-codes a colour, font, spacing, radius, shadow or gradient is reported', () => {
     const css = `
       .a { color: #fff; background: rgba(0, 0, 0, 0.5); }
       .b { border-color: red; font-family: Georgia, serif; }
@@ -162,7 +183,21 @@ describe('component styles', () => {
     ]);
   });
 
-  it('accepts tokens, zero, keywords and 1px borders', () => {
+  it('markup or script that hard-codes a colour is reported', () => {
+    const source = `
+      <rect fill="#121314"/><g fill='white'/>
+      const style = {color: 'rgb(0, 0, 0)'};
+      <path fill="currentColor" stroke="var(--pn-gold)"/>
+      <a href="?page=player-home#top">
+    `;
+    expect(findColourLiterals(source)).toEqual([
+      '#121314',
+      'rgb(',
+      "fill='white",
+    ]);
+  });
+
+  it('a stylesheet using only tokens, zero, keywords and 1px borders passes', () => {
     const css = `
       .a { color: var(--pn-text); background: transparent; margin: 0; }
       .b { border: 1px solid var(--pn-border); padding: 0 var(--pn-space-6); }
@@ -178,10 +213,11 @@ describe('component styles', () => {
     expect(findLiteralDesignValues(css)).toEqual([]);
   });
 
-  it('use only design tokens for colour, font, spacing, radius, shadow and tracking', () => {
+  it('every component and kitchen-sink stylesheet takes its colours, type, spacing, radii, shadows and tracking from tokens', () => {
     const files = [
-      ...listCssModules(LIB_DIR),
-      ...listCssModules(KITCHEN_SINK_DIR),
+      ...listFiles(LIB_DIR),
+      ...listFiles(KITCHEN_SINK_DIR, '.css'),
+      BASE_STYLESHEET,
     ];
     expect(files.length).toBeGreaterThan(0);
     const violations = files.flatMap(file =>
@@ -192,8 +228,27 @@ describe('component styles', () => {
     expect(violations).toEqual([]);
   });
 
-  it('give a shadow only to Modal and Drawer', () => {
-    const shadowed = listCssModules(LIB_DIR).filter(file =>
+  it('components and kitchen-sink pages paint every colour with a token', () => {
+    const files = [
+      ...listFiles(LIB_DIR, '.tsx'),
+      ...listFiles(LIB_DIR, '.ts'),
+      ...[/\.tsx?$/, /\.svg$/, /\.html$/].flatMap(pattern =>
+        readdirSync(KITCHEN_SINK_DIR, {recursive: true, encoding: 'utf8'})
+          .filter(file => pattern.test(file))
+          .map(file => join(KITCHEN_SINK_DIR, file)),
+      ),
+    ];
+    expect(files.length).toBeGreaterThan(0);
+    const violations = files.flatMap(file =>
+      findColourLiterals(readFileSync(file, 'utf8')).map(
+        literal => `${file}: ${literal}`,
+      ),
+    );
+    expect(violations).toEqual([]);
+  });
+
+  it('only Modal and Drawer cast a shadow', () => {
+    const shadowed = listFiles(LIB_DIR).filter(file =>
       /box-shadow\s*:\s*var\(--pn-shadow-overlay\)/.test(
         readFileSync(file, 'utf8'),
       ),

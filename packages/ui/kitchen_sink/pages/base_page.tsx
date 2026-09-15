@@ -5,6 +5,7 @@
  */
 
 import {SearchX} from 'lucide-react';
+import {useState} from 'react';
 
 import {
   AmountDisplay,
@@ -21,10 +22,11 @@ import {
   Modal,
   Select,
   StatusDot,
+  Tabs,
   Textarea,
   Toast,
 } from '../../index';
-import type {ButtonVariant, Tone} from '../../index';
+import type {ButtonVariant, TabItem, Tone} from '../../index';
 import {
   CatalogueHeader,
   CatalogueSection,
@@ -61,6 +63,51 @@ const TONE_EXAMPLES: readonly ToneExample[] = [
   {tone: 'neutral', dot: '無須押金', badge: '示意資料'},
 ];
 
+const UNDERLINE_TABS: readonly TabItem[] = [
+  {id: 'pending', label: '待處理', count: '02'},
+  {id: 'running', label: '執行中', count: '01'},
+  {id: 'closed', label: '已結案', count: '12'},
+];
+
+const SEGMENTED_TABS: readonly TabItem[] = [
+  {id: 'open', label: '進行中'},
+  {id: 'done', label: '已完成'},
+  {id: 'all', label: '全部'},
+];
+
+/** Renders both Tabs variants, each switchable by click or arrow keys. */
+function TabsSpecimens() {
+  const [underline, setUnderline] = useState('pending');
+  const [segmented, setSegmented] = useState('open');
+  return (
+    <>
+      <SpecimenRow label="underline">
+        <Specimen caption="頁內 · 帶計數">
+          <Tabs
+            label="案件狀態"
+            items={UNDERLINE_TABS}
+            selectedId={underline}
+            onSelect={setUnderline}
+          />
+        </Specimen>
+      </SpecimenRow>
+      <SpecimenRow label="segmented">
+        <Specimen caption="僅手機">
+          <div className={styles['phone-width']}>
+            <Tabs
+              label="任務篩選"
+              variant="segmented"
+              items={SEGMENTED_TABS}
+              selectedId={segmented}
+              onSelect={setSegmented}
+            />
+          </div>
+        </Specimen>
+      </SpecimenRow>
+    </>
+  );
+}
+
 /** Does nothing; overlays on this page stay open for the catalogue. */
 function keepOpen(): void {}
 
@@ -82,14 +129,10 @@ export function BasePage() {
               <Button variant={variant}>{label}</Button>
             </Specimen>
             <Specimen caption="hover">
-              <Button variant={variant} data-state="hover">
-                {label}
-              </Button>
+              <Button variant={variant}>{label}</Button>
             </Specimen>
             <Specimen caption="focus-visible">
-              <Button variant={variant} data-state="focus-visible">
-                {label}
-              </Button>
+              <Button variant={variant}>{label}</Button>
             </Specimen>
             <Specimen caption="disabled">
               <Button variant={variant} disabled>
@@ -135,6 +178,10 @@ export function BasePage() {
             </Specimen>
           ))}
         </SpecimenRow>
+      </CatalogueSection>
+
+      <CatalogueSection title="Tabs" source="DESIGN.md §4 Tabs">
+        <TabsSpecimens />
       </CatalogueSection>
 
       <CatalogueSection title="Card" source="DESIGN.md §4 Card">

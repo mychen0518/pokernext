@@ -4,7 +4,7 @@
  */
 
 import '@pokernext/ui/tokens.css';
-import './root_layout.css';
+import '@pokernext/ui/base.css';
 
 import type {Metadata, Viewport} from 'next';
 import type {ReactNode} from 'react';

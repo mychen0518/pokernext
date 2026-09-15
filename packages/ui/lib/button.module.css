@@ -66,24 +66,18 @@
 }
 
 /* Hover: the fill brightens by 6% (DESIGN.md §4). */
-.primary:hover:not(:disabled),
-.primary[data-state='hover'] {
+.primary:hover:not(:disabled) {
   filter: brightness(1.06);
 }
 
 .secondary:hover:not(:disabled),
-.secondary[data-state='hover'],
 .outline-gold:hover:not(:disabled),
-.outline-gold[data-state='hover'],
 .ghost:hover:not(:disabled),
-.ghost[data-state='hover'],
-.danger:hover:not(:disabled),
-.danger[data-state='hover'] {
+.danger:hover:not(:disabled) {
   background-color: color-mix(in srgb, var(--pn-text) 6%, transparent);
 }
 
-.button:focus-visible,
-.button[data-state='focus-visible'] {
+.button:focus-visible {
   outline: var(--pn-focus-ring);
   outline-offset: var(--pn-focus-offset);
 }

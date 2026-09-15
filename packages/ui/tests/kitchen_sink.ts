@@ -1,10 +1,33 @@
 /**
- * @fileoverview Playwright helper for opening a kitchen-sink page in a
- * settled, screenshot-ready state.
+ * @fileoverview Playwright helpers for the kitchen-sink: opening a page in a
+ * settled, screenshot-ready state, and skipping screenshot comparisons on
+ * operating systems that have no committed baselines.
  */
 
-import {expect} from '@playwright/test';
+import {expect, test} from '@playwright/test';
 import type {Page} from '@playwright/test';
+
+/**
+ * Operating systems (`process.platform`) with committed screenshot
+ * baselines. Fonts render differently per OS, so each keeps its own PNGs.
+ * To add one, list it here and run `test:e2e:update` on that OS.
+ */
+export const SCREENSHOT_BASELINE_PLATFORMS: readonly string[] = ['win32'];
+
+/**
+ * Skips every test in the calling spec file when this OS has no committed
+ * baselines, so `pnpm test` stays green there while keyboard, layout and
+ * accessibility specs still run. Call it at the top level of a screenshot
+ * spec.
+ */
+export function skipScreenshotsWithoutBaselines(): void {
+  test.skip(
+    !SCREENSHOT_BASELINE_PLATFORMS.includes(process.platform),
+    `No screenshot baselines for ${process.platform}; they are committed ` +
+      `for ${SCREENSHOT_BASELINE_PLATFORMS.join(', ')} only (fonts differ ` +
+      'per OS, see packages/ui/README.md).',
+  );
+}
 
 /**
  * Opens `/?page=<id>` (plus any extra query such as `{state: 'empty'}`) and

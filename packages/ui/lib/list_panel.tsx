@@ -14,7 +14,6 @@ import {
   isValidElement,
   useContext,
   useId,
-  useRef,
   useState,
 } from 'react';
 import type {KeyboardEvent, ReactNode} from 'react';
@@ -26,6 +25,7 @@ import type {DataState} from './data_state';
 import {EmptyState} from './empty_state';
 import {ICON_SIZE, ICON_STROKE_WIDTH} from './icon';
 import styles from './list_panel.module.css';
+import {moveRovingFocus} from './roving_focus';
 import hidden from './visually_hidden.module.css';
 
 /** Number of skeleton items while loading. */
@@ -78,7 +78,6 @@ export function ListPanel({
   children,
 }: ListPanelProps) {
   const baseId = useId();
-  const listRef = useRef<HTMLDivElement>(null);
   const [focusedId, setFocusedId] = useState<string>();
   const itemIds = Children.toArray(children).flatMap(child =>
     isValidElement<ListItemProps>(child) ? [child.props.id] : [],
@@ -89,34 +88,16 @@ export function ListPanel({
   );
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const current = itemIds.indexOf(tabStopId ?? '');
-    const last = itemIds.length - 1;
-    let next: number;
-    switch (event.key) {
-      case 'ArrowDown':
-        next = Math.min(current + 1, last);
-        break;
-      case 'ArrowUp':
-        next = Math.max(current - 1, 0);
-        break;
-      case 'Home':
-        next = 0;
-        break;
-      case 'End':
-        next = last;
-        break;
-      default:
-        return;
+    const id = moveRovingFocus(event, {
+      itemIds,
+      currentId: tabStopId,
+      orientation: 'vertical',
+      wrap: false,
+      elementId: optionId,
+    });
+    if (id !== undefined) {
+      setFocusedId(id);
     }
-    event.preventDefault();
-    const id = itemIds[next];
-    if (id === undefined) {
-      return;
-    }
-    setFocusedId(id);
-    listRef.current
-      ?.querySelector<HTMLElement>(`[id="${optionId(id)}"]`)
-      ?.focus();
   }
 
   let body: ReactNode;
@@ -149,7 +130,6 @@ export function ListPanel({
         }}
       >
         <div
-          ref={listRef}
           className={styles['items']}
           role="listbox"
           aria-label={label}

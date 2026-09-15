@@ -36,8 +36,8 @@ function findPlayMorePrompts(copy: string): string[] {
   return PLAY_MORE_PROMPTS.filter(phrase => copy.includes(phrase));
 }
 
-describe('player copy', () => {
-  it('flags the play-more prompt quoted in ticket 13', () => {
+describe('Player copy', () => {
+  it('the play-more prompt quoted in ticket 13 is recognised', () => {
     expect(findPlayMorePrompts('再打多久就能免費住宿')).toEqual([
       '再打多久',
       '免費住宿',
@@ -50,7 +50,7 @@ describe('player copy', () => {
     ]);
   });
 
-  it('never urges the member to play more for a free stay', () => {
+  it('the player home never urges a member to play more for a free stay', () => {
     const found = PLAYER_COPY_FILES.flatMap(file =>
       findPlayMorePrompts(
         readFileSync(fileURLToPath(new URL(file, import.meta.url)), 'utf8'),

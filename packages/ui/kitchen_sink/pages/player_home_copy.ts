@@ -21,7 +21,9 @@ export const PLAYER_HOME_READY = {
   lodging: '住宿已確認',
   transfer: '接送待確認',
   itinerary: '行程待您確認',
-  // The prototype shows 可用積分 as ledger 30,000 minus reserved 25,000.
+  // 可用積分 is 帳面餘額 minus 有效保留 (PRD 5.7.4, 6.7.1; ticket 25). Alex's
+  // 30,000 分 in the foundation spec story 6 and the prototype seed is his
+  // 帳面餘額; 25,000 分 of it is reserved, so 5,000 分 is available.
   availablePoints: 5000,
   reservedPoints: 25000,
   contactLabel: '接待人',

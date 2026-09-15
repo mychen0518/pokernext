@@ -5,6 +5,7 @@
 
 import type {ReactNode} from 'react';
 
+import {classNames} from './class_names';
 import styles from './field.module.css';
 
 /** Where a form label sits: `left` for desktop label/value forms, `top` on mobile. */
@@ -38,7 +39,7 @@ export function Field({
 }: FieldProps) {
   const hasFooter = error !== undefined || meta !== undefined;
   return (
-    <div className={`${styles['field']} ${styles[labelPosition]}`}>
+    <div className={classNames(styles['field'], styles[labelPosition])}>
       <label className={styles['label']} htmlFor={controlId}>
         {label}
       </label>

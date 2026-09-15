@@ -11,11 +11,14 @@ import {openKitchenSinkPage} from './kitchen_sink';
 // --pn-gold from DESIGN.md §2.1 (#c8a86f) as the browser reports it.
 const GOLD = 'rgb(200, 168, 111)';
 
+// Items with tabindex="-1" (unselected tabs) are reached with arrow keys,
+// not Tab.
 const INTERACTIVE =
-  'a[href], button:not(:disabled), input:not(:disabled), ' +
-  'select:not(:disabled), textarea:not(:disabled), [tabindex="0"]';
+  'a[href]:not([tabindex="-1"]), button:not(:disabled):not([tabindex="-1"]), ' +
+  'input:not(:disabled), select:not(:disabled), textarea:not(:disabled), ' +
+  '[tabindex="0"]';
 
-test('Tab reaches every interactive element with a 2px gold outline', async ({
+test('a keyboard user reaches every base control with Tab and sees a 2px gold outline', async ({
   page,
 }) => {
   await openKitchenSinkPage(page, 'base');
@@ -62,5 +65,38 @@ test('Tab reaches every interactive element with a 2px gold outline', async ({
   );
   for (const [probe, outline] of outlines) {
     expect(outline, `element #${probe}`).toBe(`2px solid ${GOLD}`);
+  }
+});
+
+test('a member switches the segmented tabs with the arrow keys', async ({
+  page,
+}) => {
+  await openKitchenSinkPage(page, 'base');
+  const tabs = page.getByRole('tablist', {name: '任務篩選'});
+
+  await tabs.getByRole('tab', {name: '進行中'}).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(
+    tabs.getByRole('tab', {name: '已完成', selected: true}),
+  ).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(
+    tabs.getByRole('tab', {name: '全部', selected: true}),
+  ).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(
+    tabs.getByRole('tab', {name: '進行中', selected: true}),
+  ).toBeFocused();
+
+  // Each segment is a full-width share of the row and a 44px touch target.
+  const boxes = await tabs
+    .getByRole('tab')
+    .evaluateAll(elements =>
+      elements.map(element => element.getBoundingClientRect()),
+    );
+  expect(boxes).toHaveLength(3);
+  for (const box of boxes) {
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.width).toBeCloseTo(boxes[0].width, 0);
   }
 });

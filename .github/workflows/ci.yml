@@ -1,16 +1,47 @@
-# Runs every check on each push and pull request. Tests use a Postgres 16
-# service container through DATABASE_URL instead of embedded-postgres
-# (ADR-0001: Postgres 16 locally, in CI and in production).
+# Runs the whole check on each push and pull request: one command per job,
+# `pnpm check` (typecheck, lint, boundaries, unit tests and every e2e suite),
+# the same command as on a developer machine (ticket 01).
+#
+# - windows: the OS with committed screenshot baselines (packages/ui
+#   SCREENSHOT_BASELINE_PLATFORMS), so the visual comparisons run here.
+#   Tests start the embedded Postgres 16 test cluster themselves (no
+#   service containers on Windows runners).
+# - linux: tests use a Postgres 16 service container through DATABASE_URL
+#   (ADR-0001: Postgres 16 locally, in CI and in production). Screenshot
+#   comparisons skip with a reason; keyboard, layout and accessibility
+#   specs still run.
 name: CI
 
 on:
   push:
   pull_request:
 
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
 jobs:
-  check:
+  check-windows:
+    name: pnpm check (windows, screenshot baselines)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium
+      - name: Check
+        run: pnpm check
+
+  check-linux:
+    name: pnpm check (linux, Postgres service)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16
@@ -27,7 +58,6 @@ jobs:
           --health-retries 20
     env:
       DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
-      NEXT_TELEMETRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -35,8 +65,9 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Typecheck, lint, boundaries and unit tests
-        run: pnpm typecheck && pnpm lint && pnpm lint:boundaries && pnpm test:unit
-      - name: HTTP tests of apps/web
-        run: pnpm --filter @pokernext/web test:e2e
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium and its system libraries
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Check
+        run: pnpm check

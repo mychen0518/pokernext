@@ -6,7 +6,12 @@
 
 import {expect, test} from '@playwright/test';
 
-import {openKitchenSinkPage} from './kitchen_sink';
+import {
+  openKitchenSinkPage,
+  skipScreenshotsWithoutBaselines,
+} from './kitchen_sink';
+
+skipScreenshotsWithoutBaselines();
 
 for (const state of ['ready', 'empty']) {
   test(`player home (${state}) looks like the approved screenshot`, async ({
