@@ -66,6 +66,7 @@ export class FakeNotificationSender implements NotificationSender {
     }
   }
 
+  /** Delivers the message unless a failure is injected for its channel. */
   async send(
     notification: OutgoingNotification,
   ): Promise<NotificationSent | NotificationFailed> {

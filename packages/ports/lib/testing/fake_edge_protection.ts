@@ -45,6 +45,7 @@ export class FakeEdgeProtection implements EdgeProtection {
     this.failures.restore();
   }
 
+  /** Forwards the request unless an injected failure stops it. */
   async pass<T>(
     request: EdgeRequest,
     origin: () => Promise<T>,

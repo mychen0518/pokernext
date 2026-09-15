@@ -106,6 +106,7 @@ export class FakePointsWorkbookSource implements PointsWorkbookSource {
     this.files.set(fileId, {kind: 'blocked', errors});
   }
 
+  /** Reads the sample file, rejecting blocked or mismatched formats. */
   async read(
     upload: PointsWorkbookUpload,
   ): Promise<

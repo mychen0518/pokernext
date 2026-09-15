@@ -1,6 +1,6 @@
 /**
  * @fileoverview drizzle-kit config: generates SQL migrations from the schema.
- * Run `pnpm --filter @pokernext/db db:generate -- --name <change>`.
+ * Run `pnpm --filter @pokernext/db exec drizzle-kit generate --name <change>`.
  */
 
 import {defineConfig} from 'drizzle-kit';

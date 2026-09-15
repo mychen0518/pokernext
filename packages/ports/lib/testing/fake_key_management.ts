@@ -58,6 +58,7 @@ export class FakeKeyManagementService implements KeyManagementService {
     this.unavailableRegions.clear();
   }
 
+  /** Wraps the data key with AES-256-GCM under the key version. */
   async wrapDataKey(
     key: KeyReference,
     dataKey: Uint8Array,
@@ -76,6 +77,7 @@ export class FakeKeyManagementService implements KeyManagementService {
     return {status: 'wrapped', key, wrappedDataKey: new Uint8Array(wrapped)};
   }
 
+  /** Unwraps a data key; tampered or foreign input fails to decrypt. */
   async unwrapDataKey(
     key: KeyReference,
     wrappedDataKey: Uint8Array,

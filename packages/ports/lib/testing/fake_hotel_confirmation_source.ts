@@ -61,6 +61,7 @@ export class FakeHotelConfirmationSource implements HotelConfirmationSource {
     this.files.delete(fileId);
   }
 
+  /** Reads the sample PDF stored under the file id, or reports it missing. */
   async read(
     fileId: string,
   ): Promise<HotelConfirmationRead | HotelConfirmationMissing> {

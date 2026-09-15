@@ -9,9 +9,6 @@
     "./local_cluster": "./local_cluster.ts",
     "./testing": "./testing.ts"
   },
-  "scripts": {
-    "db:generate": "drizzle-kit generate"
-  },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
     "embedded-postgres": "16.9.0-beta.15",

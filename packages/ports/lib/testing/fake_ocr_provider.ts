@@ -85,6 +85,7 @@ export class FakeOcrProvider implements OcrProvider {
     this.behaviours.restore();
   }
 
+  /** Answers per the next injected behaviour, delays measured on the clock. */
   async recognize(
     request: OcrRequest,
   ): Promise<OcrRecognized | OcrUnrecognized> {
