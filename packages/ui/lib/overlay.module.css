@@ -1,0 +1,109 @@
+/*
+ * Modal and Drawer (DESIGN.md §4): the only components allowed a shadow.
+ */
+
+.scrim {
+  background-color: var(--pn-scrim);
+  box-sizing: border-box;
+  display: flex;
+  inset: 0;
+  position: fixed;
+  z-index: 50;
+}
+
+.center {
+  align-items: center;
+  justify-content: center;
+  padding: var(--pn-space-4);
+}
+
+.end {
+  justify-content: flex-end;
+}
+
+.panel {
+  background-color: var(--pn-surface);
+  border: 1px solid var(--pn-border-strong);
+  box-shadow: var(--pn-shadow-overlay);
+  box-sizing: border-box;
+  color: var(--pn-text);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  max-height: 100%;
+}
+
+.panel-center {
+  border-radius: var(--pn-radius-lg);
+  max-width: 560px;
+  width: 100%;
+}
+
+.panel-end {
+  border-radius: var(--pn-radius-lg) 0 0 var(--pn-radius-lg);
+  height: 100%;
+  max-width: 100%;
+  width: 480px;
+}
+
+.header {
+  align-items: center;
+  border-bottom: 1px solid var(--pn-border);
+  display: flex;
+  gap: var(--pn-space-3);
+  justify-content: space-between;
+  padding: var(--pn-space-4) var(--pn-space-6);
+}
+
+.title {
+  font-family: var(--pn-type-title-md-family);
+  font-size: var(--pn-type-title-md-size);
+  font-weight: var(--pn-type-title-md-weight);
+  line-height: var(--pn-type-title-md-line);
+  margin: 0;
+}
+
+.close {
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--pn-radius-sm);
+  color: var(--pn-text-2);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  height: 44px;
+  justify-content: center;
+  margin-right: calc(-1 * var(--pn-space-3));
+  padding: 0;
+  width: 44px;
+}
+
+.close:hover {
+  color: var(--pn-text);
+}
+
+.close:focus-visible {
+  outline: var(--pn-focus-ring);
+  outline-offset: var(--pn-focus-offset);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--pn-space-4);
+  overflow: auto;
+  padding: var(--pn-space-6);
+}
+
+.footer {
+  border-top: 1px solid var(--pn-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-3);
+  justify-content: flex-end;
+  padding: var(--pn-space-4) var(--pn-space-6);
+}

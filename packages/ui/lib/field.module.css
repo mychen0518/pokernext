@@ -1,0 +1,101 @@
+/*
+ * Shared form field layout and control box for Input, Select, DateInput and
+ * Textarea (DESIGN.md §4, same box as SearchInput).
+ */
+
+.field {
+  color: var(--pn-text);
+  display: grid;
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  gap: var(--pn-space-2);
+  line-height: var(--pn-type-body-line);
+  min-width: 0;
+}
+
+.left {
+  align-items: start;
+  column-gap: var(--pn-space-4);
+  grid-template-columns: 160px minmax(0, 1fr);
+}
+
+.label {
+  color: var(--pn-text-2);
+}
+
+.left .label {
+  align-items: center;
+  display: flex;
+  min-height: 48px;
+}
+
+.control-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-1);
+  min-width: 0;
+}
+
+/* The native element itself is the box, so focus lands on what is outlined. */
+.control {
+  appearance: none;
+  background-color: var(--pn-surface-2);
+  border: 1px solid var(--pn-border-strong);
+  border-radius: var(--pn-radius-sm);
+  box-sizing: border-box;
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  height: 48px;
+  line-height: var(--pn-type-body-line);
+  margin: 0;
+  min-width: 0;
+  padding: 0 var(--pn-space-4);
+  width: 100%;
+}
+
+.control::placeholder {
+  color: var(--pn-text-3);
+}
+
+.control:focus-visible {
+  outline: var(--pn-focus-ring);
+  outline-offset: var(--pn-focus-offset);
+}
+
+.control:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.invalid {
+  border-color: var(--pn-danger);
+}
+
+.footer {
+  display: flex;
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  gap: var(--pn-space-3);
+  justify-content: space-between;
+  line-height: var(--pn-type-label-line);
+}
+
+.error {
+  color: var(--pn-danger);
+}
+
+.meta {
+  color: var(--pn-text-3);
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .left {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .left .label {
+    min-height: 0;
+  }
+}

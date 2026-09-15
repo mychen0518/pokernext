@@ -1,0 +1,56 @@
+/* Card and CardHeader (DESIGN.md §4). Flat: never a shadow. */
+
+.card {
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius-md);
+  box-shadow: var(--pn-shadow);
+  box-sizing: border-box;
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  min-width: 0;
+}
+
+.default {
+  background-color: var(--pn-surface);
+}
+
+.elevated {
+  background-color: var(--pn-surface-2);
+}
+
+.header {
+  align-items: center;
+  border-bottom: 1px solid var(--pn-border);
+  display: flex;
+  gap: var(--pn-space-3);
+  justify-content: space-between;
+  padding: var(--pn-space-4) var(--pn-space-6);
+}
+
+.title {
+  font-family: var(--pn-type-title-md-family);
+  font-size: var(--pn-type-title-md-size);
+  font-weight: var(--pn-type-title-md-weight);
+  line-height: var(--pn-type-title-md-line);
+  margin: 0;
+}
+
+.status {
+  flex: none;
+}
+
+.body {
+  padding: var(--pn-space-6);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: var(--pn-space-4) var(--pn-space-5);
+  }
+
+  .body {
+    padding: var(--pn-space-5);
+  }
+}

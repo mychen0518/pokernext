@@ -1,0 +1,37 @@
+/* AmountDisplay (DESIGN.md §4). */
+
+.amount-display {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-2) var(--pn-space-4);
+}
+
+.label {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+}
+
+.value {
+  align-items: baseline;
+  display: inline-flex;
+  gap: var(--pn-space-2);
+}
+
+.currency {
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+}
+
+.amount {
+  color: var(--pn-gold-bright);
+  font-family: var(--pn-type-display-md-family);
+  font-size: var(--pn-type-display-md-size);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--pn-type-display-md-weight);
+  line-height: var(--pn-type-display-md-line);
+}

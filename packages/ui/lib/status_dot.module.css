@@ -1,0 +1,39 @@
+/* StatusDot (DESIGN.md §4). */
+
+.status-dot {
+  align-items: center;
+  display: inline-flex;
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  gap: var(--pn-space-2);
+  line-height: var(--pn-type-body-line);
+  white-space: nowrap;
+}
+
+.dot {
+  background-color: currentcolor;
+  border-radius: var(--pn-radius-round);
+  flex: none;
+  height: 8px;
+  width: 8px;
+}
+
+.success {
+  color: var(--pn-success);
+}
+
+.warning {
+  color: var(--pn-warning);
+}
+
+.danger {
+  color: var(--pn-danger);
+}
+
+.info {
+  color: var(--pn-info);
+}
+
+.neutral {
+  color: var(--pn-neutral);
+}

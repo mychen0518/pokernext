@@ -1,0 +1,24 @@
+/* Select (DESIGN.md §4). */
+
+.wrapper {
+  min-width: 0;
+  position: relative;
+}
+
+.select {
+  cursor: pointer;
+  padding-right: var(--pn-space-10);
+}
+
+.select option {
+  background-color: var(--pn-surface-2);
+  color: var(--pn-text);
+}
+
+.chevron {
+  color: var(--pn-text-2);
+  inset: 0 var(--pn-space-4) 0 auto;
+  margin: auto 0;
+  pointer-events: none;
+  position: absolute;
+}

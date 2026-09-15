@@ -1,0 +1,36 @@
+/* InfoBox (DESIGN.md §4). */
+
+.info-box {
+  background-color: var(--pn-surface-2);
+  border-radius: var(--pn-radius-md);
+  box-sizing: border-box;
+  color: var(--pn-text);
+  display: flex;
+  gap: var(--pn-space-3);
+  padding: var(--pn-space-4);
+}
+
+.icon {
+  color: var(--pn-text-2);
+  flex: none;
+  margin-top: var(--pn-space-1);
+}
+
+.text {
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  font-weight: 600;
+  line-height: var(--pn-type-body-line);
+  margin: 0;
+}
+
+.description {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  line-height: var(--pn-type-body-sm-line);
+}

@@ -1,0 +1,129 @@
+/* Button (DESIGN.md §4). */
+
+.button {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--pn-radius-md);
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  font-weight: 600;
+  gap: var(--pn-space-2);
+  justify-content: center;
+  line-height: 1;
+  padding: 0 var(--pn-space-6);
+  position: relative;
+  white-space: nowrap;
+}
+
+.sm {
+  font-size: var(--pn-type-body-sm-size);
+  height: 32px;
+  padding: 0 var(--pn-space-3);
+}
+
+.md {
+  height: 44px;
+}
+
+.lg {
+  height: 52px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.primary {
+  background-color: var(--pn-gold);
+  color: var(--pn-text-inverse);
+}
+
+.secondary {
+  background-color: transparent;
+  border-color: var(--pn-border-strong);
+  color: var(--pn-text);
+}
+
+.outline-gold {
+  background-color: transparent;
+  border-color: var(--pn-gold);
+  color: var(--pn-gold-bright);
+}
+
+.ghost {
+  background-color: transparent;
+  color: var(--pn-gold-bright);
+  gap: var(--pn-space-1);
+  padding: 0 var(--pn-space-2);
+}
+
+.danger {
+  background-color: transparent;
+  color: var(--pn-danger);
+}
+
+/* Hover: the fill brightens by 6% (DESIGN.md §4). */
+.primary:hover:not(:disabled),
+.primary[data-state='hover'] {
+  filter: brightness(1.06);
+}
+
+.secondary:hover:not(:disabled),
+.secondary[data-state='hover'],
+.outline-gold:hover:not(:disabled),
+.outline-gold[data-state='hover'],
+.ghost:hover:not(:disabled),
+.ghost[data-state='hover'],
+.danger:hover:not(:disabled),
+.danger[data-state='hover'] {
+  background-color: color-mix(in srgb, var(--pn-text) 6%, transparent);
+}
+
+.button:focus-visible,
+.button[data-state='focus-visible'] {
+  outline: var(--pn-focus-ring);
+  outline-offset: var(--pn-focus-offset);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+}
+
+.button:disabled:not(.loading) {
+  opacity: 0.4;
+}
+
+.loading {
+  cursor: progress;
+}
+
+.loading .label,
+.loading .chevron {
+  opacity: 0;
+}
+
+.chevron {
+  flex: none;
+}
+
+.spinner {
+  animation: spin 0.9s linear infinite;
+  inset: 0;
+  margin: auto;
+  position: absolute;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+}
