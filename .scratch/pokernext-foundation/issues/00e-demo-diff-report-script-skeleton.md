@@ -185,3 +185,12 @@ of the report: `.scratch/pokernext-foundation/screenshots/00e/report.png`.
   1 s). Port and origins come from `lib/demo_hosts.ts`, which defaults to
   the domain's `LOCAL_HOST_NAMES` and `DEFAULT_DEMO_PORT` through
   `@pokernext/app/routing`.
+
+### 2026-09-15 self-hosted fonts
+
+- The system-fallback note above is resolved: the formal pages render with the
+  bundled Noto Sans TC (`@pokernext/ui/fonts.css`), and the captures wait a
+  frame before `document.fonts.ready` so every font subset has loaded.
+- `pnpm demo:diff` after the change: `player_home` 47.5%, `venue_home` 47.3%,
+  `admin_home` 43.3%, `platform_home` 3.7%, `staff_home` 13.7%, `agent_home`
+  6.4%. The shells are still empty, so layout, not type, drives the ratios.

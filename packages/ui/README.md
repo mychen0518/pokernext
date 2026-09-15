@@ -7,11 +7,22 @@ library. It imports no other workspace package.
 ## Using it
 
 ```tsx
+import '@pokernext/ui/fonts.css'; // once, in the app root, before the tokens
 import '@pokernext/ui/tokens.css'; // once, in the app root
 import '@pokernext/ui/base.css'; // once, after the tokens
 import {Button, StatusDot} from '@pokernext/ui';
 ```
 
+- `fonts.css` self-hosts the DESIGN.md §2.2 typefaces: it registers
+  "Noto Sans TC" (400, 500, 600, 700) and "Noto Serif TC" (700) from the
+  `@fontsource/noto-sans-tc` and `@fontsource/noto-serif-tc` packages, the
+  first families of `--pn-font-sans` and `--pn-font-serif`. The bundler emits
+  the font files with the app, so no page loads fonts from an external host.
+  Each weight is split into `unicode-range` subsets and a browser downloads
+  only the subsets its text needs. Add a weight here only when a type token or
+  component starts using it. The Noto fonts are licensed under the SIL Open
+  Font License 1.1 (see each package's `LICENSE`), which allows bundling and
+  redistributing them with the app.
 - `tokens.css` defines every token as a `--pn-*` custom property. Type tokens
   are split into `--pn-type-<name>-family`, `-size`, `-line` and `-weight`.
 - `base.css` styles the document `body` (background, text colour, body type)
@@ -44,13 +55,14 @@ deliberate exception, for these reasons:
   `roving_focus.ts` and `container_states.tsx` are not exported, and `lib/`
   stays unimportable from outside the package (dependency-cruiser).
 
-Stylesheets are separate entries (`tokens.css`, `base.css`) because they are
-side-effect imports, not components.
+Stylesheets are separate entries (`fonts.css`, `tokens.css`, `base.css`)
+because they are side-effect imports, not components.
 
 ## Layout
 
 ```text
 index.ts          public entry: named exports of every component
+fonts.css         public entry: self-hosted Noto Sans TC and Noto Serif TC
 tokens.css        public entry: design tokens
 base.css          public entry: document body styles from the tokens
 lib/              components, one snake_case .tsx + .module.css each

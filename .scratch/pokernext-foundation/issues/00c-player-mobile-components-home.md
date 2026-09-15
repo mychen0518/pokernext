@@ -175,3 +175,18 @@ project.
   `tests/component_styles_use_tokens.test.ts` now also fails on hex, functional
   or named colour literals in `lib/**/*.ts(x)` and
   `kitchen_sink/**/*.{ts,tsx,svg,html}`.
+
+### 2026-09-15 self-hosted fonts
+
+- Pages render with the bundled Noto Sans TC and Noto Serif TC
+  (`@pokernext/ui/fonts.css`, see 00a). The five player-home baselines were
+  regenerated and checked: glyphs change (serif 5,000 and 25,000 are wider),
+  layout does not. Every screenshot and side-by-side in `screenshots/00c/` was
+  recaptured, including both 200% text captures.
+- The 200% text gate (`tests/player_home_accessibility.spec.ts`) measured text
+  runs by their content area. Noto Serif TC's ascent plus descent is about
+  1.45em against the display tokens' 1.1 line height, so 濟州島 and 5,000 were
+  reported overlapping JEJU ISLAND and 可用積分 with no glyph touching them
+  (checked in a 200% capture). Runs now span their line boxes vertically; a
+  negative margin pulling JEJU ISLAND into 濟州島 still fails the test. No CSS
+  changed.

@@ -42,6 +42,29 @@ export async function openKitchenSinkPage(
   await page.goto(`/?${search.toString()}`);
   await expect(page.locator(`[data-kitchen-sink-page="${id}"]`)).toBeVisible();
   await page.evaluate(async () => {
+    // A font subset starts loading when layout first needs a glyph in its
+    // unicode-range; after a frame every rendered run has asked for its
+    // subsets, so `ready` waits for all of them.
+    await new Promise(resolve => requestAnimationFrame(resolve));
     await document.fonts.ready;
+  });
+}
+
+/**
+ * Returns the families of the web fonts the page has finished loading,
+ * without quotes. A family appears only when its glyphs were drawn: each
+ * face covers a `unicode-range` and loads when text in that range is laid
+ * out.
+ */
+export async function loadedFontFamilies(page: Page): Promise<string[]> {
+  return page.evaluate(async () => {
+    await document.fonts.ready;
+    const families = new Set<string>();
+    document.fonts.forEach(face => {
+      if (face.status === 'loaded') {
+        families.add(face.family.replace(/^"|"$/g, ''));
+      }
+    });
+    return [...families];
   });
 }

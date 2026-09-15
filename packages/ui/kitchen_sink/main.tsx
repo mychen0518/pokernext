@@ -3,6 +3,7 @@
  * and lists all pages when no page is given.
  */
 
+import '../fonts.css';
 import '../tokens.css';
 import '../base.css';
 import './kitchen_sink.css';

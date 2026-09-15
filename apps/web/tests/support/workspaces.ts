@@ -79,6 +79,8 @@ export async function switchAccount(
   await drawer.getByRole('button', {name: `以 ${displayName} 進入`}).click();
   await expect(page).toHaveURL(demoAccountHome(displayName).homeUrl);
   await page.evaluate(async () => {
+    // Font subsets start loading at the first layout that needs them.
+    await new Promise(resolve => requestAnimationFrame(resolve));
     await document.fonts.ready;
   });
 }
