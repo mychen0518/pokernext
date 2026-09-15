@@ -26,6 +26,28 @@ import {Button, StatusDot} from '@pokernext/ui';
   colour, font family or size, spacing or radius in `lib/**/*.module.css`; if
   a value is missing, add a token to DESIGN.md §2 and `tokens.css` first.
 
+## Why `index.ts` lists every component
+
+`packages/README.md` says "No barrels": expose several small entry points
+rather than one `index.ts` that re-exports a whole subtree. `@pokernext/ui`
+is the one deliberate exception, for these reasons:
+
+- The foundation spec (story 1) and tickets 00a–00c require every DESIGN.md
+  §4 component to be importable from the package root:
+  `import {Button, DataTable, StatusDot} from '@pokernext/ui'`. DESIGN.md
+  names are the contract, so the root is the catalogue.
+- The components are one vocabulary used together on every screen; per
+  component entry points (`@pokernext/ui/button`) would only lengthen imports
+  without hiding anything.
+- It stays a narrow interface, not a funnel: each component and props type is
+  re-exported by name (no `export *`), private helpers such as
+  `class_names.ts`, `roving_focus.ts` and `container_states.tsx` are not
+  exported, and `lib/` stays unimportable from outside the package
+  (dependency-cruiser).
+
+Stylesheets are separate entries (`tokens.css`, `base.css`) because they are
+side-effect imports, not components.
+
 ## Layout
 
 ```text
