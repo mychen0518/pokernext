@@ -12,7 +12,9 @@
 | `references/partner-checkin.png` | 合作端（桌面） | 到場報到：掃碼結果列、雙欄「資料核對 / 押金收取」 |
 | `references/partner-change-requests.png` | 合作端（桌面） | 行程異動：狀態分頁、左清單右詳情（master-detail）、處理進度 |
 
-管理端（POKERNEXT 內部人員）目前沒有參考圖：**沿用合作端的桌面版面與所有 token**，只把側欄品牌副標改為「管理端」。
+管理端（POKERNEXT 內部人員與外部 Agent；管理、平台治理、Agent 三個工作區）目前沒有參考圖：**沿用合作端的桌面版面與所有 token**，只把側欄品牌副標改為所在工作區名稱。
+
+接待端（接待工作區的手機工作台）目前沒有參考圖，也沒有版面先例：見 §3.3。
 
 ---
 
@@ -145,6 +147,11 @@
   3. **案件頁**（`partner-change-requests.png`）：`Tabs`（帶計數）→ 左 `ListPanel` 380px（`SearchInput` + `ListItem` 可選取）+ 右 `DetailPanel`（標題 + Badge、`KeyValueList`、`Stepper`、表單、底部動作列）。
 - 資料表最多 6 欄；超過的資訊併入同一欄的第二行（`body-sm`、`--pn-text-2`）。
 - 每張卡片底部可放一行 `label` 級的 meta（掃碼時間、最後更新、時區）。
+
+### 3.3 接待端（Reception，手機工作台）
+
+- 尚無版面先例。沿用 §2 全部 token 與玩家端的手機視口規則（≤ 768px、觸控區 ≥ 44×44），但**不**沿用玩家端的 `BottomNav` 五項、`HeroTripCard` 與玩家端文案規則。
+- 第一張接待端 UI 票（第 22 票）實作前先跑 `/prototype`（UI 分支，2–3 個 `?variant=`），選定後補寫本節的結構與頁型，並把選擇記在該票 `## Comments`。
 
 ---
 

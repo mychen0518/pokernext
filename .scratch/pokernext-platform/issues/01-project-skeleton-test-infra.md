@@ -14,4 +14,4 @@
 - [ ] 提供併發測試工具：能對同一操作發出並行請求並斷言只生效一次
 - [ ] 每個測試的名稱是一句業務句子；CI 上一條指令跑完全部測試
 
-**Notes:** 架構選型已提案於 ADR-0001（Next.js 單 app 分六 surface、packages/domain、Postgres），本票以該 ADR 為準並補足 RPO／RTO 考量；選型必須為第 02 票的 RPO 0／跨區 RTO 2 小時驗證留有可能。建議在此票同時建立 CONTEXT.md 固定 PRD 術語（會員 UUID／行程編號／酒店預訂編號／核對單編號；在島內／營運已離境／實際離島；保留／扣分／應退／實退；有效到訪；售前輪次），或另跑 /domain-modeling。
+**Notes:** 架構選型已提案於 ADR-0001（Next.js 單 app 分六個工作區、packages/domain、packages/app use-case 層、Postgres 16），本票以該 ADR 為準並補足 RPO／RTO 考量；選型必須為第 02 票的 RPO 0／跨區 RTO 2 小時驗證留有可能。建議在此票同時建立 CONTEXT.md 固定 PRD 術語（會員 UUID／行程編號／酒店預訂編號／核對單編號；在島內／營運已離境／實際離島；保留／扣分／應退／實退；有效到訪；售前輪次），或另跑 /domain-modeling。

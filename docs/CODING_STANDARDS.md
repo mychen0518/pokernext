@@ -28,6 +28,18 @@ The TypeScript rules the reviewer checks by hand (the ones `gts` does not catch 
 - No decorators of our own; no wrapper objects (`new String()` …); no `eval`; no prototype patching; no `debugger`.
 - Naming: `UpperCamelCase` for classes/interfaces/types/enums/type params; `lowerCamelCase` for values, functions, properties, module aliases; `CONSTANT_CASE` for module-level constants and enum values; acronyms as words (`loadHttpUrl`); no leading/trailing `_`; files in `snake_case` (`deposit_axes.ts`, `deposit_axes.test.ts`).
 - Comments: `/** JSDoc */` on every exported symbol (verb phrase, third person); `//` for implementation notes; multi-line comments as stacked `//`, not `/* */`.
+- React component files are `snake_case` too (`status_dot.tsx` exports `StatusDot`).
+
+Framework-forced exceptions (ADR-0001). Only these files may use
+`export default` or a non-`snake_case` name, and the eslint override lists
+exactly these paths; anything else is a finding:
+
+- Next.js special files under `apps/web/app/`: `page.tsx`, `layout.tsx`,
+  `template.tsx`, `loading.tsx`, `error.tsx`, `default.tsx`, `not-found.tsx`,
+  `global-error.tsx`. The default export is a one-line re-export of a named
+  component defined in a `snake_case` file.
+- Tool config files at a package or workspace root: `next.config.ts`,
+  `drizzle.config.ts`, `playwright.config.ts`, `vitest.config.ts`.
 
 HTML/CSS rules the reviewer checks by hand: semantic elements; lowercase everything; class names lowercase-hyphenated and named by purpose (`status-dot`, not `red-text`); no ID selectors for styling; no `!important` outside the reset; shorthand properties; `0` without units; declarations alphabetised inside a rule; 2-space indent; single quotes in CSS; every colour/spacing/radius value is a `var(--pn-*)` token (see UI section below).
 
@@ -58,4 +70,6 @@ Markdown rules for tickets and docs: ATX headings, one `#` per file, `-` bullets
 ## Structure
 
 - Deep modules per `/setup-ts-deep-modules`: import a package only through its root files.
-- Prototype code (`docs/design/prototype/`) is a reference, never copied into `apps/` or `packages/`.
+- Prototype code (`docs/design/prototype/`) is a reference, never copied into `apps/` or `packages/`. Demo data literals from its `seed()` may be transcribed into test fixtures and the demo seed; state transitions, calculations and rendering logic may not.
+- Authorization rules are pure functions in `packages/domain`; every `packages/app` use-case calls them on every read and write and writes AuditLog on denial. A permission check that exists only in Next.js middleware, a route handler or the UI is a finding.
+- Fake ports come only from `packages/ports/testing.ts`; importing it from `apps/web` or non-test code is a finding (dependency-cruiser also blocks it).

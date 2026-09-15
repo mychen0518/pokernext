@@ -7,7 +7,7 @@
 **Status:** ready-for-agent
 
 **UI:**
-- Surface: 管理端（提出）＋ Platform admin（執行）
+- Surface: 管理端（管理工作區提出＋平台治理工作區執行）
 - Page type: DESIGN.md §3.2 總覽頁變體（左轉派申請／右公共池）
 - Reference: `docs/design/references/partner-overview.png`
 - Prototype: `#/admin/ownership`、`#/platform/approvals`；actions `proposeTransfer`, `executeTransfer`

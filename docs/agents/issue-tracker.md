@@ -35,7 +35,7 @@ Any ticket that touches a screen carries a `**UI:**` block directly after `**Sta
 
 ```md
 **UI:**
-- Surface: 玩家端 | 合作端 | 管理端
+- Surface: 玩家端 | 合作端 | 管理端 | 接待端（加工作區名稱，見 `CONTEXT.md`）
 - Page type: <one of DESIGN.md §3 page types, or "no precedent → /prototype first">
 - Reference: `docs/design/references/<file>.png` (or "none")
 - Components: <DESIGN.md §4 component names, with variants>

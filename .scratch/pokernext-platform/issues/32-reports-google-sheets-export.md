@@ -7,7 +7,7 @@
 **Status:** ready-for-agent
 
 **UI:**
-- Surface: 管理端（授權人員）＋ Platform admin（核准目的地）
+- Surface: 管理端（管理工作區授權人員＋平台治理工作區核准目的地）
 - Page type: DESIGN.md §3.2 總覽頁變體（報表卡×4 ＋ 輸出歷史 DataTable）
 - Reference: `docs/design/references/partner-overview.png`
 - Prototype: 無對應（比照 `#/platform/approvals` 的敏感匯出卡）

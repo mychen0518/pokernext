@@ -30,7 +30,7 @@ agent 會先給你一份編號清單（預期三張：00a 設計系統套件、0
 ## 3. 建 repo 骨架（`/setup-ts-deep-modules`）
 
 ```
-/setup-ts-deep-modules 依 ADR-0001 建立 pnpm workspace：apps/web、packages/ui、packages/domain、packages/db、packages/ports、tooling/demo。每個 package 依深模組規則（根目錄為公開介面、lib/ 與 tests/ 私有），裝好 dependency-cruiser 並證明規則會擋。
+/setup-ts-deep-modules 依 ADR-0001 建立 pnpm workspace：apps/web、packages/ui、packages/domain、packages/app、packages/db、packages/ports、tooling/demo；分層 apps/web → app → domain, db, ports，並禁止 apps/web 引用 packages/ports/testing.ts。每個 package 依深模組規則（根目錄為公開介面、lib/ 與 tests/ 私有），裝好 dependency-cruiser 並證明規則會擋。
 ```
 
 接著在同一個 session 貼：

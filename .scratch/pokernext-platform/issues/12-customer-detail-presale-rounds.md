@@ -7,7 +7,7 @@
 **Status:** ready-for-agent
 
 **UI:**
-- Surface: 管理端（銷售）＋ Agent 端共用同一頁型
+- Surface: 管理端（管理工作區的銷售＋Agent 工作區，共用同一頁型）
 - Page type: DESIGN.md §3.2 案件頁（左客戶清單／右詳情，Tabs 售前輪次／行程／任務／案件）
 - Reference: `docs/design/references/partner-change-requests.png`
 - Prototype: `#/admin/customers/C-2060`、`#/agent/customers`；actions `addFollowup`

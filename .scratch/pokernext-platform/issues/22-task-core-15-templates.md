@@ -7,8 +7,8 @@
 **Status:** ready-for-agent
 
 **UI:**
-- Surface: 員工端（手機，我的任務）＋ 管理端（任務與異常）
-- Page type: 員工端 DESIGN.md §3.1 列表＋任務明細固定布局（PRD 8.2：參照 → 來源狀態 → 固定答案 → 條件欄位 → 補充 → 提交）
+- Surface: 接待端（接待工作區，手機，我的任務）＋ 管理端（管理工作區，任務與異常）
+- Page type: 接待端 no precedent → /prototype first（DESIGN.md §3.3）；列表＋任務明細固定布局（PRD 8.2：參照 → 來源狀態 → 固定答案 → 條件欄位 → 補充 → 提交）
 - Reference: `docs/design/references/player-home-mobile.png`（手機 token）；管理端用 `partner-overview.png` 的 DataTable
 - Prototype: `#/staff/tasks`、`#/staff/tasks/TSK-1043`、`#/admin/tasks`；actions `submitTask`, `newTask`
 - Components: 員工端 seg（進行中／已完成／全部）、ListItem（Badge T06 + 標題 + 期限）、Card（客戶與業務參照）、Card（來源狀態／既有回報）、Radio（固定答案）、依答案展開的 Input（實際時間、來源）、Textarea、Button/primary/m block（提交回報，未選答案時 disabled）；管理端 DataTable/dense、Modal（建立任務：範本／行程／指派）
