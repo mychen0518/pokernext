@@ -10,7 +10,8 @@ import {connectDatabase, type Database} from '@pokernext/db';
 import {accountKindOfWorkspace, type Workspace} from '@pokernext/domain';
 import type {Clock} from '@pokernext/ports';
 
-import {type AccountSummary, createAccountUseCases} from './accounts';
+import type {AccountSummary} from './accounts';
+import {listEveryAccount} from './account_listing';
 import {SYSTEM_CLOCK} from './system_clock';
 
 /** One demo account as seeded. */
@@ -88,7 +89,7 @@ export async function ensureDemoAccountsOn(
       created += 1;
     }
   }
-  const accounts = await createAccountUseCases(database).list();
+  const accounts = await listEveryAccount(database);
   return {created, accounts};
 }
 

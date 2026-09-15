@@ -156,8 +156,9 @@ export interface OcrUnrecognized {
 
 /**
  * An external OCR provider. It may answer slowly or never; callers race it
- * against the clock (spec: OCR p95 ≤ 30 s, manual fill after 30 s, timeout
- * after 2 min).
+ * against the clock (PRD 16.19 R16-19-10: p95 ≤ 30 s, manual fill after 30 s,
+ * this attempt times out after 2 min and may be retried; R18-08: a late
+ * result is for comparison only).
  */
 export interface OcrProvider {
   /** Recognises the fields of an identity document. */

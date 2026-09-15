@@ -18,10 +18,10 @@ describe('合法業務操作建構器', () => {
     await app.close();
   });
 
-  it('以建構器建立的健康檢查，之後經應用服務查得到', async () => {
+  it('以建構器建立的健康檢查，之後查得到同一筆紀錄', async () => {
     const record = await given(app).healthCheckRecorded();
 
-    expect(await app.healthCheck.list()).toEqual([record]);
+    expect(await app.healthCheckRecords()).toEqual([record]);
   });
 
   it('連續建立的前置狀態各自獨立，不會互相覆蓋', async () => {
@@ -29,13 +29,13 @@ describe('合法業務操作建構器', () => {
     const second = await given(app).healthCheckRecorded();
 
     expect(first.requestKey).not.toBe(second.requestKey);
-    expect(await app.healthCheck.list()).toHaveLength(2);
+    expect(await app.healthCheckRecords()).toHaveLength(2);
   });
 
   it('use-case 拒絕時建構器直接失敗，資料庫裡不會出現這筆狀態', async () => {
     await expect(
       given(app).healthCheckRecorded({requestKey: ''}),
     ).rejects.toThrow(/invalidRequestKey/);
-    expect(await app.healthCheck.list()).toEqual([]);
+    expect(await app.healthCheckRecords()).toEqual([]);
   });
 });

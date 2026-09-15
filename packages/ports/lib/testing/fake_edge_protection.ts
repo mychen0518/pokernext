@@ -1,5 +1,6 @@
 /**
- * @fileoverview Middleware-style stand-in for the Cloudflare edge.
+ * @fileoverview Stand-in for the Cloudflare edge's decisions. `withFakeEdge`
+ * (fake_edge_middleware.ts) puts it in front of HTTP handlers.
  */
 
 import type {

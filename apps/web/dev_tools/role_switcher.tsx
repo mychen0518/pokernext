@@ -1,15 +1,16 @@
 /**
  * @fileoverview Development-only role switcher (not a DESIGN.md §4 component):
- * lists every account through `app.accounts.list` and hands the entries to
- * the Drawer. Imported as `#role_switcher`; `next.config.ts` maps that import
+ * lists every account through `@pokernext/app/dev` (dependency-cruiser allows
+ * only this file to import it) and hands the entries to the Drawer. Imported
+ * as `#role_switcher`; `next.config.ts` maps that import
  * to `role_switcher_removed.tsx` outside the development server, so production
  * bundles never contain this file.
  */
 
+import {listAccountsForRoleSwitcher} from '@pokernext/app/dev';
 import {headers} from 'next/headers';
 
 import {originOf} from '../lib/hosts';
-import {getRuntimeApp} from '../lib/runtime_app';
 import {WORKSPACE_ROUTES} from '../lib/workspace_routes';
 import {
   type RoleSwitcherEntry,
@@ -21,7 +22,7 @@ export async function RoleSwitcher() {
   const requestHeaders = await headers();
   const hostHeader = requestHeaders.get('host') ?? '';
   const protocol = requestHeaders.get('x-forwarded-proto') ?? 'http';
-  const accounts = await getRuntimeApp().accounts.list();
+  const accounts = await listAccountsForRoleSwitcher();
   const entries: RoleSwitcherEntry[] = accounts.map(account => {
     const route = WORKSPACE_ROUTES[account.workspace];
     return {

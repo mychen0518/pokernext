@@ -10,6 +10,16 @@ export {
   startTestDatabaseServer,
 } from '@pokernext/db/testing';
 export type {TestDatabase, TestDatabaseServer} from '@pokernext/db/testing';
+// For HTTP-level tests (apps/web may not import @pokernext/ports/testing):
+// the fake Cloudflare edge as middleware in front of `fetch`.
+export {
+  EdgeResponseInterrupted,
+  FAKE_EDGE_OUTCOME_HEADER,
+  FakeEdgeProtection,
+  withFakeEdge,
+} from '@pokernext/ports/testing';
+export type {HttpHandler} from '@pokernext/ports/testing';
+export type {AuditEntry} from './lib/audit_log';
 export {
   ConcurrencyViolation,
   expectTakesEffectOnce,
@@ -20,7 +30,8 @@ export type {
   TakesEffectOnceCheck,
 } from './lib/testing/concurrency';
 // For HTTP-level test servers that run the app on a cloned database: the same
-// demo account creation as `@pokernext/app/demo`.
+// demo account creation as `@pokernext/app/demo`. dependency-cruiser lets only
+// demo.ts and this test-only wiring reach lib/demo_accounts.ts.
 export {ensureDemoAccounts as ensureDemoAccountsInDatabase} from './lib/demo_accounts';
 export type {DemoAccountsEnsured} from './lib/demo_accounts';
 export {given, LegalOperations, PreconditionRefused} from './lib/testing/given';

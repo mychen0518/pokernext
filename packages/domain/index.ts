@@ -6,10 +6,13 @@
 
 export {
   accountKindOfWorkspace,
+  DEFAULT_DEMO_PORT,
+  decideSessionEnd,
   decideSessionStart,
   decideWorkspaceEntry,
   hostOfAccountKind,
   hostOfWorkspace,
+  LOCAL_HOST_NAMES,
   WORKSPACES,
 } from './lib/workspace_access';
 export type {
@@ -17,6 +20,9 @@ export type {
   Allowed,
   HostKind,
   Refused,
+  SessionEndDecision,
+  SessionEndRefusal,
+  SessionEndRequest,
   SessionStartDecision,
   SessionStartRefusal,
   Workspace,

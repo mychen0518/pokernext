@@ -3,11 +3,13 @@
  *
  * Development tools exist only in the development server (`next dev`). In
  * every other phase, including `next build`, two build-time switches remove
- * them rather than hiding them at runtime:
- * - `#role_switcher` resolves to an empty component, so the role switcher and
- *   its account listing are not in the module graph;
+ * them rather than hiding them at runtime, whichever bundler builds:
+ * - `#role_switcher` resolves to an empty component under both Turbopack
+ *   (`turbopack.resolveAlias`) and webpack (`resolve.alias`), so the role
+ *   switcher and its account listing are not in the module graph;
  * - `.dev.ts(x)` is not a page extension, so `app/dev/**` routes do not exist.
- * `apps/web/tests/production_build.test.ts` checks the build output.
+ * `apps/web/tests/production_bundles_exclude_dev_tools.test.ts` builds with
+ * both bundlers and checks the output.
  */
 
 import {fileURLToPath} from 'node:url';
@@ -24,6 +26,11 @@ const DEV_HOSTS = [
   process.env.POKERNEXT_WORK_HOST || 'work.localhost',
 ];
 
+/**
+ * Returns the Next.js config for a phase: development tools are routed and
+ * bundled only in the development server, and removed at build time in every
+ * other phase for Turbopack and webpack alike.
+ */
 export default function nextConfig(phase: string): NextConfig {
   const withDevTools = phase === PHASE_DEVELOPMENT_SERVER;
   return {
@@ -52,6 +59,15 @@ export default function nextConfig(phase: string): NextConfig {
       resolveAlias: withDevTools
         ? {}
         : {'#role_switcher': REMOVED_ROLE_SWITCHER},
+    },
+    webpack: config => {
+      if (!withDevTools) {
+        // `$` matches the bare specifier only; webpack wants an absolute path.
+        config.resolve.alias['#role_switcher$'] = fileURLToPath(
+          new URL(REMOVED_ROLE_SWITCHER, import.meta.url),
+        );
+      }
+      return config;
     },
   };
 }

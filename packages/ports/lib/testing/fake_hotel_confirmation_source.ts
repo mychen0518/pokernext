@@ -10,6 +10,8 @@ import type {
   HotelConfirmationRead,
   HotelConfirmationSource,
 } from '../../index';
+import type {HotelConfirmationSampleName} from './samples/sample_definitions';
+import {loadHotelConfirmationSample} from './samples/sample_files';
 
 /** What a test supplies for one sample confirmation PDF. */
 export interface HotelConfirmationContent {
@@ -28,6 +30,15 @@ export interface HotelConfirmationContent {
  */
 export class FakeHotelConfirmationSource implements HotelConfirmationSource {
   private readonly files = new Map<string, HotelConfirmation>();
+
+  /** Stores one of the committed PDF sample files under a file id. */
+  async provideSample(
+    fileId: string,
+    name: HotelConfirmationSampleName,
+  ): Promise<void> {
+    const {confirmation} = await loadHotelConfirmationSample(name);
+    this.provide(fileId, confirmation);
+  }
 
   /** Stores a sample confirmation PDF under a file id. */
   provide(fileId: string, content: HotelConfirmationContent): void {

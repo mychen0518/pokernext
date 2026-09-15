@@ -10,7 +10,8 @@ export type {
   Workspace,
   WorkspaceEntryRefusal,
 } from '@pokernext/domain';
-export type {AccountSummary, AccountUseCases} from './lib/accounts';
+export {DEFAULT_DEMO_PORT, LOCAL_HOST_NAMES} from '@pokernext/domain';
+export type {AccountSummary} from './lib/accounts';
 export {createApp, createAppFromEnvironment} from './lib/app';
 export type {App, AppDependencies, AppEnvironment} from './lib/app';
 export type {
@@ -18,13 +19,17 @@ export type {
   HealthCheckRecorded,
   HealthCheckRejected,
   HealthCheckUseCases,
-  ListHealthChecksRequest,
+  HealthProbeFailed,
+  HealthProbePassed,
   RecordHealthCheckRequest,
 } from './lib/health_check';
+export {parseAccountId, parseSessionToken} from './lib/identifiers';
+export type {AccountId, SessionToken} from './lib/identifiers';
 export type {
   EndSessionRequest,
   ResolveSessionRequest,
   SessionEndOutcome,
+  SessionEndRefused,
   SessionHomeRequest,
   SessionStarted,
   SessionStartRefused,

@@ -4,6 +4,7 @@
  * here so they land in the migrations, not only in application checks.
  */
 
+import {WORKSPACES} from '@pokernext/domain';
 import {sql} from 'drizzle-orm';
 import {
   check,
@@ -14,6 +15,11 @@ import {
   unique,
   uuid,
 } from 'drizzle-orm/pg-core';
+
+/** Writes fixed identifiers as a SQL list of string literals: `'a', 'b'`. */
+function sqlStringList(values: readonly string[]): string {
+  return values.map(value => `'${value.replaceAll("'", "''")}'`).join(', ');
+}
 
 /** One recorded health check, written once per request key. */
 export const healthChecks = pgTable(
@@ -49,7 +55,7 @@ export const accounts = pgTable(
     check('accounts_kind_known', sql`${table.kind} IN ('member', 'work')`),
     check(
       'accounts_workspace_known',
-      sql`${table.workspace} IN ('player', 'venue', 'admin', 'platform', 'staff', 'agent')`,
+      sql`${table.workspace} IN (${sql.raw(sqlStringList(WORKSPACES))})`,
     ),
     // Members belong to the player workspace, work accounts to the others.
     check(
@@ -81,6 +87,43 @@ export const sessions = pgTable(
     check(
       'sessions_host_kind_known',
       sql`${table.hostKind} IN ('player', 'work')`,
+    ),
+  ],
+);
+
+/**
+ * The AuditLog (PRD 7 SEC-01): one row per audited decision, appended and
+ * never updated or deleted. This first cut records refused session and
+ * workspace requests; ticket 03 extends the same table and its flows
+ * (invitations, sign-in steps, successful operations). Rows carry ids and
+ * reasons only, never tokens, credentials or document numbers.
+ */
+export const auditLog = pgTable(
+  'audit_log',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    // The application clock's time, not the database server's.
+    occurredAt: timestamp('occurred_at', {withTimezone: true}).notNull(),
+    // Null when nobody is identified, such as a request without a session.
+    actorAccountId: uuid('actor_account_id'),
+    hostKind: text('host_kind').notNull(),
+    // What was attempted, such as `workspace.enter`.
+    action: text('action').notNull(),
+    // What it was attempted on, such as `workspace:venue`.
+    target: text('target').notNull(),
+    outcome: text('outcome').notNull(),
+    // The rule's refusal reason; null when the decision allowed it.
+    reason: text('reason'),
+  },
+  table => [
+    index('audit_log_occurred_at_index').on(table.occurredAt),
+    check(
+      'audit_log_host_kind_known',
+      sql`${table.hostKind} IN ('player', 'work')`,
+    ),
+    check(
+      'audit_log_outcome_known',
+      sql`${table.outcome} IN ('allowed', 'refused')`,
     ),
   ],
 );

@@ -50,7 +50,9 @@ rest in `lib/`.
 - `packages/ui/kitchen_sink/` (dev-only component catalogue) is imported only
   from inside itself, never from `packages/ui`'s entry points or `lib/`.
 - `packages/ports/testing.ts` (fakes) is imported only from `tests/` folders
-  and the `@pokernext/app/testing` wiring, never from `apps/web`.
+  and the `@pokernext/app/testing` wiring, never from `apps/web`. HTTP tests
+  in `apps/web/tests/` get the fake edge middleware (`withFakeEdge`) through
+  `@pokernext/app/testing`.
 - `packages/app/testing.ts` (test app, legal-operation builder, concurrency
   tool) is imported only from `tests/` folders; `packages/db/testing.ts`
   (cloned test databases) only from `tests/` folders and that wiring.
@@ -58,13 +60,21 @@ rest in `lib/`.
 - `packages/db/local_cluster.ts` (embedded Postgres) is imported only from
   `tooling/` and tests, so production code never loads embedded-postgres.
 - `packages/app/demo.ts` (demo account creation) is imported only from
-  `tooling/demo`; tests reach the same implementation through
-  `@pokernext/app/testing` (`given(app).demoAccount(…)`,
-  `ensureDemoAccountsInDatabase`).
+  `tooling/demo`. Its implementation `lib/demo_accounts.ts` is reachable
+  only through `demo.ts` and the test-only `@pokernext/app/testing` wiring,
+  so `index.ts` and production use-cases cannot create accounts; tests reach
+  it through `given(app).demoAccount(…)` and `ensureDemoAccountsInDatabase`.
+- `packages/app/dev.ts` (every account, no actor, for the role switcher) is
+  imported only from `apps/web/dev_tools/role_switcher.tsx` and tests, never
+  from the production stub; its implementation
+  `lib/role_switcher_accounts.ts` only through `dev.ts`, and the
+  unauthorized `lib/account_listing.ts` only from that implementation and the
+  demo account implementation.
 - `apps/web/dev_tools/` (the role switcher) is reached only through the
   `#role_switcher` import and `app/dev/**/route.dev.ts`; `next.config.ts`
-  removes both outside `next dev`, and
-  `apps/web/tests/production_build.test.ts` checks the build output.
+  removes both outside `next dev` for Turbopack and webpack alike, and
+  `apps/web/tests/production_bundles_exclude_dev_tools.test.ts` builds with
+  both bundlers and checks the output.
 - Nothing imports `apps/*` or `tooling/*`.
 
 ## Checking

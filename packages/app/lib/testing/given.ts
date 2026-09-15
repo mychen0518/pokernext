@@ -12,6 +12,7 @@ import type {HostKind, Workspace} from '@pokernext/domain';
 import type {AccountSummary} from '../accounts';
 import type {DemoAccountsEnsured} from '../demo_accounts';
 import type {HealthCheck} from '../health_check';
+import type {AccountId} from '../identifiers';
 import type {SessionStarted} from '../sessions';
 import type {TestApp} from './test_app';
 
@@ -60,7 +61,7 @@ export class LegalOperations {
 
   /** A session has been started for the account on the host. */
   async sessionStarted(request: {
-    readonly accountId: string;
+    readonly accountId: AccountId;
     readonly host: HostKind;
   }): Promise<SessionStarted> {
     const outcome = await this.app.sessions.start(request);

@@ -5,6 +5,7 @@
 
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
+import {listAccountsForRoleSwitcher} from '../dev';
 import {createTestApp, given, runInParallel, type TestApp} from '../testing';
 
 describe('Demo 帳號', () => {
@@ -19,7 +20,9 @@ describe('Demo 帳號', () => {
   });
 
   it('只跑過 migration 的資料庫沒有任何帳號', async () => {
-    expect(await app.accounts.list()).toEqual([]);
+    expect(
+      await listAccountsForRoleSwitcher({DATABASE_URL: app.databaseUrl}),
+    ).toEqual([]);
   });
 
   it('確保 demo 帳號兩次：第一次建立六個工作區各一個帳號，第二次什麼都不建立', async () => {
@@ -28,7 +31,9 @@ describe('Demo 帳號', () => {
 
     expect(first.created).toBe(6);
     expect(second.created).toBe(0);
-    const accounts = await app.accounts.list();
+    const accounts = await listAccountsForRoleSwitcher({
+      DATABASE_URL: app.databaseUrl,
+    });
     expect(
       accounts.map(({displayName, kind, workspace}) => ({
         displayName,
@@ -48,6 +53,19 @@ describe('Demo 帳號', () => {
   it('同時確保 demo 帳號五次，仍然只有六個帳號', async () => {
     await runInParallel(5, () => given(app).demoAccountsEnsured());
 
-    expect(await app.accounts.list()).toHaveLength(6);
+    expect(
+      await listAccountsForRoleSwitcher({DATABASE_URL: app.databaseUrl}),
+    ).toHaveLength(6);
+  });
+});
+
+describe('角色切換列的帳號清單', () => {
+  it('production 環境不列出任何帳號，直接拒絕執行', async () => {
+    await expect(
+      listAccountsForRoleSwitcher({
+        NODE_ENV: 'production',
+        DATABASE_URL: 'postgres://nobody@127.0.0.1:1/none',
+      }),
+    ).rejects.toThrow(/development-only/);
   });
 });

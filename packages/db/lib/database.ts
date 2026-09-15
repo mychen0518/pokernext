@@ -11,6 +11,7 @@ import {
   createSessionStore,
   type SessionStore,
 } from './accounts';
+import {type AuditLogStore, createAuditLogStore} from './audit_log';
 import {createHealthCheckStore, type HealthCheckStore} from './health_checks';
 
 /** How to connect. */
@@ -25,6 +26,7 @@ export interface Database {
   readonly healthChecks: HealthCheckStore;
   readonly accounts: AccountStore;
   readonly sessions: SessionStore;
+  readonly auditLog: AuditLogStore;
   /** Closes every pooled connection. */
   close(): Promise<void>;
 }
@@ -44,6 +46,7 @@ export function connectDatabase(options: ConnectOptions): Database {
     healthChecks: createHealthCheckStore(db),
     accounts: createAccountStore(db),
     sessions: createSessionStore(db),
+    auditLog: createAuditLogStore(db),
     close: () => pool.end(),
   };
 }

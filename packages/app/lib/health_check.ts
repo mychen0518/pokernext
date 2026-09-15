@@ -3,10 +3,20 @@
  * use-case layer, the clock and the real database. A request key makes the
  * write idempotent, like the operation ids of every business submission
  * (spec: 重試語意).
+ *
+ * The public probe answers anyone: it stores a record with a key of its own,
+ * reads that record back and reports only whether the round trip worked. It
+ * reads no stored record other than its own and reveals nothing about any
+ * member, account or operation, so there is no actor to authorize. Listing
+ * recorded health checks is not a use-case; tests observe records through
+ * the test app.
  */
 
-import type {Database} from '@pokernext/db';
-import type {Clock} from '@pokernext/ports';
+import {randomUUID} from 'node:crypto';
+
+import type {HealthCheckRecord} from '@pokernext/db';
+
+import type {AppDependencies} from './app_dependencies';
 
 /** The longest request key accepted. */
 const MAX_REQUEST_KEY_LENGTH = 200;
@@ -26,6 +36,7 @@ export interface RecordHealthCheckRequest {
 /** The health check is stored: by this call, or by an earlier one. */
 export interface HealthCheckRecorded {
   readonly status: 'recorded' | 'alreadyRecorded';
+  /** The record as read back from the database. */
   readonly record: HealthCheck;
 }
 
@@ -35,9 +46,15 @@ export interface HealthCheckRejected {
   readonly reason: 'invalidRequestKey';
 }
 
-/** Narrows a listing of health checks. */
-export interface ListHealthChecksRequest {
-  readonly requestKey?: string;
+/** The database accepted a write and returned it on reading back. */
+export interface HealthProbePassed {
+  readonly status: 'healthy';
+  readonly checkedAt: Date;
+}
+
+/** The write or the read-back failed. */
+export interface HealthProbeFailed {
+  readonly status: 'unhealthy';
 }
 
 /** The health-check use-cases. */
@@ -46,31 +63,63 @@ export interface HealthCheckUseCases {
   record(
     request: RecordHealthCheckRequest,
   ): Promise<HealthCheckRecorded | HealthCheckRejected>;
-  /** Lists recorded health checks, oldest first. */
-  list(request?: ListHealthChecksRequest): Promise<HealthCheck[]>;
+  /**
+   * Writes a new health check, reads it back and reports only whether that
+   * round trip worked; never throws.
+   */
+  probe(): Promise<HealthProbePassed | HealthProbeFailed>;
 }
 
 /** Builds the health-check use-cases over their collaborators. */
 export function createHealthCheckUseCases(
-  database: Database,
-  clock: Clock,
+  dependencies: AppDependencies,
 ): HealthCheckUseCases {
+  const {database, clock} = dependencies;
+
+  async function recordAndReadBack(
+    requestKey: string,
+    recordedAt: Date,
+  ): Promise<HealthCheckRecorded> {
+    const {created} = await database.healthChecks.recordOnce({
+      requestKey,
+      recordedAt,
+    });
+    const [record] = await database.healthChecks.list({requestKey});
+    if (record === undefined) {
+      throw new Error(`Health check ${requestKey} was stored but not found.`);
+    }
+    return {status: created ? 'recorded' : 'alreadyRecorded', record};
+  }
+
   return {
     async record({requestKey}) {
       if (!isValidRequestKey(requestKey)) {
         return {status: 'rejected', reason: 'invalidRequestKey'};
       }
-      const {record, created} = await database.healthChecks.recordOnce({
-        requestKey,
-        recordedAt: clock.now(),
-      });
-      return {status: created ? 'recorded' : 'alreadyRecorded', record};
+      return recordAndReadBack(requestKey, clock.now());
     },
 
-    async list(request = {}) {
-      return database.healthChecks.list({requestKey: request.requestKey});
+    async probe() {
+      try {
+        const checkedAt = clock.now();
+        // The same instant is written and compared: reading the clock twice
+        // would differ by a millisecond on the system clock.
+        const {status, record} = await recordAndReadBack(
+          `probe-${randomUUID()}`,
+          checkedAt,
+        );
+        return status === 'recorded' && sameInstant(record, checkedAt)
+          ? {status: 'healthy', checkedAt}
+          : {status: 'unhealthy'};
+      } catch {
+        return {status: 'unhealthy'};
+      }
     },
   };
+}
+
+function sameInstant(record: HealthCheckRecord, instant: Date): boolean {
+  return record.recordedAt.getTime() === instant.getTime();
 }
 
 function isValidRequestKey(requestKey: unknown): requestKey is string {

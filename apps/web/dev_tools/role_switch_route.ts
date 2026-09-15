@@ -10,6 +10,7 @@
  * ended; a cross-site POST would not.
  */
 
+import {parseAccountId, parseSessionToken} from '@pokernext/app';
 import {type NextRequest, NextResponse} from 'next/server';
 
 import {hostKindOf, originOf} from '../lib/hosts';
@@ -26,22 +27,26 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
   const app = getRuntimeApp();
   const cookieName = sessionCookieName(host);
-  await app.sessions.end({token: request.cookies.get(cookieName)?.value, host});
-  const started = await app.sessions.start({
-    accountId: request.nextUrl.searchParams.get('account') ?? '',
+  await app.sessions.end({
+    token: parseSessionToken(request.cookies.get(cookieName)?.value),
     host,
   });
+  const accountId = parseAccountId(request.nextUrl.searchParams.get('account'));
+  const started =
+    accountId === undefined
+      ? undefined
+      : await app.sessions.start({accountId, host});
   const origin = originOf(
     host,
     hostHeader,
     request.nextUrl.protocol.replace(/:$/, ''),
   );
   const path =
-    started.status === 'started'
+    started?.status === 'started'
       ? WORKSPACE_ROUTES[started.account.workspace].path
       : '/';
   const response = NextResponse.redirect(`${origin}${path}`, 303);
-  if (started.status === 'started') {
+  if (started?.status === 'started') {
     response.cookies.set(cookieName, started.token, sessionCookieOptions());
   } else {
     response.cookies.delete(cookieName);

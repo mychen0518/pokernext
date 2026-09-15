@@ -6,5 +6,11 @@
   "exports": {
     ".": "./index.ts",
     "./testing": "./testing.ts"
+  },
+  "scripts": {
+    "samples:generate": "tsx lib/testing/samples/generate_samples.ts"
+  },
+  "devDependencies": {
+    "exceljs": "^4.4.0"
   }
 }
