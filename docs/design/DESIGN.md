@@ -139,9 +139,9 @@
 
 ### 3.1 玩家端（Player，手機優先）
 
-- 視口 ≤ 768px 為主要設計目標；桌面上以 480px 置中容器呈現，不另做桌面版。
-- 結構：`AppHeader`（品牌字標 + 通知鈴）→ 內容 → `BottomNav`（五項固定：首頁、我的行程、到場碼、我的積分、我的帳戶）。
-- 首頁：`HeroTripCard`（全幅照片、深色漸層壓底、目的地 `display-xl`、日期、`Button/outline-gold` 主動作）→ `StatusStrip`（三格：住宿／接送／行程）→ `PointsPanel`（可用積分 `display-lg` 左、已保留右，中間垂直分隔線）→ `ContactRow`（接待人）。
+- 視口 ≤ 768px 為主要設計目標；桌面上以 480px 置中容器呈現（`PlayerShell`），不另做桌面版。
+- 結構：`PlayerShell` 內 `AppHeader`（品牌字標 + 通知鈴）→ 內容 → `BottomNav`（五項固定：首頁、我的行程、到場碼、我的積分、我的帳戶）。首頁有行程時 `AppHeader` 放進 `HeroTripCard` 頂部、疊在圖上。
+- 首頁：`HeroTripCard`（全幅照片、深色漸層壓底、問候、目的地 `display-xl`、日期、`Button/outline-gold` 主動作）→ `StatusStrip`（地點列 + 三格：住宿／接送／行程）→ `PointsPanel`（可用積分 `display-lg` 左、已保留右，中間垂直分隔線）→ `ContactRow`（接待人）。
 - 一屏只放一個主要動作；主要動作放在拇指區（內容底部或 Hero 卡內）。
 - 觸控區 ≥ 44×44 CSS px；底部導覽每項 icon 24px + label 12px，目前項金色。
 - 空狀態（沒有行程、沒有積分紀錄）使用 `EmptyState`：icon + 一句原因說明 + 可選的次要動作；**不得顯示 0、不得顯示空表格、不得顯示「已完成」**。
@@ -173,7 +173,9 @@
 |---|---|---|
 | `Button` | `primary`（金底深字）、`secondary`（透明底 + `--pn-border-strong` 邊框、白字）、`outline-gold`（透明底 + 金邊金字，手機 Hero 用）、`ghost`（純文字，金色，右側 chevron）、`danger`（透明底紅字） | 高 44px（手機 52px）、內距 0 24px、`--pn-radius-md`、字重 600。狀態：default / hover（底色提亮 6%）/ focus-visible（2px 金色外框）/ disabled（40% 不透明）/ loading（spinner 取代文字）。一個區塊最多一顆 `primary`。 |
 | `Sidebar` | — | 232px、`--pn-bg`；導覽項高 64px，icon 24 + 文字 `body`；目前項底 `--pn-gold-tint`、左側 3px 金色條、文字與 icon `--pn-gold-bright`。底部 `UserChip` + 登出。 |
-| `BottomNav` | — | 手機端固定底部，高 72px + safe-area；五項；目前項 icon + label 金色。 |
+| `BottomNav` | — | 手機端固定底部（在 `PlayerShell` 內以 sticky 貼底，內容不被遮住），高至少 72px + `env(safe-area-inset-bottom)`；五項固定順序：首頁、我的行程、到場碼、我的積分、我的帳戶，每項 icon 24 + label `label` 字級，平分寬度、觸控區 ≥ 44×44；非目前項 `--pn-text-2`，目前項 icon + label `--pn-gold-bright` 並標 `aria-current="page"`。 |
+| `AppHeader` | — | 玩家端頂列，高至少 64px、透明底、左右內距 `--pn-space-6`。左品牌字標：`POKER` `--pn-text` + `NEXT` `--pn-gold-bright`，`title-sm` 700、字距 `overline` tracking；下方副標 `TRAVEL · PLAY · BELONG` `overline` 字級 `--pn-text-3`。右通知鈴：icon 24 `--pn-text`、44×44 按鈕；有未讀時右上 8px `--pn-gold-bright` 圓點，且按鈕名稱帶「有未讀通知」文字。有行程時放在 `HeroTripCard` 頂部，否則是頁面第一列。 |
+| `PlayerShell` | — | 玩家端頁框：`--pn-bg` 底、寬 100%，視口 > 480px 時 480px 置中且左右 1px `--pn-border`；最小高度一個視口；內容在上、`BottomNav` 在最底。 |
 | `Topbar` | — | 64px；左 `overline` 麵包屑；右日期／時區 `body-sm` `--pn-text-2`。 |
 | `PageHeader` | — | `title-lg` + `body` 說明（`--pn-text-2`）；右側 action slot。 |
 | `Card` | `default`、`elevated`（`--pn-surface-2`） | `--pn-surface`、1px `--pn-border`、`--pn-radius-md`；可選 `CardHeader`（`title-md` + 右側狀態 slot，底下 1px 分隔線）。 |
@@ -194,9 +196,10 @@
 | `Stepper` | 水平 3–5 步 | 節點 24px：完成＝金底勾、進行中＝金色外圈、未開始＝灰外圈；完成段實線金、未完成段虛線灰；每步下方名稱 + 時間／經手人 `label`。 |
 | `ActivityTimeline` | — | 左側綠點連線；每列：時間 `body-sm` 600、事件名 `body` 600、關聯編號 `mono`、說明 `body-sm` `--pn-text-2`。 |
 | `TodoPanel` / `TodoCard` | — | 側欄堆疊；每卡 icon + 標題 `title-sm` + `Badge`，`KeyValueList/stacked` 兩三行，底部一顆 `Button/primary` 全寬。 |
-| `HeroTripCard` | — | 手機首頁全幅圖；底部 40% 黑色漸層；目的地 `display-xl` 白 + 英文 `overline`；日期 `title-sm`；`Button/outline-gold` 全寬。 |
-| `StatusStrip` | 3 格 | 手機；每格 icon 24 金色 + 狀態文字 `body`；格間垂直分隔線。 |
-| `PointsPanel` | — | 手機；左「可用積分」`display-lg` 白，右「已保留」`display-md` 灰；label 在數字上方。 |
+| `HeroTripCard` | — | 手機首頁全幅圖（`object-fit: cover`，純裝飾圖 `alt=""`；沒有圖時為 `--pn-surface-2` 平面底，不用彩色漸層）；底部 40% 由透明到 `--pn-bg` 的黑色漸層；頂部可放 `AppHeader`；可選問候 `title-md`；內容靠底、內距 `--pn-space-6`；目的地 `display-xl` 白 + 英文 `overline`；日期 `title-sm`；`Button/outline-gold` 高 52px 全寬、右側 chevron，是本屏唯一主要動作。高度隨內容增長（文字 200% 不裁切）。 |
+| `StatusStrip` | 3 格 | 手機；可選上方地點列（map-pin icon 24 金色 + 住宿名稱 `title-sm`，底下 1px 分隔線）；三格固定順序住宿／接送／行程（bed、car、file-text icon 24 `--pn-gold-bright`）+ 狀態文字 `body` 置中；格間 1px 垂直分隔線，底部 1px 分隔線。 |
+| `PointsPanel` | — | 手機；左「可用積分」`display-lg` `--pn-text`，右「已保留」`display-md` `--pn-text-2`；中間 1px 垂直分隔線；label `body-sm` `--pn-text-2` 在數字上方；數字後接單位「分」（`body`），格式 `25,000 分`。沒有積分紀錄時不渲染，改用 `EmptyState`（不顯示 0）。 |
+| `ContactRow` | — | 手機；列高至少 64px、內距 `0 --pn-space-6`、底部 1px 分隔線；左 user icon 24 `--pn-gold-bright`；中間角色 + 姓名 `title-sm`（如「接待人 Amy」），可選第二行說明 `body-sm` `--pn-text-2`（服務時段帶時區）；右側可選 `Button/ghost`（如「聯繫接待人」）。 |
 | `EmptyState` | — | 置中 icon 32 `--pn-text-3` + 一句原因（`body` `--pn-text-2`）+ 可選 `Button/secondary`；高度至少 240px。 |
 | `Modal` / `Drawer` | — | `--pn-surface`、`--pn-radius-lg`、唯一允許陰影；標題 `title-md`；底部動作列右對齊 `secondary` + `primary`。 |
 | `Toast` | success / error | 右上（桌面）／底部導覽上方（手機）；`--pn-surface-3`；左側 `StatusDot`。 |

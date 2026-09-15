@@ -1,7 +1,8 @@
 /**
- * @fileoverview Enforces DESIGN.md §2 in component styles: every colour,
- * font, font size, spacing and radius in `lib/**\/*.module.css` is a
- * `var(--pn-*)` token, never a literal.
+ * @fileoverview Enforces DESIGN.md §1 and §2 in component styles: every
+ * colour, font, font size, spacing, radius, letter spacing and shadow in
+ * `lib/**\/*.module.css` and the kitchen-sink page styles is a `var(--pn-*)`
+ * token, never a literal, and gradients only fade to the dark background.
  */
 
 import {readdirSync, readFileSync} from 'node:fs';
@@ -10,7 +11,9 @@ import {fileURLToPath} from 'node:url';
 
 import {describe, expect, it} from 'vitest';
 
-const LIB_DIR = fileURLToPath(new URL('../lib', import.meta.url));
+const STYLE_DIRS = ['../lib', '../kitchen_sink'].map(dir =>
+  fileURLToPath(new URL(dir, import.meta.url)),
+);
 
 // CSS Color Module Level 4 named colours. `transparent` and `currentcolor`
 // are keywords, not palette colours, and stay allowed.
@@ -49,6 +52,12 @@ const RADIUS_PROPERTY = /^border(-[a-z]+)*-radius$/;
 // Weight and line height are plain numbers in DESIGN.md, so only the family
 // and size (and the `font` shorthand, which carries both) must be tokens.
 const FONT_PROPERTY = /^(font|font-family|font-size)$/;
+// DESIGN.md §2.3: no shadows except the overlay token.
+const SHADOW_PROPERTY = /^(box-shadow|text-shadow)$/;
+// DESIGN.md §1: no colourful gradients. A gradient may only fade between
+// transparent and the dark background or scrim (HeroTripCard).
+const GRADIENT = /\b(linear|radial|conic)-gradient\(/;
+const DARK_GRADIENT_TOKEN = /^var\(--pn-(bg|scrim)\)$/;
 
 /** One literal design value found in a stylesheet. */
 interface Violation {
@@ -91,6 +100,26 @@ function findLiteralDesignValues(css: string): Violation[] {
     if (RADIUS_PROPERTY.test(property) && LENGTH_LITERAL.test(literalPart)) {
       violations.push({declaration, reason: 'literal radius'});
     }
+    if (
+      property === 'letter-spacing' &&
+      !/^\s*(0|normal|inherit)?\s*$/.test(literalPart)
+    ) {
+      violations.push({declaration, reason: 'literal letter spacing'});
+    }
+    if (
+      SHADOW_PROPERTY.test(property) &&
+      !/^\s*(none)?\s*$/.test(literalPart)
+    ) {
+      violations.push({declaration, reason: 'literal shadow'});
+    }
+    if (
+      GRADIENT.test(value) &&
+      (value.match(TOKEN_REFERENCE) ?? []).some(
+        token => !DARK_GRADIENT_TOKEN.test(token),
+      )
+    ) {
+      violations.push({declaration, reason: 'colourful gradient'});
+    }
   }
   return violations;
 }
@@ -109,6 +138,8 @@ describe('component styles', () => {
       .b { border-color: red; font-family: Georgia, serif; }
       .c { padding: 12px var(--pn-space-2); gap: 1rem; }
       .d { border-radius: 10px; font-size: 14px; }
+      .e { letter-spacing: 0.25em; box-shadow: 0 2px 4px var(--pn-bg); }
+      .f { background: linear-gradient(var(--pn-gold), var(--pn-bg)); }
     `;
     expect(findLiteralDesignValues(css).map(v => v.reason)).toEqual([
       'literal colour',
@@ -119,6 +150,9 @@ describe('component styles', () => {
       'literal spacing',
       'literal radius',
       'literal font value',
+      'literal letter spacing',
+      'literal shadow',
+      'colourful gradient',
     ]);
   });
 
@@ -130,12 +164,15 @@ describe('component styles', () => {
         var(--pn-type-body-line) var(--pn-type-body-family); }
       .d { border-radius: var(--pn-radius-md); height: 44px; }
       .e { margin-left: calc(-1 * var(--pn-space-2)); }
+      .f { letter-spacing: var(--pn-type-overline-tracking); }
+      .g { box-shadow: var(--pn-shadow-overlay); text-shadow: none; }
+      .h { background: linear-gradient(180deg, transparent, var(--pn-bg)); }
     `;
     expect(findLiteralDesignValues(css)).toEqual([]);
   });
 
   it('use only design tokens for colour, font, spacing and radius', () => {
-    const files = listCssModules(LIB_DIR);
+    const files = STYLE_DIRS.flatMap(listCssModules);
     expect(files.length).toBeGreaterThan(0);
     const violations = files.flatMap(file =>
       findLiteralDesignValues(readFileSync(file, 'utf8')).map(

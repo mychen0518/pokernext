@@ -1,0 +1,21 @@
+/* Player home kitchen-sink page (DESIGN.md §3.1). */
+
+/* The phone page fills the window instead of the catalogue frame. */
+:global(.pn-kitchen-sink[data-kitchen-sink-page='player-home']) {
+  max-width: none;
+  padding: 0;
+}
+
+.greeting {
+  font-family: var(--pn-type-title-md-family);
+  font-size: var(--pn-type-title-md-size);
+  font-weight: var(--pn-type-title-md-weight);
+  line-height: var(--pn-type-title-md-line);
+  margin: 0;
+  padding: var(--pn-space-4) var(--pn-space-6) 0;
+}
+
+.divider {
+  border-top: 1px solid var(--pn-border);
+  margin: 0 var(--pn-space-6);
+}

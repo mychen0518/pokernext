@@ -6,8 +6,14 @@
 
 import type {KitchenSinkPage} from './page_types';
 import {BasePage} from './pages/base_page';
+import {PlayerHomePage} from './pages/player_home_page';
 
 /** Registered pages, in the order the index lists them. */
 export const KITCHEN_SINK_PAGES: readonly KitchenSinkPage[] = [
   {id: 'base', title: 'Tokens and base components (00a)', component: BasePage},
+  {
+    id: 'player-home',
+    title: 'Player home, ready and empty (00c)',
+    component: PlayerHomePage,
+  },
 ];

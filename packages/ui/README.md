@@ -41,8 +41,9 @@ pnpm --filter @pokernext/ui kitchen-sink          # http://127.0.0.1:5173/
 KITCHEN_SINK_PORT=5199 pnpm --filter @pokernext/ui kitchen-sink
 ```
 
-Pages are addressed by query: `/?page=base` (tokens and base components).
-`/` lists every registered page.
+Pages are addressed by query: `/?page=base` (tokens and base components),
+`/?page=player-home&state=ready|empty` (the DESIGN.md §3.1 player home at
+phone width). `/` lists every registered page.
 
 Button hover and focus-visible are pinned for screenshots with
 `data-state="hover"` or `data-state="focus-visible"` on the `Button`.
@@ -51,7 +52,7 @@ Button hover and focus-visible are pinned for screenshots with
 
 | Command | What it does |
 | --- | --- |
-| `pnpm test:unit` (root) | Token contrast and no-literal-value checks. |
+| `pnpm test:unit` (root) | Token contrast, no-literal-value and player copy checks. |
 | `pnpm --filter @pokernext/ui test:e2e` | Screenshot comparison and keyboard focus; fails on a diff. |
 | `pnpm --filter @pokernext/ui test:e2e:update` | Rewrites the screenshot baselines. |
 

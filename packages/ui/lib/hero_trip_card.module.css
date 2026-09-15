@@ -1,0 +1,105 @@
+/* HeroTripCard (DESIGN.md §4). */
+
+.hero-trip-card {
+  box-sizing: border-box;
+  color: var(--pn-text);
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  min-height: 400px;
+  overflow: hidden;
+  position: relative;
+}
+
+.placeholder {
+  background-color: var(--pn-surface-2);
+}
+
+.image {
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  position: absolute;
+  width: 100%;
+  z-index: -2;
+}
+
+/* Bottom 40%: fades from transparent to the page background. */
+.scrim {
+  background: linear-gradient(180deg, transparent, var(--pn-bg));
+  bottom: 0;
+  height: 40%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  z-index: -1;
+}
+
+.body {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--pn-space-6);
+  justify-content: space-between;
+  padding: var(--pn-space-4) var(--pn-space-6) var(--pn-space-6);
+}
+
+.greeting {
+  font-family: var(--pn-type-title-md-family);
+  font-size: var(--pn-type-title-md-size);
+  font-weight: var(--pn-type-title-md-weight);
+  line-height: var(--pn-type-title-md-line);
+  margin: 0;
+}
+
+.trip {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+}
+
+.destination {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--pn-type-display-xl-family);
+  font-size: var(--pn-type-display-xl-size);
+  font-weight: var(--pn-type-display-xl-weight);
+  gap: var(--pn-space-3);
+  line-height: var(--pn-type-display-xl-line);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.destination-en {
+  color: var(--pn-gold-dim);
+  font-family: var(--pn-type-overline-family);
+  font-size: var(--pn-type-overline-size);
+  font-weight: var(--pn-type-overline-weight);
+  letter-spacing: var(--pn-type-overline-tracking);
+  line-height: var(--pn-type-overline-line);
+}
+
+.dates {
+  font-family: var(--pn-type-title-sm-family);
+  font-size: var(--pn-type-title-sm-size);
+  font-weight: var(--pn-type-title-sm-weight);
+  line-height: var(--pn-type-title-sm-line);
+  margin: var(--pn-space-3) 0 var(--pn-space-4);
+}
+
+.hero-trip-card .action {
+  font-size: var(--pn-type-title-sm-size);
+  height: auto;
+  min-height: 52px;
+  padding: var(--pn-space-2) var(--pn-space-10);
+  white-space: normal;
+}
+
+.hero-trip-card .action-chevron {
+  bottom: 0;
+  margin: auto 0;
+  position: absolute;
+  right: var(--pn-space-4);
+  top: 0;
+}

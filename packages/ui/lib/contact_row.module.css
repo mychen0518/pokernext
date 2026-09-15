@@ -1,0 +1,53 @@
+/* ContactRow (DESIGN.md §4). */
+
+.contact-row {
+  align-items: center;
+  box-sizing: border-box;
+  color: var(--pn-text);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-2) var(--pn-space-4);
+  margin: 0 var(--pn-space-6);
+  min-height: 64px;
+  padding: var(--pn-space-3) 0;
+}
+
+.icon {
+  color: var(--pn-gold-bright);
+  flex: none;
+}
+
+.who {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  font-family: var(--pn-type-title-sm-family);
+  font-size: var(--pn-type-title-sm-size);
+  font-weight: var(--pn-type-title-sm-weight);
+  line-height: var(--pn-type-title-sm-line);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.label {
+  color: var(--pn-text-2);
+  font-weight: var(--pn-type-body-weight);
+}
+
+.detail {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  line-height: var(--pn-type-body-sm-line);
+  margin: 0;
+}
+
+.action {
+  flex: none;
+  margin-left: auto;
+  margin-right: calc(-1 * var(--pn-space-2));
+}

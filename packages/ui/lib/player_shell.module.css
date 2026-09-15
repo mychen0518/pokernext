@@ -1,0 +1,31 @@
+/* PlayerShell (DESIGN.md §3.1, §4). */
+
+.player-shell {
+  background-color: var(--pn-bg);
+  box-sizing: border-box;
+  color: var(--pn-text);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  margin: 0 auto;
+  max-width: 480px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-bottom: var(--pn-space-6);
+}
+
+@media (min-width: 481px) {
+  .player-shell {
+    border-left: 1px solid var(--pn-border);
+    border-right: 1px solid var(--pn-border);
+  }
+}
