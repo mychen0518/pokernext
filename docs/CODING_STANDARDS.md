@@ -1,0 +1,61 @@
+# Coding Standards
+
+Read during `/code-review`, not during implementation. Keep it short; anything tooling enforces (typecheck, lint, dependency-cruiser, gts) is not repeated here.
+
+## Base: Google Style Guides
+
+The repo follows the Google style guides (source: `Coding Guide/` folder, https://google.github.io/styleguide/). Implementers get the same rules from the `google-style` skill; this file is the reviewer's checklist. Which guide applies where:
+
+| Code | Guide | Enforced by |
+|---|---|---|
+| `*.ts`, `*.tsx` | [TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html) | `gts` (eslint + prettier, Google config) in pre-commit and CI |
+| `*.css`, `*.html` in `packages/ui` and `apps/web` | [HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html) | stylelint (google-ish config) + reviewer |
+| `*.md` (docs, tickets, ADRs) | [Markdown Style Guide](https://google.github.io/styleguide/docguide/style.html) | reviewer only |
+| `*.json` fixtures / API payloads | [JSON Style Guide](https://google.github.io/styleguide/jsoncstyleguide.xml) | reviewer only |
+| commit messages | [How to Write a Git Commit Message](https://cbea.ms/git-commit/) (linked from the Google index) | commitlint in pre-commit |
+
+The TypeScript rules the reviewer checks by hand (the ones `gts` does not catch or that matter most here):
+
+- Named exports only; **no `export default`**; no `namespace`; `import type` when a symbol is only a type.
+- No `any` — use `unknown` and narrow. A justified exception carries a `// any: <reason>` comment on the same line.
+- No `@ts-ignore` / `@ts-expect-error` / `@ts-nocheck`.
+- Non-null assertions (`x!`) and `as` casts need a comment explaining why they are safe; `as` syntax only, never angle brackets.
+- Object types are `interface`, not `type` aliases; `T[]` for simple element types, `Array<T>` for complex ones; no `{}` type; no `const enum`; prefer optional fields (`x?: T`) over `x: T | undefined`.
+- `const`/`let` only; `===`; braces on all control flow; `for…of` over arrays; single-quoted strings; template literals for composed strings; explicit semicolons.
+- Throw `new Error()` (or subclasses) only, never strings or objects.
+- Classes: TypeScript `private`/`readonly` modifiers, not `#fields`; parameter properties for constructor injection; getters are pure; no arrow-function class properties; no `this` in static context.
+- Top-level functions are `function` declarations; nested callbacks are arrow functions; no `function` expressions.
+- No decorators of our own; no wrapper objects (`new String()` …); no `eval`; no prototype patching; no `debugger`.
+- Naming: `UpperCamelCase` for classes/interfaces/types/enums/type params; `lowerCamelCase` for values, functions, properties, module aliases; `CONSTANT_CASE` for module-level constants and enum values; acronyms as words (`loadHttpUrl`); no leading/trailing `_`; files in `snake_case` (`deposit_axes.ts`, `deposit_axes.test.ts`).
+- Comments: `/** JSDoc */` on every exported symbol (verb phrase, third person); `//` for implementation notes; multi-line comments as stacked `//`, not `/* */`.
+
+HTML/CSS rules the reviewer checks by hand: semantic elements; lowercase everything; class names lowercase-hyphenated and named by purpose (`status-dot`, not `red-text`); no ID selectors for styling; no `!important` outside the reset; shorthand properties; `0` without units; declarations alphabetised inside a rule; 2-space indent; single quotes in CSS; every colour/spacing/radius value is a `var(--pn-*)` token (see UI section below).
+
+Markdown rules for tickets and docs: ATX headings, one `#` per file, `-` bullets, fenced code with a language, 80-column soft wrap for prose, tables only when the data is tabular.
+
+## Domain and state
+
+- Objective states are derived from source records, never stored as an editable summary (PRD 8.2). A reviewer should find no writable "overall status" column and no UI that lets a person set 已入住／已到場／已取消 directly.
+- Every rule in `packages/domain` cites the PRD section it implements in a one-line comment (e.g. `// PRD 6.6.2 逐晚退款`). Tests take expected values from that section, not from the implementation.
+- Vocabulary comes from `CONTEXT.md`. Do not introduce synonyms the glossary avoids (後台, 前台, B端…).
+- Second-person approvals, venue-only facts (deposit collect/refund, venue check-in, 雙方已對齊) and player-only confirmations are enforced at the use-case boundary, not only hidden in the UI.
+
+## UI
+
+- Colours, fonts, spacing and radii come from `packages/ui` tokens (DESIGN.md §2). A hard-coded hex, px spacing outside the scale, or a radius > 8px is a finding.
+- Components are the ones named in DESIGN.md §4, with those names. A new component is added to DESIGN.md in the same change.
+- Status is never colour-only: `StatusDot` and `Badge` always carry text.
+- Every data container renders loading / empty / error / ready. An empty state carries a reason, never "沒有資料", never a zero standing in for "unknown".
+- Fact confirmations (本人核對一致、已收到押金、已在天城系統完成取消) are never pre-checked.
+- Times show a timezone label; amounts use `KRW 300,000`; points use `25,000 分`; IDs use the mono style.
+- Player surface never contains 促打文案 (再打多久就能免費住宿 etc.).
+
+## Tests
+
+- Test names are business sentences. Tests go through public interfaces at the seams agreed in the spec; no test seeds the database directly.
+- Concurrency-sensitive operations (check-in, deposit collect/refund, 核對單 confirm, one-room-per-night) have a parallel-request test asserting exactly one effect.
+
+## Structure
+
+- Deep modules per `/setup-ts-deep-modules`: import a package only through its root files.
+- Prototype code (`docs/design/prototype/`) is a reference, never copied into `apps/` or `packages/`.

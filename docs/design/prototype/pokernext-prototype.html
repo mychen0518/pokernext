@@ -1,0 +1,1040 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POKERNEXT 原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+<style>
+:root{
+  --bg:#0b0c0d;--surface:#121314;--surface-2:#1a1c1e;--surface-3:#202325;--border:#25292d;--border-strong:#393c3f;
+  --text:#f2f2f2;--text-2:#a0a2a9;--text-3:#6a6c72;--text-inverse:#141418;
+  --gold:#c8a86f;--gold-bright:#e7c076;--gold-dim:#9c8758;--gold-tint:#23211b;
+  --success:#5e9f6c;--success-tint:#17211a;--warning:#e3bd69;--warning-tint:#26221a;--danger:#c0716f;--danger-tint:#291d1f;--info:#7c95c9;--info-tint:#191f2d;--neutral:#8b8e95;--neutral-tint:#1d1f20;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;--serif:"Noto Serif TC","Songti TC",Georgia,serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r-sm:4px;--r-md:6px;--r-lg:8px;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--gold-bright)}
+h1,h2,h3,h4{margin:0;font-weight:600;text-wrap:balance}
+.mono{font-family:var(--mono);font-size:.93em}
+.num{font-family:var(--serif);font-variant-numeric:tabular-nums;font-weight:700}
+.muted{color:var(--text-2)}.faint{color:var(--text-3)}
+.overline{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold-dim);font-weight:500}
+.label{font-size:12px;color:var(--text-3);line-height:1.4}
+.hidden{display:none!important}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- role switcher / demo chrome ---------- */
+.rolebar{position:fixed;top:12px;left:12px;z-index:60;display:flex;gap:8px;align-items:center}
+.rolebar .pill{display:flex;align-items:center;gap:8px;background:var(--surface-3);border:1px solid var(--border-strong);border-radius:999px;padding:6px 14px 6px 10px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.rolebar .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.rolebar .pill b{font-weight:600}
+.rolemenu{position:fixed;top:52px;left:12px;z-index:60;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-lg);padding:6px;min-width:280px;box-shadow:0 16px 40px rgba(0,0,0,.6)}
+.rolemenu button{display:flex;width:100%;text-align:left;background:none;border:0;padding:10px 12px;border-radius:var(--r-md);gap:12px;align-items:center}
+.rolemenu button:hover{background:var(--surface-3)}
+.rolemenu button.on{background:var(--gold-tint);color:var(--gold-bright)}
+.rolemenu .who{display:flex;flex-direction:column;line-height:1.3}
+.rolemenu .who small{color:var(--text-3);font-size:12px}
+.rolemenu hr{border:0;border-top:1px solid var(--border);margin:6px 0}
+.scriptbtn{position:fixed;right:16px;bottom:16px;z-index:60;background:var(--gold);color:var(--text-inverse);border:0;border-radius:999px;padding:10px 18px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.script{position:fixed;right:16px;bottom:64px;z-index:60;width:min(420px,calc(100vw - 32px));max-height:min(70vh,640px);overflow:auto;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-lg);box-shadow:0 16px 40px rgba(0,0,0,.6);padding:16px 18px}
+.script h3{font-size:16px;margin-bottom:4px}
+.script ol{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.script li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface)}
+.script li.done{border-color:rgba(94,159,108,.4)}
+.script li .k{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border-strong);display:grid;place-items:center;font-size:11px;color:var(--text-3)}
+.script li.done .k{background:var(--success);border-color:var(--success);color:#0b0c0d}
+.script li .t{font-size:13px;line-height:1.45}
+.script li .t small{display:block;color:var(--text-3);font-size:12px}
+.script li button{background:none;border:1px solid var(--border-strong);border-radius:var(--r-sm);padding:2px 8px;font-size:12px;color:var(--gold-bright);white-space:nowrap}
+.toasts{position:fixed;top:14px;right:16px;z-index:70;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--surface-3);border:1px solid var(--border-strong);border-left:3px solid var(--success);border-radius:var(--r-md);padding:10px 14px;font-size:13px;min-width:260px;max-width:360px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:in .2s ease}
+.toast.warn{border-left-color:var(--warning)}.toast.err{border-left-color:var(--danger)}
+@keyframes in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* ---------- desktop workspace shell ---------- */
+.ws{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+.sidebar{background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{padding:72px 24px 20px}
+.brand .logo{font-size:18px;font-weight:700;letter-spacing:.18em}
+.brand .logo span{color:var(--gold-bright)}
+.brand .sub{font-size:13px;color:var(--text-2);margin-top:2px}
+.nav{display:flex;flex-direction:column}
+.nav a{display:flex;align-items:center;gap:14px;padding:0 24px;height:56px;color:var(--text);text-decoration:none;border-left:3px solid transparent;font-size:15px}
+.nav a svg{width:22px;height:22px;stroke:var(--text-2);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.nav a.on{background:var(--gold-tint);border-left-color:var(--gold);color:var(--gold-bright)}
+.nav a.on svg{stroke:var(--gold-bright)}
+.nav a:hover:not(.on){background:var(--surface)}
+.nav .cnt{margin-left:auto;font-size:12px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.nav a.on .cnt{color:var(--gold-dim)}
+.sidefoot{margin-top:auto;padding:18px 24px;border-top:1px solid var(--border);font-size:13px}
+.sidefoot .name{font-weight:600}
+.sidefoot .role{color:var(--text-3);font-size:12px}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-2)}
+.topbar .overline{color:var(--gold-dim)}
+.page{padding:28px 32px 48px;display:flex;flex-direction:column;gap:24px}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.ph h1{font-size:28px;line-height:1.3}
+.ph p{margin:4px 0 0;color:var(--text-2)}
+.ph .actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- components ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 22px;border-radius:var(--r-md);border:1px solid transparent;font-weight:600;font-size:15px;background:var(--gold);color:var(--text-inverse);white-space:nowrap;transition:filter .12s}
+.btn:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+.btn.secondary{background:transparent;border-color:var(--border-strong);color:var(--text)}
+.btn.outline-gold{background:transparent;border-color:var(--gold);color:var(--gold-bright)}
+.btn.ghost{background:none;border-color:transparent;color:var(--gold-bright);padding:0 6px;height:auto}
+.btn.danger{background:transparent;border-color:var(--border-strong);color:var(--danger)}
+.btn.sm{height:32px;padding:0 12px;font-size:13px}
+.btn.block{width:100%}
+.btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md)}
+.card.pad{padding:24px}
+.card.el{background:var(--surface-2)}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 24px;border-bottom:1px solid var(--border)}
+.chead h3{font-size:18px}
+.cbody{padding:24px}
+.cfoot{padding:14px 24px;border-top:1px solid var(--border);font-size:12px;color:var(--text-3);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.kpi{display:flex;gap:16px;align-items:center;padding:20px 24px;border-right:1px solid var(--border)}
+.kpi:last-child{border-right:0}
+.kpi svg{width:32px;height:32px;stroke:var(--gold-bright);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.kpi .l{font-size:13px;color:var(--text-2)}
+.kpi .v{font-family:var(--serif);font-size:32px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.dot{display:inline-flex;align-items:center;gap:8px;font-size:14px;white-space:nowrap}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.dot.success{color:var(--success)}.dot.warning{color:var(--warning)}.dot.danger{color:var(--danger)}.dot.info{color:var(--info)}.dot.neutral{color:var(--neutral)}
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:var(--r-sm);font-size:12px;border:1px solid currentColor;white-space:nowrap;line-height:1}
+.badge.success{color:var(--success);background:var(--success-tint)}.badge.warning{color:var(--warning);background:var(--warning-tint)}.badge.danger{color:var(--danger);background:var(--danger-tint)}.badge.info{color:var(--info);background:var(--info-tint)}.badge.neutral{color:var(--neutral);background:var(--neutral-tint)}.badge.gold{color:var(--gold-bright);background:var(--gold-tint)}
+.tabs{display:flex;border-bottom:1px solid var(--border);gap:4px;overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;height:48px;padding:0 20px;color:var(--text-2);font-size:15px;white-space:nowrap;margin-bottom:-1px}
+.tabs button.on{color:var(--gold-bright);border-bottom-color:var(--gold)}
+.tabs button .c{font-size:13px;margin-left:6px;color:var(--text-3)}
+.tabs button.on .c{color:var(--gold-dim)}
+.search{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-md);color:var(--text-3)}
+.search input{flex:1;background:none;border:0;outline:none;color:var(--text);min-width:0}
+.search svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th{text-align:left;font-weight:400;font-size:13px;color:var(--text-2);background:var(--surface-2);padding:0 16px;height:44px;white-space:nowrap}
+.tbl td{padding:12px 16px;border-top:1px solid var(--border);vertical-align:middle}
+.tbl tr.row:hover td{background:var(--surface-3)}
+.tbl tr.sel td{background:var(--gold-tint)}
+.tbl td .sub{display:block;font-size:13px;color:var(--text-2)}
+.tbl td:first-child{font-weight:600;white-space:nowrap}
+.tblwrap{overflow-x:auto}
+.kv{display:flex;flex-direction:column}
+.kv > div{display:grid;grid-template-columns:160px 1fr;gap:16px;min-height:40px;align-items:center;border-bottom:1px solid var(--border);padding:6px 0}
+.kv > div:last-child{border-bottom:0}
+.kv .k{color:var(--text-2);font-size:14px}
+.kv .v{font-size:15px;word-break:break-all}
+.kv.stack > div{grid-template-columns:1fr;gap:2px;min-height:auto;border:0;padding:2px 0}
+.kv.stack .k{font-size:12px;color:var(--text-3)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;color:var(--text-2)}
+.input,select.input,textarea.input{height:48px;padding:0 14px;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-md);color:var(--text);width:100%;outline:none}
+textarea.input{height:auto;min-height:96px;padding:12px 14px;resize:vertical}
+.input:focus{border-color:var(--gold)}
+.prefix{display:flex;align-items:stretch}
+.prefix span{display:flex;align-items:center;padding:0 14px;border:1px solid var(--border-strong);border-right:0;border-radius:var(--r-md) 0 0 var(--r-md);color:var(--text-2);background:var(--surface-2)}
+.prefix .input{border-radius:0 var(--r-md) var(--r-md) 0}
+.check{display:flex;align-items:center;gap:12px;cursor:pointer;font-size:15px}
+.check input{appearance:none;width:20px;height:20px;border:1.5px solid var(--border-strong);border-radius:var(--r-sm);display:grid;place-items:center;margin:0;flex:none}
+.check input:checked{background:var(--gold);border-color:var(--gold)}
+.check input:checked::after{content:"";width:6px;height:10px;border:solid var(--text-inverse);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.banner{display:flex;align-items:center;gap:16px;padding:0 20px;height:56px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md)}
+.banner .st{display:flex;align-items:center;gap:10px;font-weight:600}
+.banner .st svg{width:22px;height:22px}
+.banner .sep{width:1px;height:24px;background:var(--border)}
+.banner .r{margin-left:auto}
+.info{display:flex;gap:12px;padding:14px 16px;background:var(--surface-2);border-radius:var(--r-md);font-size:14px}
+.info svg{width:20px;height:20px;stroke:var(--text-2);fill:none;stroke-width:1.6;flex:none;margin-top:2px}
+.info b{display:block;font-weight:600}
+.info span{color:var(--text-2);font-size:13px}
+.amount{display:flex;align-items:baseline;gap:8px}
+.amount .cur{font-size:15px;color:var(--text-2)}
+.amount .v{font-family:var(--serif);font-size:32px;font-weight:700;color:var(--gold-bright);font-variant-numeric:tabular-nums;line-height:1.1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.grid2>*,.grid32>*,.grid13>*,.ws>*,.main{min-width:0}
+.tbl td .mono,.tbl td.mono{white-space:nowrap}
+.grid32{display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:start}
+.grid13{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
+.list{display:flex;flex-direction:column}
+.li{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--border);border-left:3px solid transparent;padding:16px 18px;color:var(--text);position:relative}
+.li:hover{background:var(--surface-3)}
+.li.on{background:var(--gold-tint);border-left-color:var(--gold)}
+.li .t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:16px;font-weight:600}
+.li .m{font-size:14px;margin-top:2px}
+.li .b{display:flex;justify-content:space-between;font-size:13px;color:var(--text-2);margin-top:2px}
+.stepper{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:relative;margin:12px 0 4px}
+.step{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;position:relative;font-size:13px}
+.step .n{width:24px;height:24px;border-radius:50%;border:2px solid var(--border-strong);display:grid;place-items:center;background:var(--surface);z-index:1;font-size:12px;color:var(--text-3)}
+.step.done .n{background:var(--gold);border-color:var(--gold);color:var(--text-inverse)}
+.step.cur .n{border-color:var(--gold);color:var(--gold-bright)}
+.step::before{content:"";position:absolute;top:11px;left:-50%;width:100%;height:2px;background:var(--border-strong);border-top:2px dashed var(--border-strong);background:none}
+.step.done::before,.step.cur::before{border-top:2px solid var(--gold)}
+.step:first-child::before{display:none}
+.step small{display:block;color:var(--text-3);font-size:12px}
+.timeline{display:flex;flex-direction:column}
+.tl{display:grid;grid-template-columns:14px 64px 120px 150px 1fr;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;position:relative}
+.tl::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--success);margin-left:3px}
+.tl .tm{font-size:13px;font-weight:600}
+.tl .ev{font-weight:600}
+.tl .ds{color:var(--text-2);font-size:13px}
+.todo{display:flex;flex-direction:column;gap:16px}
+.todo .card{padding:18px}
+.todo .th{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;margin-bottom:8px}
+.todo .th svg{width:22px;height:22px;stroke:var(--gold-bright);fill:none;stroke-width:1.6}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:200px;padding:32px;text-align:center;color:var(--text-2)}
+.empty svg{width:32px;height:32px;stroke:var(--text-3);fill:none;stroke-width:1.4}
+.empty b{color:var(--text);font-weight:600}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-lg);width:min(560px,100%);box-shadow:0 8px 32px rgba(0,0,0,.6);max-height:92vh;overflow:auto}
+.modal .mh{padding:20px 24px;border-bottom:1px solid var(--border);font-size:18px;font-weight:600}
+.modal .mb{padding:24px;display:flex;flex-direction:column;gap:16px}
+.modal .mf{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+.split > div{background:var(--surface-2);padding:14px 18px}
+.split .k{font-size:13px;color:var(--gold-dim)}
+.split .v{font-size:16px;margin-top:2px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pillb{background:none;border:1px solid var(--border-strong);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--text-2)}
+.pillb.on{border-color:var(--gold);color:var(--gold-bright);background:var(--gold-tint)}
+.radio{display:flex;flex-direction:column;gap:8px}
+.radio label{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer}
+.radio label:has(input:checked){border-color:var(--gold);background:var(--gold-tint)}
+.radio input{accent-color:var(--gold)}
+.mini{font-size:13px;color:var(--text-2)}
+.diffrow.add td{color:var(--success)}.diffrow.fix td{color:var(--warning)}.diffrow.miss td{color:var(--danger)}
+.qr{width:200px;height:200px;margin:0 auto;display:grid;grid-template-columns:repeat(21,1fr);gap:1px;background:#fff;padding:10px;border-radius:var(--r-md)}
+.qr i{display:block;background:#fff}.qr i.b{background:#111}
+
+/* ---------- phone shell ---------- */
+.phonewrap{min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:72px 16px 32px;background:radial-gradient(ellipse at top,#141517,var(--bg) 60%)}
+.phone{width:430px;max-width:100%;min-height:860px;background:var(--bg);border:1px solid var(--border-strong);border-radius:32px;position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);display:flex;flex-direction:column}
+.phone .screen{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding-bottom:88px}
+.apphead{display:flex;justify-content:space-between;align-items:center;padding:22px 24px 8px}
+.apphead .logo{font-size:15px;font-weight:700;letter-spacing:.2em}
+.apphead .logo span{color:var(--gold-bright)}
+.apphead .tag{font-size:9px;letter-spacing:.3em;color:var(--text-3)}
+.apphead .bell{position:relative;width:36px;height:36px;display:grid;place-items:center;border-radius:50%}
+.apphead .bell svg{width:24px;height:24px;stroke:var(--text);fill:none;stroke-width:1.6}
+.apphead .bell i{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--gold-bright);border-radius:50%}
+.hero{position:relative;padding:20px 24px 28px;overflow:hidden;min-height:380px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.hero .bgart{position:absolute;inset:0;background:
+  radial-gradient(ellipse 70% 40% at 70% 80%,rgba(200,168,111,.35),transparent 60%),
+  radial-gradient(ellipse 80% 50% at 30% 20%,rgba(59,84,140,.45),transparent 70%),
+  linear-gradient(180deg,#1b2233 0%,#0e1119 45%,#0b0c0d 100%)}
+.hero .bgart::after{content:"";position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(180deg,transparent,rgba(11,12,13,.95))}
+.hero .skyline{position:absolute;left:0;right:0;bottom:120px;height:90px;opacity:.55}
+.hero > *:not(.bgart):not(.skyline){position:relative}
+.hero .greet{font-size:20px;margin-bottom:auto;padding-top:6px}
+.hero .greet::after{content:"";display:block;width:36px;height:2px;background:var(--gold);margin-top:8px}
+.hero .dest{font-family:var(--serif);font-size:56px;line-height:1.05;font-weight:700}
+.hero .en{font-size:12px;letter-spacing:.4em;color:var(--gold-bright)}
+.hero .dates{font-size:17px;margin:6px 0 12px}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.strip div{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 8px;border-right:1px solid var(--border);font-size:14px;text-align:center}
+.strip div:last-child{border-right:0}
+.strip svg{width:32px;height:32px;stroke:var(--gold-bright);fill:none;stroke-width:1.3}
+.pts{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:18px;padding:22px 24px;border-bottom:1px solid var(--border)}
+.pts .sep{width:1px;height:60px;background:var(--border)}
+.pts .l{font-size:13px;color:var(--text-2)}
+.pts .v{font-family:var(--serif);font-size:48px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.pts .v.sm{font-size:32px;color:var(--text-2)}
+.row{display:flex;align-items:center;gap:14px;padding:16px 24px;border-bottom:1px solid var(--border)}
+.row svg{width:24px;height:24px;stroke:var(--gold-bright);fill:none;stroke-width:1.5;flex:none}
+.row .g{flex:1;min-width:0}
+.row .g b{font-weight:600}
+.row .g small{display:block;color:var(--text-2);font-size:13px}
+.bnav{position:absolute;left:0;right:0;bottom:0;height:80px;background:var(--bg);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:8px}
+.bnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;color:var(--text-2);text-decoration:none}
+.bnav a svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.5}
+.bnav a.on{color:var(--gold-bright)}
+.mpage{padding:16px 24px 24px;display:flex;flex-direction:column;gap:16px}
+.mpage h1{font-size:24px}
+.mpage h2{font-size:17px}
+.mcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:18px}
+.mcard .mh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-weight:600}
+.btn.m{height:52px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--surface-2);border-radius:var(--r-md);padding:4px;gap:4px}
+.seg button{background:none;border:0;border-radius:var(--r-sm);height:36px;color:var(--text-2);font-size:14px}
+.seg button.on{background:var(--gold);color:var(--text-inverse);font-weight:600}
+.mtabs{display:flex;gap:18px;border-bottom:1px solid var(--border)}
+.mtabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 2px;color:var(--text-2);font-size:15px;margin-bottom:-1px}
+.mtabs button.on{color:var(--gold-bright);border-bottom-color:var(--gold)}
+.hint{font-size:12px;color:var(--text-3)}
+.tasklist .li{border-left-width:3px}
+.taskdet{display:flex;flex-direction:column;gap:14px}
+.mtimeline{display:flex;flex-direction:column;gap:0}
+.mtl{display:grid;grid-template-columns:14px 1fr;gap:12px;padding:8px 0;font-size:14px;position:relative}
+.mtl::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:8px;margin-left:3px}
+.mtl small{display:block;color:var(--text-3);font-size:12px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(2){border-right:0}.kpi:nth-child(-n+2){border-bottom:1px solid var(--border)}.grid32,.grid13,.grid2{grid-template-columns:1fr}}
+@media (max-width:1024px){.ws{grid-template-columns:72px 1fr}.brand .logo,.brand .sub,.nav a span,.sidefoot,.nav .cnt{display:none}.nav a{justify-content:center;padding:0}.brand{padding:72px 0 12px;text-align:center}}
+.phonewrap .scriptbtn{bottom:16px}
+@media (max-width:640px){.scriptbtn{bottom:96px!important}.script{bottom:144px}.page{padding:20px 16px 40px}.topbar{padding:0 16px}.ph h1{font-size:22px}.tl{grid-template-columns:14px 1fr;gap:6px 12px}.tl .ev,.tl .mono,.tl .ds{grid-column:2}.phonewrap{padding:64px 0 0}.phone{border-radius:0;border:0;min-height:100vh}.rolebar{top:8px;left:8px}.kv > div{grid-template-columns:1fr;gap:2px}}
+</style>
+<div id="app"></div>
+<div class="toasts" id="toasts"></div>
+<script>
+/* ============================================================
+   POKERNEXT 全保真互動原型 — 單檔 SPA
+   六個端共用同一份記憶體狀態；一端的操作立即反映到其他端。
+   ============================================================ */
+const TODAY='2026/09/11', NOW='11:08';
+const ROLES={
+  player:{name:'玩家端',who:'Alex Chen',sub:'正式會員 · 濟州行程中',shell:'phone'},
+  venue:{name:'天城合作端',who:'琪琪',sub:'天城業務 · 櫃檯／異動／核對／押金',shell:'ws'},
+  admin:{name:'管理端',who:'王經理',sub:'POKERNEXT 管理者',shell:'ws'},
+  platform:{name:'Platform admin',who:'Mingyao',sub:'最高治理 · 權限／歸屬／稽核',shell:'ws'},
+  staff:{name:'員工端（接待）',who:'Amy',sub:'Host／Reception · 手機工作台',shell:'phone'},
+  agent:{name:'Agent端',who:'David Chen',sub:'外部 Agent · 名下客戶',shell:'ws'},
+};
+
+function seed(){
+  return {
+    members:[
+      {uuid:'8f39c210-7a64-4b19-92da-65a130fc482e',name:'CHEN, ALEX',cn:'Alex',tc:'TC-008126',phone:'+886 912 *** 518',email:'alex@example.com',ledger:30000,reserved:25000,lang:'繁中',channel:'LINE',pickupPref:'需要接機',restReminder:60,owner:'David Chen',host:'Amy',status:'active'},
+      {uuid:'2b7e0c11-3d54-4a0f-8c31-9a0d8e7f1a22',name:'LIN, MAY',cn:'May',tc:'TC-008127',ledger:52000,reserved:50000,owner:'David Chen',host:'Amy',status:'active'},
+      {uuid:'7c1d5e90-11aa-4b2c-9f31-2d4e6f7a8b90',name:'WANG, LEO',cn:'Leo',tc:'TC-008128',ledger:80000,reserved:50000,owner:'小美',host:'Amy',status:'active'},
+      {uuid:'9e8f7a6b-5c4d-4e3f-8a2b-1c0d9e8f7a6b',name:'LEE, ANNA',cn:'Anna',tc:'TC-008129',ledger:0,reserved:0,owner:'David Chen',host:'Ken',status:'active'},
+      {uuid:'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',name:'CHANG, RYAN',cn:'Ryan',tc:'TC-008132',ledger:12000,reserved:0,owner:'小美',host:'Ken',status:'active'},
+      {uuid:'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',name:'KIM, JISOO',cn:'Jisoo',tc:'TC-008119',ledger:41000,reserved:25000,owner:'David Chen',host:'Amy',status:'active'},
+      {uuid:'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f',name:'PARK, MINHO',cn:'Minho',tc:'TC-008101',ledger:5000,reserved:0,owner:'小美',host:'Ken',status:'active'},
+    ],
+    trips:[
+      {id:'TR-260911-028',uuid:'8f39c210-7a64-4b19-92da-65a130fc482e',dest:'濟州島',en:'JEJU ISLAND',cin:'2026/09/11',cout:'2026/09/13',nights:2,hotel:{name:'濟州君悅酒店',conf:'GHJ-260911-0842',status:'confirmed'},stage:'confirmed',version:2,playerConfirmedVersion:1,
+        pickup:{arr:{flight:'KE 1201',time:'2026/09/11 09:40',terminal:'濟州機場 T1',status:'pending',car:null},dep:{flight:'KE 1208',time:'2026/09/13 18:20',status:'pending',car:null}},
+        venueCheckin:null,hotelCheckin:null,hotelCheckout:null,host:'Amy',
+        deposit:{due:300000,collected:null,refundDue:null,refunded:null,playerPaid:null,playerReceived:null},
+        settlement:null,history:[{t:'2026/09/02 14:10',by:'Alex',e:'送出行程申請（2 晚、需要接機）'},{t:'2026/09/03 10:30',by:'王經理',e:'核准並送訂天城'},{t:'2026/09/04 16:05',by:'王經理',e:'登錄酒店確認單 GHJ-260911-0842，保留 25,000 分'},{t:'2026/09/05 09:12',by:'Alex',e:'確認行程版本 v1'},{t:'2026/09/10 18:40',by:'王經理',e:'接送安排更新，產生版本 v2（待玩家確認）'}]},
+      {id:'TR-260911-029',uuid:'2b7e0c11-3d54-4a0f-8c31-9a0d8e7f1a22',dest:'濟州島',en:'JEJU ISLAND',cin:'2026/09/11',cout:'2026/09/14',nights:3,hotel:{name:'濟州君悅酒店',conf:'GHJ-260911-0851',status:'confirmed'},stage:'arrived',version:1,playerConfirmedVersion:1,
+        pickup:{arr:{flight:'OZ 8901',time:'2026/09/11 08:10',terminal:'濟州機場 T1',status:'done',car:'黑色 Carnival · 12가 3456'},dep:{flight:'OZ 8908',time:'2026/09/14 17:00',status:'pending',car:null}},
+        venueCheckin:'2026/09/11 10:15',hotelCheckin:null,hotelCheckout:null,host:'Amy',
+        deposit:{due:300000,collected:{amt:300000,t:'2026/09/11 10:30',by:'琪琪'},refundDue:null,refunded:null,playerPaid:'2026/09/11 10:41',playerReceived:null},settlement:null,history:[]},
+      {id:'TR-260911-030',uuid:'7c1d5e90-11aa-4b2c-9f31-2d4e6f7a8b90',dest:'濟州島',en:'JEJU ISLAND',cin:'2026/09/11',cout:'2026/09/13',nights:2,hotel:{name:'濟州君悅酒店',conf:'GHJ-260911-0855',status:'confirmed'},stage:'confirmed',version:1,playerConfirmedVersion:1,pickup:{arr:{flight:'自行前往',time:'—',terminal:'—',status:'none'},dep:{flight:'—',time:'—',status:'none'}},venueCheckin:null,hotelCheckin:null,hotelCheckout:null,host:'Amy',deposit:{due:0,collected:null,refundDue:null,refunded:null,playerPaid:null,playerReceived:null},settlement:null,history:[]},
+      {id:'TR-260911-031',uuid:'9e8f7a6b-5c4d-4e3f-8a2b-1c0d9e8f7a6b',dest:'濟州島',en:'JEJU ISLAND',cin:'2026/09/11',cout:'2026/09/15',nights:4,hotel:{name:'濟州君悅酒店',conf:'GHJ-260911-0860',status:'confirmed'},stage:'confirmed',version:1,playerConfirmedVersion:1,pickup:{arr:{flight:'KE 1203',time:'2026/09/11 13:30',terminal:'濟州機場 T1',status:'pending'},dep:{flight:'KE 1210',time:'2026/09/15 19:10',status:'pending'}},venueCheckin:null,hotelCheckin:null,hotelCheckout:null,host:'Ken',deposit:{due:1200000,collected:null,refundDue:null,refunded:null,playerPaid:null,playerReceived:null},settlement:null,history:[]},
+      {id:'TR-260912-032',uuid:'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',dest:'濟州島',en:'JEJU ISLAND',cin:'2026/09/12',cout:'2026/09/14',nights:2,hotel:{name:'濟州君悅酒店',conf:'GHJ-260912-0635',status:'confirmed'},stage:'cancelling',version:1,playerConfirmedVersion:1,pickup:{arr:{flight:'KE 1201',time:'2026/09/12 09:40',status:'pending'},dep:{flight:'KE 1208',time:'2026/09/14 18:20',status:'pending'}},venueCheckin:null,hotelCheckin:null,hotelCheckout:null,host:'Ken',deposit:{due:600000,collected:null,refundDue:null,refunded:null,playerPaid:null,playerReceived:null},settlement:null,history:[]},
+      {id:'TR-260909-017',uuid:'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',dest:'濟州島',en:'JEJU ISLAND',cin:'2026/09/09',cout:'2026/09/12',nights:3,hotel:{name:'濟州君悅酒店',conf:'GHJ-260909-0512',status:'confirmed'},stage:'checked_in',version:1,playerConfirmedVersion:1,pickup:{arr:{flight:'OZ 8901',time:'2026/09/09 08:10',status:'done',car:'黑色 Carnival · 12가 3456'},dep:{flight:'OZ 8908',time:'2026/09/12 17:00',status:'pending'}},venueCheckin:'2026/09/09 10:02',hotelCheckin:'2026/09/09 15:20',hotelCheckout:null,host:'Amy',deposit:{due:600000,collected:{amt:600000,t:'2026/09/09 10:20',by:'琪琪'},refundDue:null,refunded:null,playerPaid:'2026/09/09 10:35',playerReceived:null},settlement:null,history:[]},
+      {id:'TR-260908-021',uuid:'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f',dest:'濟州島',en:'JEJU ISLAND',cin:'2026/09/08',cout:'2026/09/10',nights:2,hotel:{name:'濟州君悅酒店',conf:'GHJ-260908-0488',status:'confirmed'},stage:'checked_out',version:1,playerConfirmedVersion:1,pickup:{arr:{flight:'KE 1201',time:'2026/09/08 09:40',status:'done'},dep:{flight:'KE 1208',time:'2026/09/10 18:20',status:'done'}},venueCheckin:'2026/09/08 10:44',hotelCheckin:'2026/09/08 15:10',hotelCheckout:'2026/09/10 11:05',host:'Ken',deposit:{due:600000,collected:{amt:600000,t:'2026/09/08 10:50',by:'琪琪'},refundDue:{amt:300000,version:'STL-260910-021 v1'},refunded:null,playerPaid:'2026/09/08 11:00',playerReceived:null},settlement:{id:'STL-260910-021',version:1,nights:2,redeemed:1,points:25000,playerConfirmed:'2026/09/10 09:30',venueAligned:'2026/09/10 16:20'},history:[]},
+    ],
+    changeRequests:[
+      {id:'CHG-260911-006',tripId:'TR-260912-032',type:'cancel',stage:'in_progress',by:'CHANG, RYAN',submitted:'2026/09/11 09:18',started:'2026/09/11 10:40',startedBy:'琪琪',note:'原住宿確認單已作廢。',result:null,history:[{t:'2026/09/11 09:18',e:'申請已收到'},{t:'2026/09/11 10:40',e:'開始執行 · 琪琪'}]},
+      {id:'CHG-260909-004',tripId:'TR-260909-017',type:'extend',stage:'reported',by:'KIM, JISOO',submitted:'2026/09/09 16:20',started:'2026/09/10 09:00',startedBy:'琪琪',want:{cout:'2026/09/14',nights:2},result:{ok:'all',conf:'GHJ-260909-0512-A',note:'同房型續 2 晚'},history:[{t:'2026/09/09 16:20',e:'申請已收到'},{t:'2026/09/10 09:00',e:'開始執行 · 琪琪'},{t:'2026/09/10 11:30',e:'回報：全部成功，接續單 GHJ-260909-0512-A'}]},
+      {id:'CHG-260911-005',tripId:'TR-260911-031',type:'reschedule',stage:'pending',by:'LEE, ANNA',submitted:'2026/09/11 14:35',want:{cin:'2026/09/12',cout:'2026/09/16'},history:[{t:'2026/09/11 14:35',e:'申請已收到'}]},
+    ],
+    tasks:[
+      {id:'TSK-1042',tpl:'T05',title:'接機接到本人',tripId:'TR-260911-028',uuid:'8f39c210-7a64-4b19-92da-65a130fc482e',assignee:'Amy',status:'open',due:'2026/09/11 10:00'},
+      {id:'TSK-1043',tpl:'T06',title:'酒店入住追蹤',tripId:'TR-260911-028',uuid:'8f39c210-7a64-4b19-92da-65a130fc482e',assignee:'Amy',status:'open',due:'2026/09/11 16:00'},
+      {id:'TSK-1044',tpl:'T07',title:'引導 PokerRoom 報到',tripId:'TR-260911-028',uuid:'8f39c210-7a64-4b19-92da-65a130fc482e',assignee:'Amy',status:'open',due:'2026/09/11 12:00'},
+      {id:'TSK-1038',tpl:'T06',title:'酒店入住追蹤',tripId:'TR-260911-029',uuid:'2b7e0c11-3d54-4a0f-8c31-9a0d8e7f1a22',assignee:'Amy',status:'open',due:'2026/09/11 16:00'},
+      {id:'TSK-1031',tpl:'T08',title:'續住意願確認',tripId:'TR-260909-017',uuid:'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',assignee:'Amy',status:'done',answer:'需要續住',done:'2026/09/09 15:50'},
+      {id:'TSK-1035',tpl:'T13',title:'跟進玩家結算',tripId:'TR-260908-021',uuid:'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f',assignee:'Ken',status:'done',answer:'已提醒本人操作',done:'2026/09/10 09:10'},
+      {id:'TSK-1045',tpl:'T01',title:'聯繫客戶',tripId:null,uuid:null,customer:'黃小姐（Lead L-0931）',assignee:'David Chen',status:'open',due:'2026/09/12 12:00'},
+    ],
+    customers:[
+      {id:'C-2041',name:'CHEN, ALEX',uuid:'8f39c210-7a64-4b19-92da-65a130fc482e',phase:'trip',presale:'CONVERTED',owner:'David Chen',referrer:'David Chen',ownerUntil:'2027/03/11',rounds:2,last:'2026/09/10 · 行程 v2 待確認'},
+      {id:'C-2044',name:'LIN, MAY',uuid:'2b7e0c11-3d54-4a0f-8c31-9a0d8e7f1a22',phase:'trip',presale:'CONVERTED',owner:'David Chen',referrer:'David Chen',ownerUntil:'2027/01/20',rounds:1,last:'2026/09/11 · 已到場'},
+      {id:'C-2050',name:'KIM, JISOO',uuid:'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',phase:'trip',presale:'CONVERTED',owner:'David Chen',referrer:'—',ownerUntil:'2026/12/30',rounds:3,last:'2026/09/10 · 續住回報'},
+      {id:'C-2052',name:'LEE, ANNA',uuid:'9e8f7a6b-5c4d-4e3f-8a2b-1c0d9e8f7a6b',phase:'trip',presale:'CONVERTED',owner:'David Chen',referrer:'David Chen',ownerUntil:'2027/02/01',rounds:1,last:'2026/09/11 · 改期申請'},
+      {id:'C-2060',name:'黃小姐（Lead L-0931）',uuid:null,phase:'presale',presale:'CLARIFYING',owner:'David Chen',referrer:'David Chen',ownerUntil:'—',rounds:1,last:'2026/09/09 · LINE 詢問 10 月活動'},
+      {id:'C-2061',name:'周先生（Lead L-0935）',uuid:null,phase:'presale',presale:'INTENT_PRESENT',owner:'David Chen',referrer:'—',ownerUntil:'—',rounds:1,last:'2026/09/10 · 想 10/3 出發，尚未送申請'},
+      {id:'C-2062',name:'林先生（Lead L-0940）',uuid:null,phase:'presale',presale:'UNASSESSED',owner:'小美',referrer:'—',ownerUntil:'—',rounds:1,last:'2026/09/11 · 官方 LINE 加入'},
+      {id:'C-2030',name:'PARK, MINHO',uuid:'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f',phase:'maintain',presale:'—',owner:'小美',referrer:'—',ownerUntil:'2026/10/15',rounds:2,last:'2026/09/10 · 已退房，待退押金'},
+      {id:'C-1988',name:'HSU, WEI',uuid:'d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80',phase:'maintain',presale:'—',owner:'公共池',referrer:'—',ownerUntil:'已到期',rounds:4,last:'2026/06/02 · 歸屬到期回收'},
+    ],
+    followups:[
+      {cust:'C-2060',t:'2026/09/09 20:15',by:'David Chen',ch:'LINE',from:'UNASSESSED',to:'CLARIFYING',sum:'詢問 10 月活動日期與住宿；想帶 1 位同行。',next:'2026/09/13 提供 10 月活動卡與押金說明'},
+      {cust:'C-2061',t:'2026/09/10 11:00',by:'David Chen',ch:'電話',from:'CLARIFYING',to:'INTENT_PRESENT',sum:'確定 10/3–10/6，需接機；請他自行送出行程申請。',next:'2026/09/12 確認是否已送申請'},
+    ],
+    applications:[
+      {id:'APP-260910-118',name:'TSAI, YU-TING',submitted:'2026/09/10 21:12',version:2,status:'pending',ocr:{name:'TSAI, YU-TING',passport:'3125****',dob:'1991/04/22',expiry:'2031/08/01'},input:{name:'TSAI, YU-TING',passport:'3125****',dob:'1991/04/22',expiry:'2031/08/01'},dup:null,contact:'+886 955 *** 221'},
+      {id:'APP-260911-121',name:'HUANG, CHIH-HAO',submitted:'2026/09/11 08:05',version:1,status:'pending',ocr:{name:'HUANG, CHIH-HAO',passport:'3098****',dob:'1988/12/03',expiry:'2027/01/15'},input:{name:'HUANG, CHIH HAO',passport:'3098****',dob:'1988/12/03',expiry:'2027/01/15'},dup:{name:'HUANG, CHIH-HAO',uuid:'e5f6a7b8-…',reason:'護照末四碼與生日相同'},contact:'+886 933 *** 087'},
+      {id:'APP-260909-114',name:'WU, MEI-LING',submitted:'2026/09/09 10:40',version:1,status:'need_docs',reason:'證件照片反光，護照號不可讀',contact:'+886 921 *** 660'},
+    ],
+    pointsImport:{id:'IMP-260910-K',date:'2026/09/10',uploaded:'2026/09/11 09:05',by:'王經理',status:'preview',rows:[
+      {tc:'TC-008127',name:'LIN, MAY',trip:'TR-260911-029',prev:0,now:6200,kind:'add'},
+      {tc:'TC-008119',name:'KIM, JISOO',trip:'TR-260909-017',prev:4100,now:4100,kind:'same'},
+      {tc:'TC-008101',name:'PARK, MINHO',trip:'TR-260908-021',prev:3800,now:4200,kind:'fix'},
+      {tc:'TC-008126',name:'CHEN, ALEX',trip:'TR-260911-028',prev:0,now:5500,kind:'add'},
+      {tc:'TC-008140',name:'（未配對）',trip:'—',prev:null,now:2900,kind:'miss'},
+    ]},
+    transfers:[{id:'TRF-0017',customer:'HSU, WEI（C-1988）',from:'公共池',to:'David Chen',reason:'客戶 9/10 主動聯繫 David 詢問 10 月行程',proposedBy:'王經理',t:'2026/09/11 09:50',status:'proposed'}],
+    hostRequests:[{id:'HR-0088',customer:'周先生（Lead L-0935）',agent:'David Chen',want:'10/3–10/6 濟州行程代接待、需接機',t:'2026/09/10 11:20',status:'pending',assignee:null}],
+    cases:[{id:'CASE-260910-031',type:'押金紀錄需要核實',tripId:'TR-260908-021',by:'PARK, MINHO',t:'2026/09/10 19:12',status:'處理中',reply:'已請天城核實 9/10 退款事實，預計 9/12 前回覆。'}],
+    campaigns:[{id:'CAM-2610-01',title:'10 月天城 High Roller 週',dates:'2026/10/03 – 10/08',quota:40,used:12,status:'published',langs:['繁中','英文']},{id:'CAM-2611-01',title:'11 月會員回訪住宿加碼',dates:'2026/11/07 – 11/12',quota:30,used:0,status:'draft',langs:['繁中']}],
+    staffAccounts:[{name:'王經理',role:'管理者',mfa:true,last:'2026/09/11 10:58'},{name:'小美',role:'銷售',mfa:true,last:'2026/09/11 09:30'},{name:'Amy',role:'Host／接待',mfa:true,last:'2026/09/11 10:20'},{name:'Ken',role:'Host／接待',mfa:true,last:'2026/09/10 22:15'},{name:'David Chen',role:'外部 Agent',mfa:true,last:'2026/09/11 08:45'},{name:'琪琪',role:'天城：櫃檯／異動／核對／押金',mfa:true,last:'2026/09/11 11:05'},{name:'財務 Joyce',role:'Finance',mfa:false,last:'尚未啟用'}],
+    invites:[{email:'joyce@pokernext.example',role:'Finance',sent:'2026/09/10 17:00',expires:'2026/09/17 17:00',status:'pending'}],
+    audit:[
+      {t:'2026/09/11 10:40',by:'琪琪',role:'天城',e:'CHG-260911-006 開始執行（取消行程）'},
+      {t:'2026/09/11 10:30',by:'琪琪',role:'天城',e:'TR-260911-029 已收到押金 KRW 300,000'},
+      {t:'2026/09/11 10:15',by:'琪琪',role:'天城',e:'TR-260911-029 確認到場報到'},
+      {t:'2026/09/11 09:50',by:'王經理',role:'管理者',e:'提出歸屬轉派 TRF-0017（公共池 → David Chen）'},
+      {t:'2026/09/11 09:05',by:'王經理',role:'管理者',e:'上傳每日積分 Excel IMP-260910-K（預覽，未入帳）'},
+    ],
+    ui:{role:'player',route:null,tab:{},sel:{},modal:null,script:false,rolemenu:false,scan:null},
+    notes:[],
+  };
+}
+let S;
+function load(){ try{const raw=localStorage.getItem('pn-proto-v1'); if(raw){S=JSON.parse(raw); S.ui.modal=null; S.ui.rolemenu=false; return;} }catch(e){} S=seed(); }
+function save(){ try{localStorage.setItem('pn-proto-v1',JSON.stringify(S));}catch(e){} }
+function reset(){ S=seed(); save(); location.hash='#/player/home'; render(); toast('已重設示範資料'); }
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const krw=n=>'KRW '+Number(n).toLocaleString('en-US');
+const pts=n=>Number(n).toLocaleString('en-US');
+const short=u=>u?u.slice(0,8)+'…'+u.slice(-4):'—';
+const member=u=>S.members.find(m=>m.uuid===u);
+const trip=id=>S.trips.find(t=>t.id===id);
+const tripsOf=u=>S.trips.filter(t=>t.uuid===u);
+const nowStamp=()=>{const d=new Date();return TODAY+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+function audit(by,role,e){ S.audit.unshift({t:nowStamp(),by,role,e}); }
+function hist(t,by,e){ (t.history||(t.history=[])).push({t:nowStamp(),by,e}); }
+let toastTimer;
+function toast(msg,kind=''){ const el=document.createElement('div'); el.className='toast '+kind; el.textContent=msg; $('#toasts').appendChild(el); setTimeout(()=>el.remove(),3200); }
+function go(role,page,id){ location.hash='#/'+role+'/'+page+(id?'/'+id:''); }
+function cur(){ const p=(location.hash||'#/player/home').replace(/^#\//,'').split('/'); return {role:p[0]||'player',page:p[1]||'home',id:p[2]?decodeURIComponent(p[2]):null}; }
+
+/* ---------- stage vocabulary (PRD 8.2：客觀狀態由原始紀錄產生) ---------- */
+const STAGE={
+  applied:['已申請 · 待管理者核對','warning'],approved:['核准 · 訂房中','info'],confirmed:['住宿已確認','success'],arrived:['已到場報到','success'],checked_in:['已入住','success'],
+  checked_out:['已退房（營運已離境）','neutral'],settled:['已結算','neutral'],archived:['已歸檔','neutral'],cancelling:['取消處理中','warning'],cancelled:['已取消','neutral'],
+};
+const CHG_TYPE={cancel:'取消行程',extend:'續住申請',reschedule:'住宿日期異動'};
+const CHG_STAGE={pending:['待開始','warning'],in_progress:['執行中','info'],reported:['已回報 · 待內部核對','info'],done:['已完成','success'],withdrawn:['已撤回','neutral']};
+const PRESALE={UNASSESSED:'尚未評估',CLARIFYING:'需求確認中',INTENT_PRESENT:'有行程意願',DEFERRED:'暫緩安排',NO_INTENT:'明確無意願',CONVERTED:'已轉行程','—':'—'};
+const TPL={
+  T01:{name:'聯繫客戶',opts:['已取得回覆','未取得回覆','聯絡管道無效'],fields:['實際聯繫時間','管道','摘要']},
+  T05:{name:'接機接到本人',opts:['已接到本人','確認尚未接到','尚未核實'],fields:['實際接到時間','來源']},
+  T06:{name:'酒店入住追蹤',opts:['已入住','確認尚未入住','尚未核實'],fields:['實際入住時間','來源（酒店櫃檯／本人）']},
+  T07:{name:'引導 PokerRoom 報到',opts:['已引導至櫃檯','尚未前往','尚未核實'],fields:['引導時間']},
+  T08:{name:'續住意願確認',opts:['需要續住','按原安排退房','尚未決定','未取得回覆'],fields:['希望延長至']},
+  T10:{name:'本次住宿退房追蹤',opts:['已實際退房','確認尚未退房','尚未核實'],fields:['實際退房時間','來源']},
+  T11:{name:'送機完成回報',opts:['已送達機場','確認尚未送達','尚未核實'],fields:['實際送達時間']},
+  T13:{name:'跟進玩家結算',opts:['已提醒本人操作','需要解釋','玩家提出異議','未聯繫上'],fields:['跟進安排']},
+};
+function depositAxis(t){
+  const d=t.deposit; const r=[];
+  r.push(d.due===0?['收取','無須押金','neutral']:d.collected?['收取','已收取 '+krw(d.collected.amt),'success']:['收取','待收取 '+krw(d.due),'warning']);
+  if(d.due>0&&d.collected){
+    if(!t.settlement) r.push(['退款依據','待住宿結算','neutral']);
+    else if(!t.settlement.playerConfirmed) r.push(['退款依據','待玩家確認結算','warning']);
+    else if(!t.settlement.venueAligned) r.push(['退款依據','待天城核對','warning']);
+    else if(d.refundDue&&d.refundDue.amt>0) r.push(['退款依據','應退 '+krw(d.refundDue.amt),'info']); else r.push(['退款依據','無應退','neutral']);
+    if(d.refundDue&&d.refundDue.amt>0) r.push(d.refunded?['退還','已退還 '+krw(d.refunded.amt),'success']:['退還','待退還','warning']);
+  }
+  return r;
+}
+function computeRefund(t){ // 逐晚：有兌換且該晚已付押金才應退
+  if(!t.settlement||!t.deposit.collected) return 0;
+  const paidNights=Math.round(t.deposit.collected.amt/300000);
+  return Math.min(t.settlement.redeemed,paidNights)*300000;
+}
+
+/* ---------- icons ---------- */
+const I={
+  home:'<svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>',
+  user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  doc:'<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>',
+  bed:'<svg viewBox="0 0 24 24"><path d="M3 18V8M3 14h18v4M3 12h18M7 12V9h5v3"/></svg>',
+  coins:'<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>',
+  car:'<svg viewBox="0 0 24 24"><path d="M4 16 5.5 9h13L20 16M3 16h18v3H3zM7 19v2M17 19v2"/><circle cx="7.5" cy="16" r="1"/><circle cx="16.5" cy="16" r="1"/></svg>',
+  scan:'<svg viewBox="0 0 24 24"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4M4 12h16"/></svg>',
+  clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  users:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6M16 14c3 0 6 1.5 6 5"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="var(--success)" stroke="none"/><path d="m8 12 3 3 5-6" stroke="#0b0c0d"/></svg>',
+  pin:'<svg viewBox="0 0 24 24"><path d="M12 22s7-6 7-12a7 7 0 0 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  bell:'<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/></svg>',
+  info:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+  search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
+  inbox:'<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 14h5l1 2h4l1-2h5"/></svg>',
+  shield:'<svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>',
+  sliders:'<svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M4 12h16"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>',
+  chart:'<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>',
+  list:'<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+  flag:'<svg viewBox="0 0 24 24"><path d="M5 21V4h12l-2 4 2 4H5"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>',
+  qr:'<svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z"/></svg>',
+  wallet:'<svg viewBox="0 0 24 24"><path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7V5a2 2 0 0 1 2-2h11v4"/><circle cx="17" cy="14" r="1.2"/></svg>',
+  chat:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  upload:'<svg viewBox="0 0 24 24"><path d="M12 16V5M7 10l5-5 5 5M4 20h16"/></svg>',
+  swap:'<svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>',
+  key:'<svg viewBox="0 0 24 24"><circle cx="8" cy="14" r="4"/><path d="m11 11 9-9M15 7l3 3M18 4l2 2"/></svg>',
+  cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  briefcase:'<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M9 7V4h6v3M3 13h18"/></svg>',
+  empty:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M4 12h5l1 2h4l1-2h5"/></svg>',
+};
+const badge=(txt,k)=>`<span class="badge ${k}">${esc(txt)}</span>`;
+const dot=(txt,k)=>`<span class="dot ${k}">${esc(txt)}</span>`;
+const stageBadge=s=>badge(STAGE[s][0],STAGE[s][1]);
+const kv=(rows,stack)=>`<div class="kv ${stack?'stack':''}">${rows.map(([k,v])=>`<div><div class="k">${esc(k)}</div><div class="v">${v}</div></div>`).join('')}</div>`;
+const empty=(title,why,action)=>`<div class="empty">${I.empty}<b>${esc(title)}</b><span>${esc(why)}</span>${action||''}</div>`;
+const A=(name,params,label,cls='btn')=>`<button class="${cls}" data-act="${name}" data-p='${esc(JSON.stringify(params||{}))}'>${label}</button>`;
+</script>
+<script>
+/* ---------- navigation per role ---------- */
+const NAV={
+  player:[['home','首頁',I.home],['trips','我的行程',I.briefcase],['qr','到場碼',I.scan],['points','我的積分',I.coins],['account','我的帳戶',I.user]],
+  venue:[['overview','工作總覽',I.home],['checkin','到場報到',I.user],['changes','行程異動',I.doc,()=>S.changeRequests.filter(c=>c.stage==='pending'||c.stage==='in_progress').length],['recon','住宿兌換核對',I.bed,()=>S.trips.filter(t=>t.settlement&&t.settlement.playerConfirmed&&!t.settlement.venueAligned).length],['deposits','押金紀錄',I.coins],['transfer','接送安排',I.car],['departed','離境／未完成核對',I.clock]],
+  admin:[['dashboard','服務監控儀表板',I.chart],['customers','客戶與跟進',I.users],['review','會員審核工作台',I.shield,()=>S.applications.filter(a=>a.status==='pending').length],['trips','行程審核／預訂',I.briefcase,()=>S.trips.filter(t=>t.stage==='applied').length+S.changeRequests.filter(c=>c.stage==='reported').length],['transfer','接送用車看板',I.car],['tasks','任務與異常',I.list],['points','積分匯入與結算',I.coins],['ownership','歸屬與公共池',I.swap],['hosting','代接待指派',I.inbox,()=>S.hostRequests.filter(h=>h.status==='pending').length],['campaigns','活動與推播',I.flag]],
+  platform:[['governance','治理總覽',I.shield],['accounts','工作帳號／邀請／MFA',I.key],['approvals','高風險審批',I.check,()=>S.transfers.filter(t=>t.status==='proposed').length],['settings','參數與範本設定',I.sliders],['audit','稽核紀錄',I.list],['checklist','上線切換 Checklist',I.flag]],
+  staff:[['tasks','我的任務',I.list],['customers','我的客戶',I.users],['today','今日接待',I.cal]],
+  agent:[['customers','名下客戶',I.users],['followup','跟進工作頁',I.chat],['hosting','代接待申請',I.inbox],['performance','本人業績',I.chart]],
+};
+const SUB={venue:'天城合作端',admin:'管理端',platform:'Platform admin',agent:'Agent 工作區'};
+const CRUMB={venue:'JEJU · PARTNER WORKSPACE',admin:'POKERNEXT · OPERATIONS',platform:'POKERNEXT · GOVERNANCE',agent:'POKERNEXT · AGENT'};
+
+function roleBar(){
+  const r=S.ui.role, R=ROLES[r];
+  return `<div class="rolebar"><button class="pill" data-act="toggleRoleMenu"><span class="dot"></span><b>${R.name}</b><span class="muted">· ${R.who}</span> ▾</button></div>
+  ${S.ui.rolemenu?`<div class="rolemenu">${Object.entries(ROLES).map(([k,v])=>`<button class="${k===r?'on':''}" data-act="switchRole" data-p='{"role":"${k}"}'><span class="who"><b>${v.name}</b><small>${v.who} · ${v.sub}</small></span></button>`).join('')}<hr><button data-act="reset">↺ 重設示範資料</button></div>`:''}`;
+}
+function scriptDrawer(){
+  const t=trip('TR-260911-028'); const chg=S.changeRequests.find(c=>c.tripId==='TR-260911-028');
+  const steps=[
+    ['玩家確認行程新版本 v2','玩家端 → 我的行程','player','trips','TR-260911-028',t.playerConfirmedVersion>=t.version],
+    ['接待 Amy 回報「接機接到本人」（T05）','員工端 → 我的任務','staff','tasks','TSK-1042',S.tasks.find(x=>x.id==='TSK-1042').status==='done'],
+    ['琪琪掃碼、本人核對、確認到場','天城端 → 到場報到','venue','checkin',null,!!t.venueCheckin],
+    ['琪琪收到 KRW 300,000 押金','天城端 → 到場報到／押金紀錄','venue','checkin',null,!!t.deposit.collected],
+    ['玩家確認「我已支付」','玩家端 → 我的行程 → 押金','player','trips','TR-260911-028',!!t.deposit.playerPaid],
+    ['Amy 回報酒店已入住（T06）→ 在島玩家','員工端 → 我的任務','staff','tasks','TSK-1043',!!t.hotelCheckin],
+    ['玩家申請續住 1 晚','玩家端 → 我的行程','player','trips','TR-260911-028',!!chg],
+    ['琪琪開始執行並回報續住結果','天城端 → 行程異動','venue','changes',chg?chg.id:null,!!(chg&&chg.stage!=='pending'&&chg.stage!=='in_progress')],
+    ['管理者核對續住結果並正式登錄','管理端 → 行程審核／預訂','admin','trips',null,!!(chg&&chg.stage==='done')],
+    ['管理者核准每日積分 Excel 入帳','管理端 → 積分匯入與結算','admin','points',null,S.pointsImport.status==='approved'],
+    ['Amy 回報已退房（T10）→ 管理者開放結算','員工端／管理端','staff','tasks',null,!!t.hotelCheckout],
+    ['玩家確認結算 → 琪琪核對「雙方已對齊」','玩家端／天城端 → 住宿兌換核對','player','points',null,!!(t.settlement&&t.settlement.venueAligned)],
+    ['琪琪現場退押金 → 玩家確認已收到','天城端 → 押金紀錄／玩家端','venue','deposits',null,!!t.deposit.playerReceived],
+  ];
+  return `<button class="scriptbtn" data-act="toggleScript">${S.ui.script?'收起劇本':'示範劇本'}</button>${S.ui.script?`<div class="script"><h3>示範劇本：Alex 的濟州行程</h3><div class="mini">依序在不同端操作，狀態會互相連動。已完成的步驟打勾。</div><ol>${steps.map((s,i)=>`<li class="${s[5]?'done':''}"><span class="k">${s[5]?'✓':i+1}</span><span class="t">${esc(s[0])}<small>${esc(s[1])}</small></span><button data-act="goto" data-p='${esc(JSON.stringify({role:s[2],page:s[3],id:s[4]}))}'>前往</button></li>`).join('')}</ol></div>`:''}`;
+}
+function wsShell(role,page,body,title){
+  const R=ROLES[role];
+  return `<div class="ws"><aside class="sidebar"><div class="brand"><div class="logo">POKER<span>NEXT</span></div><div class="sub">${SUB[role]}</div></div><nav class="nav">${NAV[role].map(([k,l,ic,cnt])=>`<a href="#/${role}/${k}" class="${page===k?'on':''}">${ic}<span>${l}</span>${cnt&&cnt()?`<span class="cnt">${String(cnt()).padStart(2,'0')}</span>`:''}</a>`).join('')}</nav><div class="sidefoot"><div class="name">${R.who}</div><div class="role">${R.sub}</div><div style="margin-top:8px">${badge('示意資料','gold')}</div></div></aside>
+  <div class="main"><div class="topbar"><span class="overline">${CRUMB[role]}</span><span>${TODAY}（五）　${role==='venue'?'韓國時間':'台北時間'}　${NOW}</span></div><div class="page">${body}</div></div></div>`;
+}
+function phoneShell(role,page,body){
+  const nav=NAV[role];
+  return `<div class="phonewrap"><div class="phone"><div class="screen">${body}</div><nav class="bnav">${nav.map(([k,l,ic])=>`<a href="#/${role}/${k}" class="${page===k?'on':''}">${ic}<span>${l}</span></a>`).join('')}</nav></div></div>`;
+}
+function appHead(){ return `<div class="apphead"><div><div class="logo">POKER<span>NEXT</span></div><div class="tag">TRAVEL · PLAY · BELONG</div></div><div class="bell">${I.bell}<i></i></div></div>`; }
+function pageHead(title,desc,actions){ return `<div class="ph"><div><h1>${esc(title)}</h1>${desc?`<p>${esc(desc)}</p>`:''}</div><div class="actions">${actions||''}</div></div>`; }
+function modal(){
+  const m=S.ui.modal; if(!m) return '';
+  return `<div class="modal-bg" data-act="closeModal"><div class="modal"><div class="mh">${esc(m.title)}</div><div class="mb">${m.body}</div><div class="mf">${A('closeModal',{},'關閉','btn secondary')}${m.ok?A(m.ok.act,m.ok.p,m.ok.label,'btn'):''}</div></div></div>`;
+}
+function tab(key,def){ return S.ui.tab[key]||def; }
+function tabs(key,items,def){ const c=tab(key,def); return `<div class="tabs">${items.map(([k,l,n])=>`<button class="${c===k?'on':''}" data-act="tab" data-p='${esc(JSON.stringify({key,val:k}))}'>${l}${n!=null?`<span class="c">${String(n).padStart(2,'0')}</span>`:''}</button>`).join('')}</div>`; }
+function mtabs(key,items,def){ const c=tab(key,def); return `<div class="mtabs">${items.map(([k,l])=>`<button class="${c===k?'on':''}" data-act="tab" data-p='${esc(JSON.stringify({key,val:k}))}'>${l}</button>`).join('')}</div>`; }
+function seg(key,items,def){ const c=tab(key,def); return `<div class="seg">${items.map(([k,l])=>`<button class="${c===k?'on':''}" data-act="tab" data-p='${esc(JSON.stringify({key,val:k}))}'>${l}</button>`).join('')}</div>`; }
+function stepper(steps,cur){ return `<div class="stepper">${steps.map((s,i)=>`<div class="step ${i<cur?'done':i===cur?'cur':''}"><div class="n">${i<cur?'✓':''}</div><div>${esc(s[0])}<small>${esc(s[1]||'')}</small></div></div>`).join('')}</div>`; }
+function qrGrid(seedStr){ let h=0; for(const c of seedStr) h=(h*31+c.charCodeAt(0))>>>0; let out=''; for(let i=0;i<441;i++){ const x=i%21,y=(i/21)|0; const fp=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13); let b; if(fp){const lx=x%7>6?0:x, ly=y; const ex=x<7?x:x-14, ey=y<7?y:y-14; b=(ex===0||ex===6||ey===0||ey===6)||(ex>=2&&ex<=4&&ey>=2&&ey<=4);} else { h=(h^(h<<13))>>>0; h=(h^(h>>>17))>>>0; h=(h^(h<<5))>>>0; b=(h&3)===0; } out+=`<i class="${b?'b':''}"></i>`; } return `<div class="qr">${out}</div>`; }
+
+/* ---------- router ---------- */
+function render(){
+  const {role,page,id}=cur(); S.ui.role=role;
+  const R=ROLES[role]; if(!R){ location.hash='#/player/home'; return; }
+  const fn=PAGES[role]&&(PAGES[role][page]||PAGES[role][Object.keys(PAGES[role])[0]]);
+  let body=''; try{ body=fn(id); }catch(e){ console.error(e); body=`<div class="card pad">頁面渲染錯誤：${esc(e.message)}</div>`; }
+  const shell=R.shell==='phone'?phoneShell(role,page,body):wsShell(role,page,body);
+  $('#app').innerHTML=roleBar()+shell+modal()+scriptDrawer();
+}
+window.addEventListener('hashchange',()=>{ S.ui.rolemenu=false; render(); window.scrollTo(0,0); });
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  if(b.classList.contains('modal-bg')&&e.target!==b) return;
+  const name=b.dataset.act; let p={}; try{p=JSON.parse(b.dataset.p||'{}');}catch(_){}
+  if(!ACT[name]){ console.warn('no action',name); return; }
+  const r=ACT[name](p,b); if(r!==false){ save(); render(); }
+});
+document.addEventListener('input',e=>{ const el=e.target; if(el.dataset.bind){ S.ui.sel[el.dataset.bind]=el.type==='checkbox'?el.checked:el.value; save(); } });
+document.addEventListener('change',e=>{ const el=e.target; if(el.dataset.bind){ S.ui.sel[el.dataset.bind]=el.type==='checkbox'?el.checked:el.value; save(); if(el.dataset.rerender) render(); } });
+const sel=k=>S.ui.sel[k];
+const PAGES={}; const ACT={};
+ACT.toggleRoleMenu=()=>{S.ui.rolemenu=!S.ui.rolemenu;};
+ACT.switchRole=p=>{ S.ui.rolemenu=false; location.hash='#/'+p.role+'/'+NAV[p.role][0][0]; return false; };
+ACT.reset=()=>{ reset(); return false; };
+ACT.toggleScript=()=>{S.ui.script=!S.ui.script;};
+ACT.goto=p=>{ go(p.role,p.page,p.id); return false; };
+ACT.tab=p=>{ S.ui.tab[p.key]=p.val; };
+ACT.closeModal=()=>{ S.ui.modal=null; };
+ACT.openModal=p=>{ S.ui.modal=MODALS[p.m](p); };
+ACT.noop=()=>{ toast('原型中此動作為示意，不改變資料','warn'); return false; };
+const MODALS={};
+</script>
+<script>
+/* ================= 玩家端 ================= */
+const ME='8f39c210-7a64-4b19-92da-65a130fc482e';
+function currentTrip(){ const ts=tripsOf(ME).filter(t=>!['archived','cancelled'].includes(t.stage)); return ts.sort((a,b)=>a.cin<b.cin?-1:1)[0]||null; }
+function tripTodos(t){
+  const r=[];
+  if(t.stage==='applied') r.push(['等待管理者核對與訂房','非您可執行，無需操作',null]);
+  if(t.playerConfirmedVersion<t.version) r.push([`行程新版本 v${t.version} 待您確認`,'接送安排已更新',{act:'openModal',p:{m:'confirmVersion',id:t.id},label:'查看並確認'}]);
+  if(t.deposit.collected&&!t.deposit.playerPaid) r.push([`請確認您已向天城支付押金 ${krw(t.deposit.collected.amt)}`,'天城已回報收款 '+t.deposit.collected.t,{act:'confirmPaid',p:{id:t.id},label:'我已支付'}]);
+  if(t.settlement&&!t.settlement.playerConfirmed) r.push(['本次住宿結算待您確認','確認後才正式扣分並產生退款依據',{act:'openModal',p:{m:'settlement',id:t.id},label:'查看結算'}]);
+  if(t.deposit.refunded&&!t.deposit.playerReceived) r.push([`請確認您已收到退款 ${krw(t.deposit.refunded.amt)}`,'天城已回報退還 '+t.deposit.refunded.t,{act:'confirmReceived',p:{id:t.id},label:'我已收到'}]);
+  return r;
+}
+function playerStrip(t){
+  const hotel=t.hotel.status==='confirmed'?'住宿已確認':'住宿安排中';
+  const pk=t.pickup.arr.status==='none'?'自行前往':t.pickup.arr.status==='done'?'已接機':t.pickup.arr.car?'接送已確認':'接送待確認';
+  const ver=t.playerConfirmedVersion<t.version?'行程待您確認':'行程已確認';
+  return `<div class="strip"><div>${I.bed}${hotel}</div><div>${I.car}${pk}</div><div>${I.doc}${ver}</div></div>`;
+}
+PAGES.player={
+  home(){
+    const m=member(ME); const t=currentTrip();
+    let hero;
+    if(!t) hero=`<div class="mpage" style="padding-top:24px"><h1>${esc(m.cn)}，您好</h1>${empty('目前沒有進行中的行程','行程申請確認後會顯示在這裡。',A('goto',{role:'player',page:'trips',id:'new'},'申請行程','btn outline-gold'))}</div>`;
+    else hero=`<div class="hero"><div class="bgart"></div><svg class="skyline" viewBox="0 0 430 90" preserveAspectRatio="none"><path d="M0 90 60 70 120 76 170 52 220 60 260 40 300 55 340 48 380 62 430 50V90z" fill="#0b0c0d"/><path d="M0 90 40 82 90 84 140 72 200 78 240 66 290 74 330 70 380 78 430 72V90z" fill="#161a24"/></svg><div class="greet">${esc(m.cn)}，您好</div><div class="dest">${esc(t.dest)}</div><div class="en">${esc(t.en)}</div><div class="dates">${t.cin.slice(5)} – ${t.cout.slice(5)} · ${t.nights} 晚 ${t.stage==='cancelling'?badge('取消處理中','warning'):''}</div><a href="#/player/trips/${t.id}" class="btn outline-gold m block">查看行程 ${I.arrow}</a></div>`;
+    const todos=t?tripTodos(t):[];
+    return appHead()+hero+(t?`
+      ${todos.length?`<div class="mpage" style="padding-bottom:0"><h2>現在需要您做的</h2>${todos.map(x=>`<div class="mcard"><div class="mh"><span>${esc(x[0])}</span></div><div class="mini">${esc(x[1])}</div>${x[2]?`<div style="margin-top:12px">${A(x[2].act,x[2].p,x[2].label,'btn m block')}</div>`:''}</div>`).join('')}</div>`:''}
+      <div class="row" style="border-top:1px solid var(--border);margin-top:16px">${I.pin}<div class="g"><b>${esc(t.hotel.name)}</b><small>${t.hotel.conf?'住宿確認編號 '+t.hotel.conf:'酒店確認中'}</small></div></div>
+      ${playerStrip(t)}
+      <div class="pts"><div><div class="l">可用積分</div><div class="v">${pts(m.ledger-m.reserved)}</div></div><div class="sep"></div><div><div class="l">已保留</div><div class="v sm">${pts(m.reserved)}</div></div></div>
+      <div class="row">${I.user}<div class="g"><b>接待人 ${esc(t.host)}</b><small>服務時段 09:00–22:00（韓國時間）</small></div>${A('noop',{},'聯繫接待人 ›','btn ghost')}</div>
+      ${t.stage==='confirmed'&&t.venueCheckin==null?`<div class="row">${I.qr}<div class="g"><b>到場時出示到場碼</b><small>抵達 PokerRoom 櫃檯由琪琪掃碼核對</small></div><a href="#/player/qr" class="btn ghost">開啟 ›</a></div>`:''}`:'');
+  },
+  trips(id){
+    const m=member(ME);
+    if(id==='new') return appHead()+applyForm();
+    if(id){ const t=trip(id); if(t&&t.uuid===ME) return appHead()+tripDetail(t); }
+    const all=tripsOf(ME).sort((a,b)=>a.cin<b.cin?1:-1);
+    const now=all.filter(t=>!['archived','cancelled','checked_out','settled'].includes(t.stage)), past=all.filter(t=>['archived','cancelled','checked_out','settled'].includes(t.stage));
+    const card=t=>`<a href="#/player/trips/${t.id}" class="mcard" style="display:block;text-decoration:none;color:inherit"><div class="mh"><span>${esc(t.dest)} · ${t.cin.slice(5)}–${t.cout.slice(5)}</span>${stageBadge(t.stage)}</div><div class="mini mono">${t.id}</div><div class="mini">${esc(t.hotel.name)} · ${t.nights} 晚 · 接待人 ${esc(t.host)}</div></a>`;
+    return appHead()+`<div class="mpage"><h1>我的行程</h1>${mtabs('ptrips',[['now','目前與未來'],['past','歷史']],'now')}
+      ${tab('ptrips','now')==='now'?(now.length?now.map(card).join(''):empty('目前沒有進行中的行程','行程申請確認後會顯示在這裡。')):(past.length?past.map(card).join(''):empty('尚無歷史行程','完成的行程會保留在這裡。'))}
+      <a href="#/player/trips/new" class="btn secondary m block">申請新行程</a></div>`;
+  },
+  qr(){
+    const t=currentTrip();
+    if(!t||!['confirmed','arrived','checked_in'].includes(t.stage)) return appHead()+`<div class="mpage"><h1>到場碼</h1>${empty('目前沒有可出示的到場碼','到場碼只在有效的天城行程期間提供；行程確認後會自動出現。')}</div>`;
+    return appHead()+`<div class="mpage"><h1>到場碼</h1><div class="mcard" style="text-align:center"><div class="overline" style="margin-bottom:12px">本次行程 · ${t.id}</div>${qrGrid(t.id+(t.venueCheckin||''))}<div style="margin-top:14px" class="mono">PN-${t.id.slice(3)}-${(t.venueCheckin?'C':'A')}7Q</div><div class="hint" style="margin-top:6px">短效碼每 60 秒更新 · 僅供天城櫃檯掃碼，不含完整個資</div></div>
+      <div class="mcard"><div class="mh"><span>本行程報到</span>${t.venueCheckin?badge('已報到','success'):badge('尚未報到','neutral')}</div>${t.venueCheckin?`<div class="mini">首次有效報到 ${t.venueCheckin} · 韓國時間</div>`:`<div class="mini">抵達 PokerRoom 櫃檯後出示此碼，由天城人員核對本人後確認。每行程一次。</div>`}</div>
+      <div class="mcard"><div class="mh"><span>本次應付押金</span></div>${t.deposit.due===0?'<div class="mini">積分已足夠支持全部晚數，無須押金。</div>':`<div class="amount"><span class="cur">KRW</span><span class="v">${Number(t.deposit.due).toLocaleString()}</span></div><div class="mini">收款方：天城 PokerRoom（韓元現金）。到場時直接向天城支付，POKERNEXT 不代收。</div>`}</div></div>`;
+  },
+  points(){
+    const m=member(ME); const ts=tripsOf(ME);
+    const rows=[]; ts.forEach(t=>{ if(t.settlement&&t.settlement.playerConfirmed) rows.push([t.settlement.playerConfirmed,'住宿結算扣分 · '+t.id,-t.settlement.points]); if(t.reservedPoints||t.stage==='confirmed'||t.stage==='arrived'||t.stage==='checked_in') rows.push([t.cin,'住宿積分保留 · '+t.id,null,25000*Math.min(t.nights,Math.floor(m.ledger/25000))]); });
+    if(S.pointsImport.status==='approved'){ const r=S.pointsImport.rows.find(x=>x.tc===m.tc); if(r) rows.push([S.pointsImport.date,'天城活動日積分入帳 · '+r.trip,r.now]); }
+    rows.push(['2026/08/31','期初積分導入（天城剩餘可用）',30000]);
+    const hasAny=rows.length>0;
+    return appHead()+`<div class="mpage"><h1>我的積分</h1>
+      <div class="pts" style="padding:18px 0;border-top:1px solid var(--border)"><div><div class="l">可用積分</div><div class="v">${pts(m.ledger-m.reserved)}</div></div><div class="sep"></div><div><div class="l">帳面</div><div class="v sm">${pts(m.ledger)}</div></div></div>
+      <div class="mcard"><div class="mh"><span>已保留</span><span class="num" style="font-size:20px">${pts(m.reserved)}</span></div><div class="mini">保留給 TR-260911-028 住宿 ${Math.floor(m.reserved/25000)} 晚；正式結算確認後才扣分。</div><div class="hint" style="margin-top:6px">資料時點 ${TODAY} ${NOW} · 天城來源最後更新 ${S.pointsImport.status==='approved'?S.pointsImport.date+'（已入帳）':'2026/09/09'}</div></div>
+      <h2>積分明細</h2>${hasAny?rows.sort((a,b)=>a[0]<b[0]?1:-1).map(r=>`<div class="row" style="padding:12px 0"><div class="g"><b>${esc(r[1])}</b><small>${r[0]}</small></div><span class="num" style="font-size:18px;color:${r[2]==null?'var(--text-2)':r[2]<0?'var(--danger)':'var(--gold-bright)'}">${r[2]==null?'保留 '+pts(r[3]):(r[2]>0?'+':'')+pts(r[2])}</span></div>`).join(''):empty('尚無積分紀錄','活動日積分由天城提供並經管理者核對後入帳。')}
+      <div class="mcard"><div class="mh"><span>既有權益預覽</span></div><div class="mini">以目前可用 ${pts(m.ledger-m.reserved)} 分、每晚 25,000 分計，可再兌換 <b>${Math.floor((m.ledger-m.reserved)/25000)} 晚</b>。預覽不占分、不保證房源；正式申請時重新查核。</div></div>
+      ${A('openModal',{m:'case',tripId:'TR-260911-028',type:'積分疑問'},'對積分有疑問？回報問題','btn secondary m block')}</div>`;
+  },
+  account(){
+    const m=member(ME); const cases=S.cases.filter(c=>c.by===m.name);
+    return appHead()+`<div class="mpage"><h1>我的帳戶</h1>
+      <div class="mcard">${kv([['姓名（護照）',esc(m.name)],['POKERNEXT UUID',`<span class="mono">${short(m.uuid)}</span> ${A('noop',{},'複製','btn ghost sm')}`],['天城會員編號',`<span class="mono">${m.tc}</span>`],['手機',m.phone],['Email',m.email]],true)}</div>
+      <div class="mcard"><div class="mh"><span>通訊綁定與通知</span></div>${kv([['主要管道',`${esc(m.channel)} ${badge('已綁定','success')}`],['服務通知','開啟'],['活動推廣','已退訂']],true)}<div style="margin-top:10px">${A('noop',{},'管理綁定','btn secondary sm')}</div></div>
+      <div class="mcard"><div class="mh"><span>服務偏好</span></div><div class="field"><label>介面語言</label><select class="input" data-bind="lang"><option ${(sel('lang')||m.lang)==='繁中'?'selected':''}>繁中</option><option ${(sel('lang')||m.lang)==='英文'?'selected':''}>英文</option></select></div><div class="field" style="margin-top:10px"><label>接機偏好（下次申請帶入後仍由您確認）</label><select class="input" data-bind="pickupPref"><option ${(sel('pickupPref')||m.pickupPref)==='需要接機'?'selected':''}>需要接機</option><option ${(sel('pickupPref')||m.pickupPref)==='自行前往'?'selected':''}>自行前往</option></select></div><div class="field" style="margin-top:10px"><label>休息提醒（單次，${m.restReminder} 分鐘）</label><input class="input" type="range" min="5" max="180" step="5" value="${sel('rest')||m.restReminder}" data-bind="rest" style="padding:0;height:32px"></div><div class="hint">提醒不依報到時間推算打牌時數，不作為活動激勵。</div><div style="margin-top:12px">${A('savePrefs',{},'儲存偏好','btn m block')}</div></div>
+      <div class="mcard"><div class="mh"><span>我的問題</span>${A('openModal',{m:'case',tripId:'TR-260911-028',type:'其他'},'新增','btn secondary sm')}</div>${cases.length?cases.map(c=>`<div class="row" style="padding:10px 0"><div class="g"><b>${esc(c.type)}</b><small>${c.id} · ${c.t} · ${badge(c.status,c.status==='已解決'?'success':'info')}</small>${c.reply?`<small style="color:var(--text)">回覆：${esc(c.reply)}</small>`:''}</div></div>`).join(''):'<div class="mini">尚無問題案件。</div>'}</div>
+      <div style="display:flex;gap:10px"><a href="#/player/trips" class="btn secondary" style="flex:1">換證／聯絡變更</a>${A('noop',{},'登出','btn secondary')}</div></div>`;
+  },
+};
+function tripDetail(t){
+  const m=member(t.uuid); const chgs=S.changeRequests.filter(c=>c.tripId===t.id);
+  const todos=tripTodos(t);
+  const canPre=['confirmed','approved','applied'].includes(t.stage)&&!t.hotelCheckin;
+  const canIn=t.stage==='checked_in';
+  const openChg=chgs.find(c=>['pending','in_progress','reported'].includes(c.stage));
+  const stepsArr=[['申請',''],['已確認',''],['到場',''],['入住',''],['退房',''],['結算','']];
+  const idx={applied:0,approved:0,confirmed:1,arrived:2,checked_in:3,checked_out:4,settled:5,archived:6}[t.stage];
+  return `<div class="mpage"><a href="#/player/trips" class="btn ghost" style="align-self:flex-start;padding:0">‹ 我的行程</a><h1>${esc(t.dest)} ${t.cin.slice(5)}–${t.cout.slice(5)}</h1><div style="display:flex;gap:8px;align-items:center"><span class="mono">${t.id}</span>${stageBadge(t.stage)}</div>
+    ${t.stage==='cancelling'?`<div class="info">${I.info}<div><b>執行取消行程中</b><span>天城人員 ${esc(openChg&&openChg.startedBy||'')} 正在辦理，完成前不顯示已取消。押金與接送待辦另行保留。</span></div></div>`:t.stage==='cancelled'?`<div class="info">${I.info}<div><b>本行程已取消</b><span>天城已完成外部取消。原住宿單作廢列於歷史；如需再來請重新申請。</span></div></div>`:stepper(stepsArr,idx)}
+    ${todos.length?todos.map(x=>`<div class="mcard" style="border-color:var(--gold-dim)"><div class="mh"><span>${esc(x[0])}</span></div><div class="mini">${esc(x[1])}</div>${x[2]?`<div style="margin-top:12px">${A(x[2].act,x[2].p,x[2].label,'btn m block')}</div>`:''}</div>`).join(''):''}
+    ${playerStrip(t)}
+    <div class="mcard"><div class="mh"><span>住宿資訊</span>${t.hotel.status==='confirmed'?badge('有效','success'):badge('確認中','warning')}</div>${kv([['酒店',esc(t.hotel.name)],['住宿確認編號',`<span class="mono">${t.hotel.conf||'—'}</span>`],['入住 / 預計退房',`${t.cin} – ${t.cout} · ${t.nights} 晚`],['實際入住',t.hotelCheckin||'尚未入住（酒店回報後更新）'],['實際退房',t.hotelCheckout||'—']],true)}${t.hotel.next?`<div class="info" style="margin-top:10px">${I.bed}<div><b>接續單 ${esc(t.hotel.next.conf)}</b><span>${esc(t.hotel.next.dates)}</span></div></div>`:''}</div>
+    <div class="mcard"><div class="mh"><span>接機集合資訊</span>${t.pickup.arr.status==='none'?badge('自行前往','neutral'):t.pickup.arr.car?badge('已確認','success'):badge('待確認','warning')}</div>${t.pickup.arr.status==='none'?'<div class="mini">您選擇自行前往。</div>':kv([['航班',esc(t.pickup.arr.flight)],['抵達',esc(t.pickup.arr.time)+' · 韓國時間'],['集合',esc(t.pickup.arr.terminal||'—')+' 入境大廳 3 號出口'],['車輛',t.pickup.arr.car?esc(t.pickup.arr.car):'待天城安排確認']],true)}<div class="hint" style="margin-top:6px">接機免費；送機由玩家直接付車方。</div></div>
+    <div class="mcard"><div class="mh"><span>天城押金</span></div>${depositAxis(t).map(x=>`<div class="row" style="padding:8px 0"><div class="g"><b>${esc(x[0])}</b></div>${dot(x[1],x[2])}</div>`).join('')}${t.deposit.collected?`<div class="row" style="padding:8px 0"><div class="g"><b>本人支付確認</b></div>${t.deposit.playerPaid?dot('已確認 '+t.deposit.playerPaid,'success'):dot('待本人確認','warning')}</div>`:''}${t.deposit.refunded?`<div class="row" style="padding:8px 0"><div class="g"><b>本人收款確認</b></div>${t.deposit.playerReceived?dot('已確認 '+t.deposit.playerReceived,'success'):dot('待本人確認','warning')}</div>`:''}<div class="hint" style="margin-top:8px">收退款方均為天城 PokerRoom，韓元現金、無收據附件。</div>${t.deposit.collected?`<div style="margin-top:10px">${A('openModal',{m:'case',tripId:t.id,type:'押金紀錄需要核實'},'押金紀錄需要核實','btn secondary sm')}</div>`:''}</div>
+    ${chgs.length?`<div class="mcard"><div class="mh"><span>行程異動紀錄</span></div>${chgs.map(c=>`<div class="row" style="padding:10px 0"><div class="g"><b>${CHG_TYPE[c.type]}</b><small>${c.id} · 送出 ${c.submitted}</small>${c.result?`<small style="color:var(--text)">結果：${c.result.ok==='all'?'全部成功':c.result.ok==='part'?'部分成功':'無法辦理'}${c.result.conf?' · '+c.result.conf:''}</small>`:''}</div>${badge(CHG_STAGE[c.stage][0],CHG_STAGE[c.stage][1])}${c.stage==='pending'?A('withdrawChange',{id:c.id},'撤回','btn ghost sm'):''}</div>`).join('')}</div>`:''}
+    ${(canPre||canIn)&&!openChg?`<div class="mcard"><div class="mh"><span>${canIn?'入住中可申請':'入住前可申請'}</span></div><div style="display:flex;flex-direction:column;gap:8px">${canIn?A('openModal',{m:'change',id:t.id,type:'extend'},'申請續住','btn secondary m')+A('openModal',{m:'change',id:t.id,type:'reschedule'},'申請改期','btn secondary m'):A('openModal',{m:'change',id:t.id,type:'reschedule'},'修改住宿日期','btn secondary m')+A('openModal',{m:'change',id:t.id,type:'cancel'},'取消行程','btn danger m')}</div><div class="hint">送出後由天城處理；送出不等於新安排成立。</div></div>`:''}
+    <div class="mcard"><div class="mh"><span>本行程歷程</span></div><div class="mtimeline">${(t.history||[]).slice().reverse().map(h=>`<div class="mtl"><div>${esc(h.e)}<small>${h.t} · ${esc(h.by)}</small></div></div>`).join('')||'<div class="mini">尚無紀錄</div>'}</div></div>
+    ${A('openModal',{m:'case',tripId:t.id,type:'行程問題'},'回報本行程問題','btn secondary m block')}</div>`;
+}
+function applyForm(){
+  const m=member(ME);
+  return `<div class="mpage"><a href="#/player/trips" class="btn ghost" style="align-self:flex-start;padding:0">‹ 我的行程</a><h1>申請新行程</h1><div class="hint">送出即產生行程編號，由管理者核對後訂房訂車；押金於到場時直接付天城。</div>
+    <div class="field"><label>目的地／場館</label><select class="input" data-bind="ap_dest"><option>濟州島 · 天城 PokerRoom</option></select></div>
+    <div class="grid2" style="gap:12px"><div class="field"><label>入住</label><input class="input" type="date" value="${sel('ap_cin')||'2026-10-03'}" data-bind="ap_cin"></div><div class="field"><label>退房</label><input class="input" type="date" value="${sel('ap_cout')||'2026-10-06'}" data-bind="ap_cout"></div></div>
+    <div class="grid2" style="gap:12px"><div class="field"><label>去程航班</label><input class="input" placeholder="KE 1201" value="${esc(sel('ap_f1')||'')}" data-bind="ap_f1"></div><div class="field"><label>回程航班</label><input class="input" placeholder="KE 1208" value="${esc(sel('ap_f2')||'')}" data-bind="ap_f2"></div></div>
+    <div class="field"><label>接機需求（帶入您的偏好，請確認）</label><select class="input" data-bind="ap_pick"><option ${(sel('ap_pick')||m.pickupPref)==='需要接機'?'selected':''}>需要接機</option><option ${(sel('ap_pick')||m.pickupPref)==='自行前往'?'selected':''}>自行前往</option></select></div>
+    <div class="field"><label>同行旅客</label><input class="input" placeholder="無（本人一間房）" data-bind="ap_co"></div>
+    <div class="mcard"><div class="mh"><span>住宿需求預覽</span></div><div class="mini">可用 ${pts(m.ledger-m.reserved)} 分 → 可兌換 ${Math.floor((m.ledger-m.reserved)/25000)} 晚；不足晚數每晚押金 KRW 300,000，到場時付天城。此預覽不占分。</div></div>
+    <label class="check"><input type="checkbox" data-bind="ap_agree" ${sel('ap_agree')?'checked':''}> 我了解押金與積分保留條件（版本 2026-09）</label>
+    ${A('applyTrip',{},'送出行程申請','btn m block')}</div>`;
+}
+MODALS.confirmVersion=p=>{ const t=trip(p.id); return {title:`行程版本 v${t.version} 待您確認`,body:`<div class="split"><div><div class="k">原安排（v${t.playerConfirmedVersion}）</div><div class="v">接機待安排</div></div><div><div class="k">新安排（v${t.version}）</div><div class="v">${esc(t.pickup.arr.flight)} ${esc(t.pickup.arr.time)}<br>集合 ${esc(t.pickup.arr.terminal||'')} 入境大廳 3 號出口</div></div></div><div class="mini">已讀不等於接受；按下確認才記錄您同意此版本。住宿與押金條件不變。</div>`,ok:{act:'confirmVersion',p:{id:t.id},label:`確認版本 v${t.version}`}}; };
+MODALS.change=p=>{ const t=trip(p.id); const type=p.type; const title=CHG_TYPE[type];
+  const body=type==='cancel'?`<div class="info">${I.info}<div><b>取消將送至天城辦理</b><span>天城完成外部取消前，行程顯示「取消處理中」。已付押金依天城確認結果另行處理，不會由取消鍵直接退款。</span></div></div><div class="field"><label>原因（選填）</label><textarea class="input" data-bind="chg_note" placeholder="例如：臨時公務"></textarea></div>`
+   :type==='extend'?`<div class="field"><label>希望延長至（目前退房 ${t.cout}）</label><input class="input" type="date" data-bind="chg_cout" value="${sel('chg_cout')||'2026-09-14'}"></div><div class="mini">續住以接續單處理，原行程編號不變；積分不足的晚數另計押金。</div>`
+   :`<div class="grid2" style="gap:12px"><div class="field"><label>新入住</label><input class="input" type="date" data-bind="chg_cin" value="${sel('chg_cin')||t.cin.replace(/\//g,'-')}"></div><div class="field"><label>新退房</label><input class="input" type="date" data-bind="chg_cout" value="${sel('chg_cout')||t.cout.replace(/\//g,'-')}"></div></div><div class="mini">送出修改不等於新安排成立；天城回報後由管理者核對，再請您確認新版本。</div>`;
+  return {title,body,ok:{act:'requestChange',p:{id:t.id,type},label:'送出申請'}}; };
+MODALS.settlement=p=>{ const t=trip(p.id); const s=t.settlement; const m=member(t.uuid); const rd=computeRefund(t);
+  return {title:`住宿結算 ${s.id} v${s.version}`,body:`${kv([['住宿確認編號',`<span class="mono">${t.hotel.conf}</span>`],['實際住宿',`${t.cin} – ${t.hotelCheckout?t.hotelCheckout.slice(0,10):t.cout} · ${s.nights} 晚`],['本次可用積分',pts(m.ledger)+' 分'],['兌換晚數',`${s.redeemed} 晚 × 25,000 = ${pts(s.points)} 分`],['已付押金',t.deposit.collected?krw(t.deposit.collected.amt):'—'],['預計應退',krw(rd)+'（天城核對後生效）']])}<div class="mini">確認後形成截止快照並正式扣分；之後晚到的積分仍入本行程但不追加本次退款。</div>`,ok:{act:'confirmSettlement',p:{id:t.id},label:'確認本次結算'}}; };
+MODALS.case=p=>({title:'回報問題',body:`<div class="field"><label>問題類型</label><select class="input" data-bind="case_type"><option ${p.type==='押金紀錄需要核實'?'selected':''}>押金紀錄需要核實</option><option ${p.type==='積分疑問'?'selected':''}>積分疑問</option><option ${p.type==='行程問題'?'selected':''}>行程問題</option><option>其他</option></select></div><div class="field"><label>關聯</label><input class="input" value="${esc(p.tripId||'')}" readonly></div><div class="field"><label>說明</label><textarea class="input" data-bind="case_text" placeholder="請描述發生什麼、您預期的結果"></textarea></div><div class="hint">送出只建立案件，不直接改積分、預訂或收退狀態。同一送出重試不會建立多個案件。</div>`,ok:{act:'openCase',p:{tripId:p.tripId,type:p.type},label:'送出'}});
+
+ACT.confirmVersion=p=>{ const t=trip(p.id); t.playerConfirmedVersion=t.version; hist(t,'Alex',`確認行程版本 v${t.version}`); audit('Alex','會員',`${t.id} 本人確認版本 v${t.version}`); S.ui.modal=null; toast(`已確認版本 v${t.version}`); };
+ACT.confirmPaid=p=>{ const t=trip(p.id); t.deposit.playerPaid=nowStamp(); hist(t,'Alex','本人確認已支付押金 '+krw(t.deposit.collected.amt)); audit('Alex','會員',`${t.id} 本人確認已支付押金`); toast('已記錄您的支付確認'); };
+ACT.confirmReceived=p=>{ const t=trip(p.id); t.deposit.playerReceived=nowStamp(); hist(t,'Alex','本人確認已收到退款 '+krw(t.deposit.refunded.amt)); audit('Alex','會員',`${t.id} 本人確認已收到退款`); toast('已記錄您的收款確認'); };
+ACT.confirmSettlement=p=>{ const t=trip(p.id); const m=member(t.uuid); t.settlement.playerConfirmed=nowStamp(); m.ledger-=t.settlement.points; m.reserved=Math.max(0,m.reserved-t.settlement.points); t.deposit.refundDue={amt:computeRefund(t),version:`${t.settlement.id} v${t.settlement.version}`}; hist(t,'Alex','本人確認結算，正式扣分 '+pts(t.settlement.points)); audit('Alex','會員',`${t.id} 本人確認結算 ${t.settlement.id}，扣分 ${pts(t.settlement.points)}`); S.ui.modal=null; toast('結算已確認，已產生住宿兌換核對單送天城'); };
+ACT.requestChange=p=>{ const t=trip(p.id); const id='CHG-260911-'+String(S.changeRequests.length+7).padStart(3,'0'); const m=member(t.uuid); const c={id,tripId:t.id,type:p.type,stage:'pending',by:m.name,submitted:nowStamp(),note:sel('chg_note')||'',history:[{t:nowStamp(),e:'申請已收到'}]}; if(p.type==='extend') c.want={cout:(sel('chg_cout')||'2026-09-14').replace(/-/g,'/')}; if(p.type==='reschedule') c.want={cin:(sel('chg_cin')||'').replace(/-/g,'/'),cout:(sel('chg_cout')||'').replace(/-/g,'/')}; S.changeRequests.unshift(c); if(p.type==='cancel'){ t.stage='cancelling'; } hist(t,'Alex','送出'+CHG_TYPE[p.type]+' '+id); audit(m.cn,'會員',`${t.id} 送出${CHG_TYPE[p.type]} ${id}`); S.ui.modal=null; toast('已送出，天城端已收到案件 '+id); };
+ACT.withdrawChange=p=>{ const c=S.changeRequests.find(x=>x.id===p.id); if(c.stage!=='pending'){toast('已開始執行，無法直接撤回；請改提撤回請求','warn');return false;} c.stage='withdrawn'; c.history.push({t:nowStamp(),e:'開始前撤回'}); const t=trip(c.tripId); if(c.type==='cancel'&&t.stage==='cancelling') t.stage=t.hotelCheckin?'checked_in':'confirmed'; toast('已撤回 '+c.id); };
+ACT.applyTrip=()=>{ if(!sel('ap_agree')){toast('請先勾選同意條件','warn');return false;} const m=member(ME); const cin=(sel('ap_cin')||'2026-10-03').replace(/-/g,'/'), cout=(sel('ap_cout')||'2026-10-06').replace(/-/g,'/'); const n=Math.max(1,Math.round((new Date(cout)-new Date(cin))/86400000)); const id='TR-'+cin.slice(2,4)+cin.slice(5,7)+cin.slice(8,10)+'-0'+(40+S.trips.length); const avail=m.ledger-m.reserved; const coverable=Math.min(n,Math.floor(avail/25000)); const t={id,uuid:ME,dest:'濟州島',en:'JEJU ISLAND',cin,cout,nights:n,hotel:{name:'濟州君悅酒店',conf:null,status:'pending'},stage:'applied',version:1,playerConfirmedVersion:1,pickup:{arr:{flight:sel('ap_f1')||'待補',time:cin+' —',terminal:'濟州機場 T1',status:(sel('ap_pick')||m.pickupPref)==='自行前往'?'none':'pending'},dep:{flight:sel('ap_f2')||'待補',time:cout+' —',status:'pending'}},venueCheckin:null,hotelCheckin:null,hotelCheckout:null,host:null,deposit:{due:(n-coverable)*300000,collected:null,refundDue:null,refunded:null,playerPaid:null,playerReceived:null},settlement:null,reservePlan:coverable*25000,history:[{t:nowStamp(),by:'Alex',e:`送出行程申請（${n} 晚、${sel('ap_pick')||m.pickupPref}）`}]}; S.trips.push(t); audit('Alex','會員',`送出行程申請 ${id}`); ['ap_agree','ap_f1','ap_f2','ap_co'].forEach(k=>delete S.ui.sel[k]); go('player','trips',id); toast('申請已送出，行程編號 '+id); return false; };
+ACT.openCase=p=>{ const m=member(ME); const id='CASE-260911-0'+(32+S.cases.length); S.cases.unshift({id,type:sel('case_type')||p.type,tripId:p.tripId,by:m.name,t:nowStamp(),status:'待受理',text:sel('case_text')||''}); audit(m.cn,'會員',`建立案件 ${id}（${sel('case_type')||p.type}）`); S.ui.modal=null; delete S.ui.sel.case_text; toast('已收到，案件編號 '+id); };
+ACT.savePrefs=()=>{ const m=member(ME); if(sel('lang')) m.lang=sel('lang'); if(sel('pickupPref')) m.pickupPref=sel('pickupPref'); if(sel('rest')) m.restReminder=Number(sel('rest')); toast('偏好已儲存'); };
+</script>
+<script>
+/* ================= 天城合作端 ================= */
+const onIsland=()=>S.trips.filter(t=>t.hotelCheckin&&!t.hotelCheckout&&t.stage!=='cancelled');
+const arrivingToday=()=>S.trips.filter(t=>t.cin===TODAY&&!['cancelled','cancelling'].includes(t.stage));
+const venueTripRow=t=>{ const m=member(t.uuid); return `<tr class="row"><td>${esc(m.name)}</td><td class="mono">${m.tc}</td><td><span class="mono">${t.id}</span><span class="sub">${t.cin.slice(5)} – ${t.cout.slice(5)}</span></td><td>${t.venueCheckin?dot('已到場','success'):dot('待報到','warning')}</td><td>${t.deposit.due===0?dot('無須押金','neutral'):t.deposit.collected?dot('已收取','success'):dot('待收取','warning')}</td><td>${A('goto',{role:'venue',page:'checkin',id:t.id},'查看','btn secondary sm')}</td></tr>`; };
+PAGES.venue={
+  overview(){
+    const pend=S.changeRequests.filter(c=>c.stage==='pending'||c.stage==='in_progress');
+    const refunds=S.trips.filter(t=>t.deposit.refundDue&&t.deposit.refundDue.amt>0&&!t.deposit.refunded);
+    const list=tab('vov','today')==='today'?arrivingToday():tab('vov')==='island'?onIsland():S.trips.filter(t=>t.hotelCheckout&&t.hotelCheckout.startsWith(TODAY));
+    const q=(sel('vq')||'').toLowerCase();
+    const filtered=list.filter(t=>!q||t.id.toLowerCase().includes(q)||member(t.uuid).name.toLowerCase().includes(q)||member(t.uuid).tc.toLowerCase().includes(q));
+    const todos=[...pend.map(c=>({ic:I.doc,title:CHG_TYPE[c.type],b:badge(CHG_STAGE[c.stage][0],CHG_STAGE[c.stage][1]),kv:[['行程',c.tripId],['申請人',c.by],['申請時間',c.submitted]],btn:A('goto',{role:'venue',page:'changes',id:c.id},c.stage==='pending'?'開始執行':'查看需求')})),...refunds.map(t=>({ic:I.coins,title:'押金退還',b:badge('待退還','danger'),kv:[['行程',t.id],['申請人',member(t.uuid).name],['退還金額',krw(t.deposit.refundDue.amt)]],btn:A('goto',{role:'venue',page:'deposits',id:t.id},'查看明細')}))];
+    return pageHead('工作總覽','天城 PokerRoom',A('goto',{role:'venue',page:'checkin'},I.scan+' 掃碼報到'))+`
+      <div class="kpis"><div class="kpi">${I.users}<div><div class="l">今日預計到訪</div><div class="v">${String(arrivingToday().length).padStart(2,'0')}</div></div></div><div class="kpi">${I.user}<div><div class="l">在島玩家</div><div class="v">${String(onIsland().length).padStart(2,'0')}</div></div></div><div class="kpi">${I.doc}<div><div class="l">待處理異動</div><div class="v">${String(pend.length).padStart(2,'0')}</div></div></div><div class="kpi">${I.clock}<div><div class="l">待退押金</div><div class="v">${String(refunds.length).padStart(2,'0')}</div></div></div></div>
+      <div class="grid32"><div class="card">${tabs('vov',[['today','今日到訪'],['island','在島玩家'],['out','今日退房']],'today')}<div style="padding:16px 24px"><div class="search">${I.search}<input placeholder="輸入姓名、會員或行程編號" value="${esc(sel('vq')||'')}" data-bind="vq" data-rerender="1"></div></div>
+        ${filtered.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>玩家</th><th>天城會員編號</th><th>行程與住宿</th><th>報到狀態</th><th>押金狀態</th><th>操作</th></tr></thead><tbody>${filtered.map(venueTripRow).join('')}</tbody></table></div>`:empty(q?'搜尋無結果':'今日尚無符合的行程',q?'請確認姓名、會員或行程編號':'資料依有效紀錄產生，不以掃碼次數代替人數。')}
+        <div class="chead" style="border-top:1px solid var(--border)"><h3>最近處理</h3><a href="#/platform/audit" class="btn ghost sm">查看全部 ›</a></div><div class="timeline" style="padding:0 24px 8px">${S.audit.filter(a=>a.role==='天城').slice(0,4).map(a=>`<div class="tl"><span></span><span class="tm">${a.t.slice(11)}</span><span class="ev">${esc(a.e.split(' ')[1]||a.e.slice(0,10))}</span><span class="mono">${esc(a.e.split(' ')[0])}</span><span class="ds">${esc(a.e)}</span></div>`).join('')}</div></div>
+      <div><div class="chead" style="border:0;padding:0 0 12px"><h3>待辦事項</h3><span class="mini">${todos.length} 件</span></div><div class="todo">${todos.length?todos.map(x=>`<div class="card"><div class="th">${x.ic}${esc(x.title)} ${x.b}</div>${kv(x.kv,true)}<div style="margin-top:12px">${x.btn.replace('class="btn"','class="btn block"')}</div></div>`).join(''):empty('目前沒有待辦','異動申請與待退押金會出現在這裡。')}<div class="hint" style="text-align:right">最新資料 ${NOW} · 韓國時間</div></div></div></div>`;
+  },
+  checkin(id){
+    const scanned=id?trip(id):null;
+    if(!scanned) return pageHead('到場報到','掃描確認玩家身份，並完成到場與押金作業。')+`<div class="card pad" style="max-width:640px"><div class="overline" style="margin-bottom:12px">模擬掃碼</div><div class="mini" style="margin-bottom:14px">原型以選擇代替相機。選一位今日到訪玩家的到場碼：</div><div class="list" style="border:1px solid var(--border);border-radius:var(--r-md)">${arrivingToday().concat(S.trips.filter(t=>t.stage==='checked_in'&&!arrivingToday().includes(t))).map(t=>`<button class="li" data-act="goto" data-p='${esc(JSON.stringify({role:'venue',page:'checkin',id:t.id}))}'><div class="t"><span>${esc(member(t.uuid).name)}</span>${t.venueCheckin?badge('已報到','success'):badge('待報到','warning')}</div><div class="b"><span class="mono">${t.id} · ${member(t.uuid).tc}</span><span>${t.cin.slice(5)}–${t.cout.slice(5)}</span></div></button>`).join('')}</div><div class="info" style="margin-top:16px">${I.info}<div><b>掃碼不會自動報到或扣分</b><span>需本人核對後由櫃檯確認一次；押金收取另行按「已收到押金」。</span></div></div></div>`;
+    const t=scanned, m=member(t.uuid); const d=t.deposit;
+    const canCheckin=!t.venueCheckin&&sel('ck_verify_'+t.id);
+    const coverable=Math.min(t.nights,Math.floor(m.ledger/25000));
+    return pageHead('到場報到','掃描確認玩家身份，並完成到場與押金作業。',A('goto',{role:'venue',page:'checkin'},I.scan+' 掃描下一位','btn secondary'))+`
+      <div class="banner"><span class="st">${I.check} <span style="color:var(--success)">掃碼成功</span></span><span class="sep"></span><span class="muted">本次行程 ·</span><span class="mono">${t.id}</span><span class="r">${t.venueCheckin?dot('已到場 '+t.venueCheckin.slice(11),'success'):dot('待確認到場','warning')}</span></div>
+      <div class="grid2"><div class="card"><div class="chead"><h3>玩家與行程資料</h3></div><div class="cbody"><div style="font-size:28px;font-weight:700;margin-bottom:10px">${esc(m.name)}</div>${kv([['POKERNEXT UUID',`<span class="mono">${m.uuid}</span>`],['天城會員編號',`<span class="mono">${m.tc}</span>`],['行程編號',`<span class="mono">${t.id}</span>`],['住宿確認編號',`<span class="mono">${t.hotel.conf}</span>`],['住宿日期',`${t.cin} – ${t.cout}`],['住宿晚數',t.nights+' 晚']])}
+        <div class="label" style="margin:18px 0 8px">行程狀態</div><div class="split"><div style="display:flex;gap:12px;align-items:center">${I.bed.replace('<svg','<svg style="width:28px;height:28px;stroke:var(--gold-bright);fill:none;stroke-width:1.5"')}<div><div class="mini">酒店入住</div>${t.hotelCheckin?dot('已入住','success'):dot('尚未入住','neutral')}</div></div><div style="display:flex;gap:12px;align-items:center">${I.pin.replace('<svg','<svg style="width:28px;height:28px;stroke:var(--gold-bright);fill:none;stroke-width:1.5"')}<div><div class="mini">PokerRoom</div>${t.venueCheckin?dot('已報到','success'):dot('待報到','warning')}</div></div></div>
+        ${t.venueCheckin?`<div class="info" style="margin-top:18px">${I.info}<div><b>本行程已於 ${t.venueCheckin} 報到</b><span>每行程一次；重複掃碼不會再次報到。</span></div></div>`:`<label class="check" style="margin:18px 0"><input type="checkbox" data-bind="ck_verify_${t.id}" data-rerender="1" ${sel('ck_verify_'+t.id)?'checked':''}> 本人與行程資料核對一致（護照英文姓名、四項編號）</label>${A('venueCheckin',{id:t.id},'確認到場報到','btn block'+(canCheckin?'':' disabled'))}`}
+        </div><div class="cfoot"><span>掃碼時間　${TODAY} ${NOW} · 韓國時間</span></div></div>
+      <div class="card"><div class="chead"><h3>押金收取</h3>${d.due===0?dot('無須押金','neutral'):d.collected?dot('已收取','success'):dot('待收取','warning')}</div><div class="cbody">${kv([['住宿需求',t.nights+' 晚'],['已保留積分',`${pts(coverable*25000)} 分 · 可兌換 ${coverable} 晚`],['積分不足',`<span style="color:var(--gold-bright)">${t.nights-coverable} 晚</span>`],['每晚押金','KRW 300,000']])}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 12px"><b>應收押金</b><div class="amount"><span class="cur">KRW</span><span class="v">${Number(d.due).toLocaleString()}</span></div></div>
+        <div class="info">${I.info}<div><b>收款方：天城 PokerRoom</b><span>玩家於現場直接向天城 PokerRoom 支付押金。POKERNEXT 不代收。</span></div></div>
+        ${d.due===0?'':d.collected?`<div style="margin-top:16px">${kv([['實收金額',krw(d.collected.amt)],['收款時間',d.collected.t],['收款人',esc(d.collected.by)],['玩家本人確認',d.playerPaid?dot('已確認 '+d.playerPaid,'success'):dot('待本人確認','warning')]])}</div>`:`<div class="field" style="margin-top:16px"><label>實收金額</label><div class="prefix"><span>KRW</span><input class="input" value="${sel('ck_amt_'+t.id)||Number(d.due).toLocaleString()}" data-bind="ck_amt_${t.id}"></div></div><div class="field" style="margin-top:12px"><label>收款時間</label><input class="input" value="${TODAY} ${NOW}" data-bind="ck_time_${t.id}"></div><div style="margin-top:16px">${A('collectDeposit',{id:t.id},'已收到押金','btn block')}</div><div class="hint" style="margin-top:8px;display:flex;gap:6px;align-items:center">${I.clock.replace('<svg','<svg style="width:16px;height:16px;stroke:currentColor;fill:none"')} 尚未記錄收款</div>`}
+        </div><div class="cfoot"><span>接待人　<b style="color:var(--text)">${esc(t.host||'待安排')}</b></span>${A('noop',{},'聯繫接待人 ›','btn ghost sm')}</div></div></div>`;
+  },
+  changes(id){
+    const f=tab('vch','pending'); const all=S.changeRequests;
+    const list=all.filter(c=>f==='all'||c.stage===f||(f==='reported'&&c.stage==='reported'));
+    const c=id?all.find(x=>x.id===id):list[0];
+    const cnt=s=>all.filter(x=>x.stage===s).length;
+    return pageHead('行程異動','處理玩家行程、住宿與相關異動申請')+tabs('vch',[['pending','待開始',cnt('pending')],['in_progress','執行中',cnt('in_progress')],['reported','待內部核對',cnt('reported')],['done','已完成',cnt('done')],['withdrawn','已撤回',cnt('withdrawn')],['all','全部',null]],'pending')+`
+      <div class="grid13"><div class="card"><div style="padding:14px"><div class="search">${I.search}<input placeholder="輸入會員或行程編號"></div></div><div class="list">${list.length?list.map(x=>`<button class="li ${c&&c.id===x.id?'on':''}" data-act="goto" data-p='${esc(JSON.stringify({role:'venue',page:'changes',id:x.id}))}'><div class="t"><span>${CHG_TYPE[x.type]}</span>${badge(CHG_STAGE[x.stage][0],CHG_STAGE[x.stage][1])}</div><div class="m">${esc(x.by)}</div><div class="b"><span class="mono">${x.tripId}</span><span>${x.submitted.slice(5)}</span></div></button>`).join(''):empty('此狀態沒有案件','切換上方分頁查看其他狀態。')}</div></div>
+      ${c?changeDetail(c):'<div class="card">'+empty('請從左側選擇案件','')+'</div>'}</div>`;
+  },
+  recon(id){
+    const items=S.trips.filter(t=>t.settlement&&t.settlement.playerConfirmed);
+    const t=id?trip(id):items.find(x=>!x.settlement.venueAligned)||items[0];
+    return pageHead('住宿兌換核對','核對 POKERNEXT 提出的住宿結算版本；確認後記為「雙方已對齊」。')+`<div class="grid13"><div class="card"><div class="list">${items.length?items.map(x=>`<button class="li ${t&&t.id===x.id?'on':''}" data-act="goto" data-p='${esc(JSON.stringify({role:'venue',page:'recon',id:x.id}))}'><div class="t"><span>${esc(member(x.uuid).name)}</span>${x.settlement.venueAligned?badge('雙方已對齊','success'):badge('待核對','warning')}</div><div class="b"><span class="mono">${x.settlement.id} v${x.settlement.version}</span><span>${x.id}</span></div></button>`).join(''):empty('沒有待核對的核對單','玩家確認結算後，核對單會出現在這裡。')}</div></div>
+      ${t?`<div class="card"><div class="chead"><h3>核對單 ${t.settlement.id} <span class="muted">v${t.settlement.version}</span></h3>${t.settlement.venueAligned?dot('雙方已對齊 '+t.settlement.venueAligned,'success'):dot('待天城核對','warning')}</div><div class="cbody">${kv([['玩家',esc(member(t.uuid).name)],['天城會員編號',`<span class="mono">${member(t.uuid).tc}</span>`],['行程編號',`<span class="mono">${t.id}</span>`],['酒店確認編號',`<span class="mono">${t.hotel.conf}</span>`],['住宿日期',`${t.cin} – ${t.hotelCheckout?t.hotelCheckout.slice(0,10):t.cout} · ${t.settlement.nights} 晚`],['兌換晚數／積分',`${t.settlement.redeemed} 晚 · ${pts(t.settlement.points)} 分`],['已收押金',t.deposit.collected?krw(t.deposit.collected.amt)+' · '+t.deposit.collected.t:'—'],['應退（天城）',t.deposit.refundDue?krw(t.deposit.refundDue.amt):'—'],['玩家本人確認',t.settlement.playerConfirmed]])}
+        <div class="label" style="margin:18px 0 8px">逐晚分配</div><div class="tblwrap"><table class="tbl"><thead><tr><th>晚</th><th>日期</th><th>兌換</th><th>押金</th><th>應退</th></tr></thead><tbody>${Array.from({length:t.settlement.nights}).map((_,i)=>{const red=i<t.settlement.redeemed;const paid=t.deposit.collected&&i<Math.round(t.deposit.collected.amt/300000);return `<tr><td>第 ${i+1} 晚</td><td>${t.cin.slice(0,8)}${String(Number(t.cin.slice(8))+i).padStart(2,'0')}</td><td>${red?dot('25,000 分','success'):dot('未兌換','neutral')}</td><td>${paid?'已付 300,000':'—'}</td><td>${red&&paid?'<b style="color:var(--gold-bright)">300,000</b>':'0'}</td></tr>`;}).join('')}</tbody></table></div>
+        ${t.settlement.venueAligned?'':`<div style="display:flex;gap:10px;margin-top:20px">${A('venueAlign',{id:t.id},'確認：雙方已對齊')}${A('openModal',{m:'diff',id:t.id},'提出差異','btn secondary')}</div>`}</div><div class="cfoot"><span>天城餘額時點 ${TODAY} 09:00</span><span>確認不等於改帳；差異走獨立案件</span></div></div>`:''}</div>`;
+  },
+  deposits(id){
+    const f=tab('vdep','all');
+    const all=S.trips.filter(t=>t.deposit.due>0);
+    const st=t=>{const d=t.deposit; if(!d.collected) return 'collect'; if(d.refunded) return 'refunded'; if(d.refundDue&&d.refundDue.amt>0) return 'refund'; if(t.settlement&&t.settlement.playerConfirmed&&!t.settlement.venueAligned) return 'recon'; return 'settle';};
+    const LAB={collect:['待收取','warning'],settle:['待住宿結算','neutral'],recon:['待核對','warning'],refund:['待退還','danger'],refunded:['已退還','success']};
+    const list=all.filter(t=>f==='all'||st(t)===f);
+    const t=id?trip(id):null;
+    return pageHead('押金紀錄','應收／實收／應退／實退四軸，僅韓元現金、無收據附件。')+tabs('vdep',[['all','全部',all.length],['collect','待收取',all.filter(x=>st(x)==='collect').length],['settle','待住宿結算',null],['recon','待核對',null],['refund','待退還',all.filter(x=>st(x)==='refund').length],['refunded','已退還',null]],'all')+`
+      <div class="card"><div class="tblwrap"><table class="tbl"><thead><tr><th>玩家</th><th>行程／酒店單</th><th>應收</th><th>實收</th><th>應退</th><th>實退</th><th>狀態</th><th></th></tr></thead><tbody>${list.length?list.map(x=>{const d=x.deposit;const s=st(x);return `<tr class="row ${t&&t.id===x.id?'sel':''}"><td>${esc(member(x.uuid).name)}<span class="sub mono">${member(x.uuid).tc}</span></td><td><span class="mono">${x.id}</span><span class="sub mono">${x.hotel.conf} · ${x.nights} 晚</span></td><td class="num" style="font-weight:400">${Number(d.due).toLocaleString()}</td><td class="num" style="font-weight:400">${d.collected?Number(d.collected.amt).toLocaleString():'—'}</td><td class="num" style="font-weight:400">${d.refundDue?Number(d.refundDue.amt).toLocaleString():'—'}</td><td class="num" style="font-weight:400">${d.refunded?Number(d.refunded.amt).toLocaleString():'—'}</td><td>${dot(LAB[s][0],LAB[s][1])}</td><td>${A('goto',{role:'venue',page:'deposits',id:x.id},'明細','btn secondary sm')}</td></tr>`;}).join(''):`<tr><td colspan="8">${empty('此篩選沒有紀錄','')}</td></tr>`}</tbody></table></div></div>
+      ${t?depositDetail(t):''}`;
+  },
+  transfer(){
+    const list=S.trips.filter(t=>t.pickup.arr.status!=='none'&&!['cancelled','checked_out','settled','archived'].includes(t.stage));
+    return pageHead('接送安排','本場館接機／送機需求與安排回報；接機免費，送機由玩家直接付車方。')+`<div class="card">${tabs('vtr',[['arr','接機'],['dep','送機']],'arr')}<div class="tblwrap"><table class="tbl"><thead><tr><th>玩家</th><th>行程</th><th>航班／時間</th><th>集合</th><th>車輛</th><th>狀態</th><th></th></tr></thead><tbody>${list.map(t=>{const k=tab('vtr','arr');const p=t.pickup[k];return `<tr class="row"><td>${esc(member(t.uuid).name)}</td><td class="mono">${t.id}</td><td>${esc(p.flight)}<span class="sub">${esc(p.time)}</span></td><td>${k==='arr'?esc(t.pickup.arr.terminal||'—')+'<span class="sub">入境大廳 3 號出口</span>':'酒店大廳'}</td><td>${p.car?esc(p.car):'<span class="muted">待安排</span>'}</td><td>${p.status==='done'?dot('已完成','success'):p.car?dot('已安排','info'):dot('待安排','warning')}</td><td>${p.status==='done'?'':p.car?A('noop',{},'回報結果','btn secondary sm'):A('openModal',{m:'assignCar',id:t.id,k},'安排車輛','btn secondary sm')}</td></tr>`;}).join('')||`<tr><td colspan="7">${empty('沒有接送需求','')}</td></tr>`}</tbody></table></div></div>`;
+  },
+  departed(){
+    const f=tab('vdp','today');
+    const out=S.trips.filter(t=>t.hotelCheckout);
+    const list=f==='today'?out.filter(t=>t.hotelCheckout.startsWith(TODAY)):f==='hist'?out:out.filter(t=>!(t.settlement&&t.settlement.venueAligned&&(!t.deposit.refundDue||t.deposit.refundDue.amt===0||t.deposit.refunded)));
+    return pageHead('離境玩家與未完成核對','以酒店實際退房為準；未完成核對不受日期篩選限制。')+`<div class="card">${tabs('vdp',[['today','今日已離境'],['hist','歷史已離境'],['open','未完成核對']],'today')}<div class="tblwrap"><table class="tbl"><thead><tr><th>玩家</th><th>行程</th><th>實際退房</th><th>住宿核對</th><th>押金退還</th><th></th></tr></thead><tbody>${list.length?list.map(t=>`<tr class="row"><td>${esc(member(t.uuid).name)}</td><td class="mono">${t.id}</td><td>${t.hotelCheckout}</td><td>${t.settlement?t.settlement.venueAligned?dot('雙方已對齊','success'):t.settlement.playerConfirmed?dot('待天城核對','warning'):dot('待玩家確認','warning'):dot('待結算','neutral')}</td><td>${t.deposit.due===0?dot('無須','neutral'):t.deposit.refunded?dot('已退還','success'):t.deposit.refundDue&&t.deposit.refundDue.amt>0?dot('待退還','danger'):dot('待依據','neutral')}</td><td>${A('goto',{role:'venue',page:'deposits',id:t.id},'明細','btn secondary sm')}</td></tr>`).join(''):`<tr><td colspan="6">${empty(f==='open'?'沒有未完成核對的行程':'沒有符合的離境紀錄',f==='open'?'':'離境以酒店實際退房回報為準，不以航班時間推定。')}</td></tr>`}</tbody></table></div></div>`;
+  },
+};
+function changeDetail(c){
+  const t=trip(c.tripId); const m=member(t.uuid);
+  const steps=[['申請已收到',c.submitted],['開始執行',c.started?c.started+' · '+c.startedBy:''],[c.type==='cancel'?'已完成':'已回報',c.result?(c.history.slice(-1)[0].t):'']];
+  const cur=c.stage==='pending'?0:c.stage==='in_progress'?1:c.stage==='withdrawn'?0:3;
+  const want=c.type==='cancel'?'取消本次行程與住宿':c.type==='extend'?`續住至 ${c.want.cout}`:`改為 ${c.want.cin} – ${c.want.cout}`;
+  return `<div class="card"><div class="chead"><div><h3>${CHG_TYPE[c.type]} ${badge(CHG_STAGE[c.stage][0],CHG_STAGE[c.stage][1])}</h3><div class="mini">案件編號 <span class="mono">${c.id}</span></div></div></div><div class="cbody">
+    ${kv([['玩家',esc(m.name)],['天城會員編號',`<span class="mono">${m.tc}</span>`],['行程編號',`<span class="mono">${t.id}</span>`],['住宿確認編號',`<span class="mono">${t.hotel.conf}</span> ${A('noop',{},'檢視確認單','btn ghost sm')}`]])}
+    <div class="split" style="margin:16px 0"><div><div class="k">目前住宿</div><div class="v">${t.cin} – ${t.cout} · ${t.nights} 晚</div></div><div><div class="k">申請內容（版本 v1）</div><div class="v">${esc(want)}</div></div></div>
+    <div class="mini">酒店入住：${t.hotelCheckin?'已入住 '+t.hotelCheckin:'尚未入住'}${c.note?' · 備註：'+esc(c.note):''}</div>
+    <div class="label" style="margin:18px 0 0">處理進度</div>${stepper(steps,cur)}
+    ${c.stage==='pending'?`<div style="display:flex;gap:10px;margin-top:16px">${A('startChange',{id:c.id},'開始執行')}</div><div class="hint" style="margin-top:8px">開始時將重查最新需求版本；單純查看不算開始。</div>`:''}
+    ${c.stage==='in_progress'?(c.type==='cancel'?`<div style="margin-top:16px"><div class="label" style="margin-bottom:8px">取消結果</div><label class="check"><input type="checkbox" data-bind="chg_done_${c.id}" data-rerender="1" ${sel('chg_done_'+c.id)?'checked':''}> 已在天城系統完成取消</label><div class="field" style="margin-top:12px"><label>處理備註</label><textarea class="input" data-bind="chg_memo_${c.id}" placeholder="原住宿確認單已作廢。">${esc(sel('chg_memo_'+c.id)||'')}</textarea></div><div style="display:flex;gap:10px;margin-top:16px;align-items:center">${A('completeCancel',{id:c.id},'已完成','btn'+(sel('chg_done_'+c.id)?'':' disabled'))}${A('noop',{},'儲存備註','btn secondary')}<span class="mini" style="margin-left:auto">完成後玩家端立即顯示已取消，不等管理者批准</span></div></div>`
+      :`<div style="margin-top:16px"><div class="label" style="margin-bottom:8px">回報結果</div><div class="radio"><label><input type="radio" name="r_${c.id}" data-bind="chg_res_${c.id}" value="all" ${(sel('chg_res_'+c.id)||'all')==='all'?'checked':''}> 全部成功（同房型）</label><label><input type="radio" name="r_${c.id}" data-bind="chg_res_${c.id}" value="part" ${sel('chg_res_'+c.id)==='part'?'checked':''}> 部分成功（提供實際可行日期）</label><label><input type="radio" name="r_${c.id}" data-bind="chg_res_${c.id}" value="no" ${sel('chg_res_'+c.id)==='no'?'checked':''}> 無法辦理</label></div><div class="field" style="margin-top:12px"><label>${c.type==='extend'?'接續單編號':'新／同號確認單編號'}</label><input class="input" value="${esc(sel('chg_conf_'+c.id)||t.hotel.conf+'-A')}" data-bind="chg_conf_${c.id}"></div><div style="display:flex;gap:10px;margin-top:16px">${A('reportChange',{id:c.id},'送出回報')}</div><div class="hint" style="margin-top:8px">回報後由 POKERNEXT 管理者核對並正式登錄；不在此直接改玩家的正式安排。</div></div>`)
+    :''}
+    ${c.stage==='reported'?`<div class="info" style="margin-top:16px">${I.info}<div><b>已回報，等待管理者核對</b><span>結果：${c.result.ok==='all'?'全部成功':c.result.ok==='part'?'部分成功':'無法辦理'}${c.result.conf?' · '+esc(c.result.conf):''}</span></div></div>`:''}
+    ${c.stage==='done'?`<div class="info" style="margin-top:16px">${I.check}<div><b>已完成</b><span>${c.type==='cancel'?'玩家端已顯示已取消；押金／接送未完事項另行保留。':'管理者已核對並正式登錄。'}</span></div></div>`:''}
+    <div class="label" style="margin:18px 0 6px">案件歷程</div><div class="mtimeline">${c.history.map(h=>`<div class="mtl"><div>${esc(h.e)}<small>${h.t}</small></div></div>`).join('')}</div>
+    </div><div class="cfoot"><span>玩家端目前顯示：<b style="color:var(--gold-bright)">${c.type==='cancel'?(c.stage==='done'?'已取消':c.stage==='in_progress'?'執行取消行程中':c.stage==='pending'?'取消中，等待回覆':'—'):CHG_STAGE[c.stage][0]}</b></span><span>最後更新 ${c.history.slice(-1)[0].t}</span></div></div>`;
+}
+function depositDetail(t){
+  const d=t.deposit; const m=member(t.uuid);
+  const canRefund=d.refundDue&&d.refundDue.amt>0&&!d.refunded;
+  return `<div class="card"><div class="chead"><h3>${esc(m.name)} · <span class="mono muted">${t.id}</span></h3>${dot(canRefund?'待退還':d.refunded?'已退還':d.collected?'已收取':'待收取',canRefund?'danger':d.refunded||d.collected?'success':'warning')}</div><div class="cbody grid2">
+    <div><div class="label" style="margin-bottom:8px">收取軸</div>${kv([['應收',krw(d.due)],['實收',d.collected?krw(d.collected.amt):'—'],['收款時間／人',d.collected?d.collected.t+' · '+d.collected.by:'—'],['玩家本人確認',d.collected?(d.playerPaid?dot('已確認 '+d.playerPaid,'success'):dot('待本人確認','warning')):'—']])}${!d.collected?`<div style="margin-top:12px">${A('goto',{role:'venue',page:'checkin',id:t.id},'前往報到頁收取','btn secondary')}</div>`:''}</div>
+    <div><div class="label" style="margin-bottom:8px">退還軸</div>${kv([['退款依據',t.settlement?(t.settlement.venueAligned?`${t.settlement.id} v${t.settlement.version} · 雙方已對齊`:'核對單待對齊'):'待住宿結算'],['應退',d.refundDue?krw(d.refundDue.amt):'—'],['實退',d.refunded?krw(d.refunded.amt)+' · '+d.refunded.t:'—'],['玩家本人確認',d.refunded?(d.playerReceived?dot('已確認 '+d.playerReceived,'success'):dot('待本人確認','warning')):'—']])}
+    ${canRefund?`<div class="field" style="margin-top:14px"><label>實退金額（須與應退完全一致）</label><div class="prefix"><span>KRW</span><input class="input" value="${sel('rf_amt_'+t.id)||Number(d.refundDue.amt).toLocaleString()}" data-bind="rf_amt_${t.id}"></div></div><div style="display:flex;gap:10px;margin-top:14px">${A('refundDeposit',{id:t.id},'已退還押金')}${A('openModal',{m:'diff',id:t.id},'轉差異案件','btn secondary')}</div><div class="hint" style="margin-top:8px">首版不開正常部分退款；金額不一致不能完成。</div>`:''}</div>
+    </div><div class="cfoot"><span>收退款方均為天城 PokerRoom · 韓元現金 · 無收據附件</span><span>行程獨立付款、獨立退款</span></div></div>`;
+}
+MODALS.diff=p=>({title:'提出資料差異',body:`<div class="field"><label>差異項目</label><select class="input" data-bind="diff_type"><option>積分</option><option>住宿日期／晚數</option><option>押金金額</option><option>編號／姓名</option></select></div><div class="field"><label>說明</label><textarea class="input" data-bind="diff_text" placeholder="例如：天城系統顯示 9/10 積分為 4,500，核對單為 4,200"></textarea></div><div class="field"><label>憑據</label><div class="input" style="display:flex;align-items:center;color:var(--text-3)">${I.upload.replace('<svg','<svg style="width:18px;height:18px;stroke:currentColor;fill:none;margin-right:8px"')} 拖曳或選擇檔案（JPG／PNG／PDF）</div></div><div class="hint">差異案件由 POKERNEXT 管理者處理，天城不直接修改平台帳目。</div>`,ok:{act:'raiseDiff',p:{id:p.id},label:'建立差異案件'}});
+MODALS.assignCar=p=>({title:'安排車輛',body:`<div class="field"><label>車輛／車牌</label><input class="input" data-bind="car" value="${esc(sel('car')||'黑色 Carnival · 34나 7788')}"></div><div class="field"><label>集合位置</label><input class="input" value="濟州機場 T1 入境大廳 3 號出口" readonly></div><div class="hint">只提供司機必要接送資訊；不提供護照圖、積分或全行程存取。</div>`,ok:{act:'assignCar',p,label:'儲存安排'}});
+ACT.venueCheckin=p=>{ const t=trip(p.id); if(t.venueCheckin) return false; t.venueCheckin=nowStamp(); if(t.stage==='confirmed') t.stage='arrived'; hist(t,'琪琪','天城櫃檯確認到場報到'); audit('琪琪','天城',`${t.id} 確認到場報到`); toast('已確認到場，本行程報到一次'); };
+ACT.collectDeposit=p=>{ const t=trip(p.id); const amt=Number(String(sel('ck_amt_'+t.id)||t.deposit.due).replace(/,/g,'')); if(!amt||amt<=0){toast('實收 0 不能記已收','err');return false;} if(amt!==t.deposit.due){toast('實收與應收不一致，請轉差異案件','err');return false;} t.deposit.collected={amt,t:sel('ck_time_'+t.id)||nowStamp(),by:'琪琪'}; hist(t,'琪琪','天城已收到押金 '+krw(amt)); audit('琪琪','天城',`${t.id} 已收到押金 ${krw(amt)}`); toast('已記錄收款；玩家端將請本人確認'); };
+ACT.startChange=p=>{ const c=S.changeRequests.find(x=>x.id===p.id); c.stage='in_progress'; c.started=nowStamp(); c.startedBy='琪琪'; c.history.push({t:nowStamp(),e:'開始執行 · 琪琪'}); const t=trip(c.tripId); if(c.type==='cancel') t.stage='cancelling'; hist(t,'琪琪',`天城開始執行 ${CHG_TYPE[c.type]}`); audit('琪琪','天城',`${c.id} 開始執行（${CHG_TYPE[c.type]}）`); toast('已開始執行，已重查最新需求版本 v1'); };
+ACT.completeCancel=p=>{ const c=S.changeRequests.find(x=>x.id===p.id); if(!sel('chg_done_'+c.id)) return false; c.stage='done'; c.result={ok:'all',note:sel('chg_memo_'+c.id)||''}; c.history.push({t:nowStamp(),e:'天城完成取消 · 已完成'}); const t=trip(c.tripId); t.stage='cancelled'; t.hotel.status='void'; const m=member(t.uuid); m.reserved=Math.max(0,m.reserved-25000*Math.min(t.nights,Math.floor(m.ledger/25000))); hist(t,'琪琪','天城完成外部取消，行程已取消並歸檔'); audit('琪琪','天城',`${c.id} 取消完成，${t.id} 已取消`); toast('已完成；玩家端與管理端已同步為已取消'); };
+ACT.reportChange=p=>{ const c=S.changeRequests.find(x=>x.id===p.id); const ok=sel('chg_res_'+c.id)||'all'; c.stage='reported'; c.result={ok,conf:ok==='no'?null:(sel('chg_conf_'+c.id)||trip(c.tripId).hotel.conf+'-A')}; c.history.push({t:nowStamp(),e:`回報：${ok==='all'?'全部成功':ok==='part'?'部分成功':'無法辦理'}${c.result.conf?'，接續單 '+c.result.conf:''}`}); const t=trip(c.tripId); hist(t,'琪琪',`天城回報${CHG_TYPE[c.type]}結果：${ok==='all'?'全部成功':ok==='part'?'部分成功':'無法辦理'}`); audit('琪琪','天城',`${c.id} 回報結果（${ok}）`); toast('已回報，等待管理者核對'); };
+ACT.venueAlign=p=>{ const t=trip(p.id); t.settlement.venueAligned=nowStamp(); t.deposit.refundDue={amt:computeRefund(t),version:`${t.settlement.id} v${t.settlement.version}`}; hist(t,'琪琪','天城核對確認：雙方已對齊'+(t.deposit.refundDue.amt?'，應退 '+krw(t.deposit.refundDue.amt):'')); audit('琪琪','天城',`${t.settlement.id} 雙方已對齊`); toast('已記為雙方已對齊'+(t.deposit.refundDue.amt?'；產生應退 '+krw(t.deposit.refundDue.amt):'')); };
+ACT.refundDeposit=p=>{ const t=trip(p.id); const amt=Number(String(sel('rf_amt_'+t.id)||t.deposit.refundDue.amt).replace(/,/g,'')); if(amt!==t.deposit.refundDue.amt){toast('實退金額須與應退完全一致；不一致請轉差異案件','err');return false;} t.deposit.refunded={amt,t:nowStamp(),by:'琪琪'}; hist(t,'琪琪','天城已退還押金 '+krw(amt)); audit('琪琪','天城',`${t.id} 已退還押金 ${krw(amt)}`); toast('已記錄退還；玩家端將請本人確認收到'); };
+ACT.raiseDiff=p=>{ const t=trip(p.id); const id='CASE-260911-0'+(32+S.cases.length); S.cases.unshift({id,type:'資料差異：'+(sel('diff_type')||'積分'),tripId:t.id,by:'琪琪（天城）',t:nowStamp(),status:'待受理',text:sel('diff_text')||''}); audit('琪琪','天城',`建立差異案件 ${id}（${t.id}）`); S.ui.modal=null; toast('差異案件已建立 '+id+'，由管理者處理'); };
+ACT.assignCar=p=>{ const t=trip(p.id); t.pickup[p.k].car=sel('car')||'黑色 Carnival · 34나 7788'; if(t.pickup[p.k].status==='pending') t.pickup[p.k].status='assigned'; hist(t,'琪琪',`天城安排${p.k==='arr'?'接機':'送機'}車輛 ${t.pickup[p.k].car}`); audit('琪琪','天城',`${t.id} 安排車輛`); S.ui.modal=null; toast('已儲存，管理端接送看板可核對'); };
+</script>
+<script>
+/* ================= 管理端（管理者） ================= */
+PAGES.admin={
+  dashboard(){
+    const applied=S.trips.filter(t=>t.stage==='applied'); const reported=S.changeRequests.filter(c=>c.stage==='reported'); const pendApps=S.applications.filter(a=>a.status==='pending');
+    const unassigned=S.trips.filter(t=>!t.host&&!['cancelled','checked_out','settled','archived'].includes(t.stage));
+    const today=S.trips.filter(t=>t.cin===TODAY&&!['cancelled'].includes(t.stage)); const tomorrow=S.trips.filter(t=>t.cin==='2026/09/12'&&t.stage!=='cancelled');
+    const openCases=S.cases.filter(c=>c.status!=='已解決');
+    return pageHead('服務監控儀表板','三階段工作與今日／明日接待。資料來自正式紀錄，顯示來源時間。')+`
+      <div class="kpis"><div class="kpi">${I.users}<div><div class="l">今日接待</div><div class="v">${String(today.length).padStart(2,'0')}</div></div></div><div class="kpi">${I.cal}<div><div class="l">明日接待</div><div class="v">${String(tomorrow.length).padStart(2,'0')}</div></div></div><div class="kpi">${I.inbox}<div><div class="l">待我處理</div><div class="v">${String(applied.length+reported.length+pendApps.length+S.hostRequests.filter(h=>h.status==='pending').length+(S.pointsImport.status==='preview'?1:0)).padStart(2,'0')}</div></div></div><div class="kpi">${I.flag}<div><div class="l">未完成案件</div><div class="v">${String(openCases.length).padStart(2,'0')}</div></div></div></div>
+      <div class="grid32"><div style="display:flex;flex-direction:column;gap:24px">
+        <div class="card"><div class="chead"><h3>今日／明日接待</h3><span class="mini">來源：有效行程 · 最後更新 ${NOW}</span></div><div class="tblwrap"><table class="tbl"><thead><tr><th>玩家</th><th>行程</th><th>階段</th><th>酒店</th><th>接送</th><th>PokerRoom</th><th>接待人</th></tr></thead><tbody>${today.concat(tomorrow).map(t=>`<tr class="row"><td>${esc(member(t.uuid).name)}<span class="sub">${t.cin.slice(5)} 抵達</span></td><td class="mono">${t.id}</td><td>${stageBadge(t.stage)}</td><td>${t.hotelCheckin?dot('已入住','success'):t.hotel.status==='confirmed'?dot('已確認','info'):dot('確認中','warning')}</td><td>${t.pickup.arr.status==='none'?dot('自行','neutral'):t.pickup.arr.status==='done'?dot('已接到','success'):t.pickup.arr.car?dot('已安排','info'):dot('待安排','warning')}</td><td>${t.venueCheckin?dot('已報到','success'):dot('未報到','neutral')}</td><td>${t.host?esc(t.host):'<span style="color:var(--warning)">待指派</span>'}</td></tr>`).join('')}</tbody></table></div></div>
+        <div class="card"><div class="chead"><h3>三階段工作</h3></div><div class="cbody" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">${[['售前',S.customers.filter(c=>c.phase==='presale').length,'待接洽／確認中'],['行程服務',S.customers.filter(c=>c.phase==='trip').length,'進行中行程'],['維護',S.customers.filter(c=>c.phase==='maintain').length,'退房後／回訪']].map(x=>`<div class="card el pad" style="padding:16px"><div class="mini">${x[0]}</div><div class="num" style="font-size:28px">${x[1]}</div><div class="hint">${x[2]}</div></div>`).join('')}</div></div></div>
+      <div><div class="chead" style="border:0;padding:0 0 12px"><h3>待處理</h3></div><div class="todo">
+        ${applied.map(t=>`<div class="card"><div class="th">${I.briefcase}行程申請待核對 ${badge('新','warning')}</div>${kv([['行程',t.id],['申請人',member(t.uuid).name],['需求',`${t.cin.slice(5)}–${t.cout.slice(5)} · ${t.nights} 晚`]],true)}<div style="margin-top:12px">${A('goto',{role:'admin',page:'trips',id:t.id},'核對並送訂','btn block')}</div></div>`).join('')}
+        ${reported.map(c=>`<div class="card"><div class="th">${I.doc}天城已回報${CHG_TYPE[c.type]} ${badge('待核對','info')}</div>${kv([['案件',c.id],['行程',c.tripId],['結果',c.result.ok==='all'?'全部成功':c.result.ok==='part'?'部分成功':'無法辦理']],true)}<div style="margin-top:12px">${A('goto',{role:'admin',page:'trips',id:c.id},'核對並登錄','btn block')}</div></div>`).join('')}
+        ${pendApps.length?`<div class="card"><div class="th">${I.shield}會員申請待審核 ${badge(pendApps.length+' 件','warning')}</div><div class="mini">${pendApps.map(a=>esc(a.name)).join('、')}</div><div style="margin-top:12px">${A('goto',{role:'admin',page:'review'},'前往審核工作台','btn block secondary')}</div></div>`:''}
+        ${S.pointsImport.status==='preview'?`<div class="card"><div class="th">${I.coins}每日積分 Excel 待核准 ${badge('預覽中','info')}</div>${kv([['批次',S.pointsImport.id],['活動日',S.pointsImport.date],['列數',S.pointsImport.rows.length+' 列（1 列未配對）']],true)}<div style="margin-top:12px">${A('goto',{role:'admin',page:'points'},'查看差額預覽','btn block secondary')}</div></div>`:''}
+        ${S.hostRequests.filter(h=>h.status==='pending').map(h=>`<div class="card"><div class="th">${I.inbox}代接待申請 ${badge('待指派','warning')}</div>${kv([['客戶',h.customer],['歸屬人',h.agent],['需求',h.want]],true)}<div style="margin-top:12px">${A('goto',{role:'admin',page:'hosting'},'指派服務人','btn block secondary')}</div></div>`).join('')}
+        ${openCases.map(c=>`<div class="card"><div class="th">${I.chat}${esc(c.type)} ${badge(c.status,'info')}</div>${kv([['案件',c.id],['提出',c.by],['行程',c.tripId||'—']],true)}<div style="margin-top:12px">${A('openModal',{m:'replyCase',id:c.id},'處理／回覆','btn block secondary')}</div></div>`).join('')}
+      </div></div></div>`;
+  },
+  customers(id){
+    const f=tab('acu','all'); const list=S.customers.filter(c=>f==='all'||c.phase===f);
+    const c=id?S.customers.find(x=>x.id===id):null;
+    if(c) return customerDetail(c,'admin');
+    return pageHead('客戶與跟進','Lead／會員列表；售前固定五種進度，行程與維護以正式紀錄衍生。',A('openModal',{m:'newLead'},'建立 Lead','btn secondary'))+`<div class="card">${tabs('acu',[['all','全部',S.customers.length],['presale','售前',S.customers.filter(x=>x.phase==='presale').length],['trip','行程服務',S.customers.filter(x=>x.phase==='trip').length],['maintain','維護',S.customers.filter(x=>x.phase==='maintain').length]],'all')}<div class="tblwrap"><table class="tbl"><thead><tr><th>客戶</th><th>階段</th><th>售前進度</th><th>歸屬人</th><th>歸屬期限</th><th>最近紀錄</th><th></th></tr></thead><tbody>${list.map(x=>`<tr class="row"><td>${esc(x.name)}<span class="sub mono">${x.uuid?short(x.uuid):x.id}</span></td><td>${badge({presale:'售前',trip:'行程服務',maintain:'維護'}[x.phase],{presale:'warning',trip:'info',maintain:'neutral'}[x.phase])}</td><td>${PRESALE[x.presale]}</td><td>${x.owner==='公共池'?'<span style="color:var(--warning)">公共池</span>':esc(x.owner)}</td><td>${x.ownerUntil}</td><td class="mini">${esc(x.last)}</td><td>${A('goto',{role:'admin',page:'customers',id:x.id},'詳情','btn secondary sm')}</td></tr>`).join('')}</tbody></table></div></div>`;
+  },
+  review(id){
+    const list=S.applications; const a=id?list.find(x=>x.id===id):list.find(x=>x.status==='pending')||list[0];
+    return pageHead('會員審核工作台','並列比對申請人輸入值、OCR 結果、證件原圖與重複候選；核准只對特定申請版本生效。')+`<div class="grid13"><div class="card"><div class="list">${list.map(x=>`<button class="li ${a&&a.id===x.id?'on':''}" data-act="goto" data-p='${esc(JSON.stringify({role:'admin',page:'review',id:x.id}))}'><div class="t"><span>${esc(x.name)}</span>${badge({pending:'待審核',need_docs:'補件中',approved:'已核准',rejected:'已拒絕'}[x.status],{pending:'warning',need_docs:'info',approved:'success',rejected:'danger'}[x.status])}</div><div class="b"><span class="mono">${x.id} · v${x.version}</span><span>${x.submitted.slice(5)}</span></div></button>`).join('')}</div></div>
+      ${a?`<div class="card"><div class="chead"><h3>${esc(a.name)} <span class="muted mono">${a.id} · 版本 v${a.version}</span></h3>${a.dup?badge('重複候選','danger'):''}</div><div class="cbody">
+        ${a.status==='need_docs'?`<div class="info">${I.info}<div><b>補件中</b><span>${esc(a.reason)}。申請人重送後產生新版本。</span></div></div>`:`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px"><div><div class="label" style="margin-bottom:8px">申請人輸入</div>${kv(Object.entries({姓名:a.input.name,護照號:a.input.passport,出生:a.input.dob,效期:a.input.expiry}).map(([k,v])=>[k,esc(v)+(a.ocr[{姓名:'name',護照號:'passport',出生:'dob',效期:'expiry'}[k]]!==v?' '+badge('與 OCR 不同','warning'):'')]),true)}</div><div><div class="label" style="margin-bottom:8px">OCR 擷取</div>${kv([['姓名',a.ocr.name],['護照號',a.ocr.passport],['出生',a.ocr.dob],['效期',a.ocr.expiry]],true)}</div><div><div class="label" style="margin-bottom:8px">證件原圖（限時 5 分鐘）</div><div style="aspect-ratio:4/3;background:repeating-linear-gradient(45deg,#1a1c1e,#1a1c1e 8px,#161819 8px,#161819 16px);border:1px solid var(--border-strong);border-radius:var(--r-md);display:grid;place-items:center;color:var(--text-3);font-size:12px">加密影像 · 04:32 後遮蔽</div></div></div>
+        ${a.dup?`<div class="info" style="margin-top:16px">${I.info}<div><b>重複候選：${esc(a.dup.name)}（${a.dup.uuid}）</b><span>${esc(a.dup.reason)}。若核實為同一人，沿用原 UUID；不同人只改被占欄位。</span></div></div>`:''}
+        ${a.status==='pending'?`<div style="display:flex;gap:10px;margin-top:20px">${A('reviewApp',{id:a.id,r:'approved'},'核准 v'+a.version)}${A('reviewApp',{id:a.id,r:'need_docs'},'要求補件','btn secondary')}${A('reviewApp',{id:a.id,r:'rejected'},'拒絕','btn danger')}</div><div class="hint" style="margin-top:8px">核准後仍需申請人完成手機 OTP 與 Email 雙驗證才啟用 UUID。</div>`:''}`}
+        </div><div class="cfoot"><span>聯絡 ${a.contact}</span><span>送出 ${a.submitted}</span></div></div>`:''}</div>`;
+  },
+  trips(id){
+    const applied=S.trips.filter(t=>t.stage==='applied'||t.stage==='approved'); const reported=S.changeRequests.filter(c=>c.stage==='reported');
+    const selT=id&&trip(id); const selC=id&&S.changeRequests.find(c=>c.id===id);
+    const bookings=S.trips.filter(t=>t.hotel.conf&&t.stage!=='archived');
+    return pageHead('行程審核與外部預訂','核准送訂、登錄酒店確認單、核對天城回報的異動結果。房車分開確認。')+`
+      ${applied.length||reported.length?`<div class="grid2">${applied.map(t=>{const m=member(t.uuid);const cov=Math.min(t.nights,Math.floor((m.ledger-m.reserved)/25000));return `<div class="card ${selT&&selT.id===t.id?'':''}"><div class="chead"><h3>${esc(m.name)} · <span class="mono muted">${t.id}</span></h3>${stageBadge(t.stage)}</div><div class="cbody">${kv([['需求',`${t.cin} – ${t.cout} · ${t.nights} 晚`],['航班',`${esc(t.pickup.arr.flight)} / ${esc(t.pickup.dep.flight)}`],['接機',t.pickup.arr.status==='none'?'自行前往':'需要接機'],['可用積分',`${pts(m.ledger-m.reserved)} 分 → 可保留 ${cov} 晚`],['預計應付押金',krw((t.nights-cov)*300000)+'（到場付天城）'],['歸屬人',esc(m.owner)]])}
+        ${t.stage==='applied'?`<div style="display:flex;gap:10px;margin-top:16px">${A('approveTrip',{id:t.id},'核准並送訂天城')}${A('noop',{},'退回補資料','btn secondary')}</div>`:`<div class="field" style="margin-top:16px"><label>酒店確認單編號（天城回傳 PDF 核對後登錄）</label><input class="input" data-bind="conf_${t.id}" value="${esc(sel('conf_'+t.id)||'GHJ-'+t.cin.slice(2,4)+t.cin.slice(5,7)+t.cin.slice(8,10)+'-0901')}"></div><label class="check" style="margin-top:12px"><input type="checkbox" data-bind="confok_${t.id}" data-rerender="1" ${sel('confok_'+t.id)?'checked':''}> 已核對 PDF 本人姓名、日期、晚數與編號</label><div style="display:flex;gap:10px;margin-top:16px">${A('confirmHotel',{id:t.id},'登錄有效住宿並保留積分','btn'+(sel('confok_'+t.id)?'':' disabled'))}</div>`}
+        </div></div>`;}).join('')}
+        ${reported.map(c=>{const t=trip(c.tripId);const m=member(t.uuid);return `<div class="card"><div class="chead"><h3>天城回報：${CHG_TYPE[c.type]} <span class="mono muted">${c.id}</span></h3>${badge('待核對','info')}</div><div class="cbody">${kv([['玩家',esc(m.name)],['行程',`<span class="mono">${t.id}</span>`],['原安排',`${t.cin} – ${t.cout} · ${t.nights} 晚`],['申請',c.type==='extend'?'續住至 '+c.want.cout:c.want?`${c.want.cin} – ${c.want.cout}`:'—'],['天城結果',`${c.result.ok==='all'?'全部成功':c.result.ok==='part'?'部分成功':'無法辦理'}${c.result.conf?' · <span class="mono">'+esc(c.result.conf)+'</span>':''}`],['回報時間',c.history.slice(-1)[0].t]])}
+        <div style="display:flex;gap:10px;margin-top:16px">${A('verifyChange',{id:c.id},'核對無誤，正式登錄')}${A('noop',{},'請天城補正','btn secondary')}</div><div class="hint" style="margin-top:8px">登錄後產生行程新版本並通知玩家確認；原單保留、接續單另列。</div></div></div>`;}).join('')}</div>`:''}
+      <div class="card"><div class="chead"><h3>酒店預訂單</h3><span class="mini">${bookings.length} 張有效／歷史</span></div><div class="tblwrap"><table class="tbl"><thead><tr><th>玩家</th><th>行程</th><th>確認單</th><th>日期／晚數</th><th>入住階段</th><th>單據狀態</th><th>接續／前單</th></tr></thead><tbody>${bookings.map(t=>`<tr class="row"><td>${esc(member(t.uuid).name)}</td><td class="mono">${t.id}</td><td class="mono">${t.hotel.conf}</td><td>${t.cin.slice(5)}–${t.cout.slice(5)} · ${t.nights} 晚</td><td>${t.hotelCheckout?dot('已退房','neutral'):t.hotelCheckin?dot('已入住','success'):dot('未入住','neutral')}</td><td>${t.hotel.status==='void'?badge('已作廢','danger'):badge('有效','success')}</td><td class="mono">${t.hotel.next?t.hotel.next.conf:'—'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  },
+  transfer(){
+    const list=S.trips.filter(t=>t.pickup.arr.status!=='none'&&!['cancelled','archived','settled'].includes(t.stage));
+    return pageHead('接送用車看板','接機免費、送機玩家付車方；核對天城安排並指派接待回報。無 Driver 登入。')+`<div class="card">${tabs('atr',[['arr','接機'],['dep','送機']],'arr')}<div class="tblwrap"><table class="tbl"><thead><tr><th>玩家</th><th>行程</th><th>航班／時間</th><th>天城安排</th><th>平台核對</th><th>接待回報</th></tr></thead><tbody>${list.map(t=>{const k=tab('atr','arr');const p=t.pickup[k];return `<tr class="row"><td>${esc(member(t.uuid).name)}<span class="sub">${esc(t.host||'待指派')}</span></td><td class="mono">${t.id}</td><td>${esc(p.flight)}<span class="sub">${esc(p.time)}</span></td><td>${p.car?esc(p.car):'<span class="muted">待天城安排</span>'}</td><td>${p.car?(p.verified?dot('已核對','success'):A('verifyCar',{id:t.id,k},'核對','btn secondary sm')):'—'}</td><td>${p.status==='done'?dot('已完成','success'):dot('待回報','neutral')}</td></tr>`;}).join('')}</tbody></table></div></div>`;
+  },
+  tasks(){
+    const f=tab('atk','open'); const list=S.tasks.filter(t=>f==='all'||t.status===f);
+    return pageHead('結構化任務與異常管理','T01–T15 固定答案／條件欄位；完成依據來自正式來源，不由文字推定。',A('openModal',{m:'newTask'},'建立任務','btn secondary'))+`<div class="card">${tabs('atk',[['open','進行中',S.tasks.filter(t=>t.status==='open').length],['done','已完成',S.tasks.filter(t=>t.status==='done').length],['all','全部',null]],'open')}<div class="tblwrap"><table class="tbl"><thead><tr><th>任務</th><th>範本</th><th>客戶／行程</th><th>負責人</th><th>期限／完成</th><th>回答</th></tr></thead><tbody>${list.map(t=>`<tr class="row"><td>${esc(t.title)}<span class="sub mono">${t.id}</span></td><td>${badge(t.tpl,'neutral')}</td><td>${t.uuid?esc(member(t.uuid).name):esc(t.customer||'')}<span class="sub mono">${t.tripId||''}</span></td><td>${esc(t.assignee)}</td><td>${t.status==='done'?t.done:t.due}</td><td>${t.status==='done'?dot(t.answer,'success'):dot('待回報','warning')}</td></tr>`).join('')}</tbody></table></div></div>`;
+  },
+  points(id){
+    const imp=S.pointsImport; const cnt=k=>imp.rows.filter(r=>r.kind===k).length;
+    const outs=S.trips.filter(t=>t.hotelCheckout&&t.deposit.due>0||t.hotelCheckout);
+    return pageHead('積分匯入與住宿結算','每日積分 Excel 整批入帳（上傳／試算不入帳）；退房後開放住宿結算供玩家確認。',A('noop',{},I.upload+' 上傳每日 Excel','btn secondary'))+`
+      <div class="card"><div class="chead"><h3>批次 ${imp.id} · 活動日 ${imp.date}</h3>${imp.status==='approved'?dot('已入帳 '+imp.approvedAt,'success'):dot('預覽中 · 未入帳','warning')}</div>
+        <div style="display:flex;gap:8px;padding:14px 24px 0">${badge('新增 '+cnt('add'),'success')}${badge('未變 '+cnt('same'),'neutral')}${badge('更正 '+cnt('fix'),'warning')}${badge('缺列／未配對 '+cnt('miss'),'danger')}</div>
+        <div class="tblwrap" style="padding-top:12px"><table class="tbl"><thead><tr><th>天城會員編號</th><th>會員</th><th>配對行程</th><th>前值</th><th>本次</th><th>差額</th><th>判定</th></tr></thead><tbody>${imp.rows.map(r=>`<tr class="diffrow ${r.kind}"><td class="mono">${r.tc}</td><td>${esc(r.name)}</td><td class="mono">${r.trip}</td><td class="num" style="font-weight:400">${r.prev==null?'—':pts(r.prev)}</td><td class="num" style="font-weight:400">${pts(r.now)}</td><td class="num" style="font-weight:400">${r.prev==null?'—':(r.now-r.prev>=0?'+':'')+pts(r.now-r.prev)}</td><td>${{add:'新增',same:'未變',fix:'更正',miss:'未配對'}[r.kind]}</td></tr>`).join('')}</tbody></table></div>
+        <div class="cfoot"><span>上傳 ${imp.uploaded} · ${imp.by} · 格式檢查通過 · 同日防重通過</span>${imp.status==='preview'?`<span style="display:flex;gap:10px">${A('noop',{},'處理未配對列','btn secondary sm')}${A('approveImport',{},'授權核准整批入帳','btn sm')}</span>`:''}</div></div>
+      <div class="card"><div class="chead"><h3>住宿結算</h3><span class="mini">按酒店預訂編號逐晚核對；玩家本人確認後正式扣分</span></div><div class="tblwrap"><table class="tbl"><thead><tr><th>玩家</th><th>行程</th><th>實際住宿</th><th>可用積分</th><th>可兌換</th><th>結算</th><th></th></tr></thead><tbody>${outs.length?outs.map(t=>{const m=member(t.uuid);const red=Math.min(t.nights,Math.floor(m.ledger/25000));return `<tr class="row"><td>${esc(m.name)}</td><td class="mono">${t.id}</td><td>${t.cin.slice(5)} – ${t.hotelCheckout.slice(5,10)} · ${t.nights} 晚</td><td>${pts(m.ledger)}</td><td>${red} 晚</td><td>${t.settlement?(t.settlement.venueAligned?dot('雙方已對齊','success'):t.settlement.playerConfirmed?dot('待天城核對','info'):dot('待玩家確認','warning')):dot('未開放','neutral')}</td><td>${t.settlement?'':A('openSettlement',{id:t.id},'開放結算','btn secondary sm')}</td></tr>`;}).join(''):`<tr><td colspan="7">${empty('沒有待結算的行程','酒店回報實際退房後會出現在這裡。')}</td></tr>`}</tbody></table></div></div>`;
+  },
+  ownership(){
+    const pool=S.customers.filter(c=>c.owner==='公共池');
+    return pageHead('歸屬與公共池','管理者提出指派／轉派，由 Platform admin 執行；歸屬期限到期回收至公共池。')+`<div class="grid2">
+      <div class="card"><div class="chead"><h3>轉派申請</h3></div><div class="cbody">${S.transfers.map(x=>`<div class="card el pad" style="padding:14px;margin-bottom:12px">${kv([['客戶',esc(x.customer)],['轉派',`${esc(x.from)} → ${esc(x.to)}`],['理由',esc(x.reason)],['狀態',x.status==='proposed'?badge('待 Platform admin 執行','warning'):badge('已執行 '+x.executedAt,'success')]],true)}</div>`).join('')}
+        <div class="label" style="margin:12px 0 8px">提出新的轉派</div><div class="field"><label>客戶</label><select class="input" data-bind="tr_c">${S.customers.map(c=>`<option>${esc(c.name)}（${c.id}）</option>`).join('')}</select></div><div class="grid2" style="gap:12px;margin-top:10px"><div class="field"><label>轉給</label><select class="input" data-bind="tr_to"><option>David Chen</option><option>小美</option><option>公共池</option></select></div><div class="field"><label>理由</label><input class="input" data-bind="tr_why" placeholder="留理由、期間、影響"></div></div><div style="margin-top:14px">${A('proposeTransfer',{},'提出轉派','btn secondary')}</div></div></div>
+      <div class="card"><div class="chead"><h3>公共池</h3><span class="mini">完整名單限管理者及治理權限</span></div><div class="tblwrap"><table class="tbl"><thead><tr><th>客戶</th><th>原歸屬</th><th>回收原因</th><th>最近紀錄</th></tr></thead><tbody>${pool.map(c=>`<tr><td>${esc(c.name)}</td><td>小美</td><td>歸屬期限到期</td><td class="mini">${esc(c.last)}</td></tr>`).join('')||'<tr><td colspan="4">公共池目前沒有客戶</td></tr>'}</tbody></table></div>
+        <div class="chead" style="border-top:1px solid var(--border)"><h3>有效到訪延長審批</h3></div><div class="cbody">${kv([['客戶','KIM, JISOO'],['四證據','入帳 ✓ · 酒店入住 ✓ · 場館到場 ✓ · 本人確認 ✓'],['原期限','2026/12/30'],['公式','max(原期限, 有效活動日 + 6 月) = 2027/03/10']])}<div style="margin-top:12px">${A('noop',{},'核准延長','btn secondary sm')}</div></div></div></div>`;
+  },
+  hosting(){
+    return pageHead('代接待申請與指派','歸屬人提出需求，管理者指派服務人。歸屬 A、任務服務 B，不同授權。')+`<div class="card"><div class="tblwrap"><table class="tbl"><thead><tr><th>申請</th><th>客戶</th><th>歸屬人</th><th>需求</th><th>指派</th><th></th></tr></thead><tbody>${S.hostRequests.map(h=>`<tr class="row"><td class="mono">${h.id}<span class="sub">${h.t}</span></td><td>${esc(h.customer)}</td><td>${esc(h.agent)}</td><td>${esc(h.want)}</td><td>${h.assignee?dot(h.assignee,'success'):dot('待指派','warning')}</td><td>${h.assignee?'':`<div style="display:flex;gap:8px"><select class="input" style="height:32px;padding:0 8px;width:110px" data-bind="hr_${h.id}"><option>Amy</option><option>Ken</option></select>${A('assignHost',{id:h.id},'指派','btn sm')}</div>`}</td></tr>`).join('')}</tbody></table></div></div>`;
+  },
+  campaigns(){
+    return pageHead('活動與推播','分語言核准、單行程單優惠、名額保留；推播另審，發送仍依玩家同意。',A('noop',{},'新增活動','btn secondary'))+`<div class="card"><div class="tblwrap"><table class="tbl"><thead><tr><th>活動</th><th>日期</th><th>名額</th><th>語言</th><th>狀態</th><th></th></tr></thead><tbody>${S.campaigns.map(c=>`<tr class="row"><td>${esc(c.title)}<span class="sub mono">${c.id}</span></td><td>${c.dates}</td><td>${c.used} / ${c.quota}</td><td>${c.langs.join('、')}</td><td>${c.status==='published'?dot('已發布','success'):dot('草稿','neutral')}</td><td>${c.status==='published'?A('noop',{},'推播（需另一人核准）','btn secondary sm'):A('publishCampaign',{id:c.id},'送審發布','btn secondary sm')}</td></tr>`).join('')}</tbody></table></div></div>`;
+  },
+};
+function customerDetail(c,role){
+  const m=c.uuid&&member(c.uuid); const ts=m?tripsOf(m.uuid):[]; const fus=S.followups.filter(f=>f.cust===c.id);
+  const back=role==='admin'?'#/admin/customers':'#/agent/customers';
+  return pageHead(c.name,`${c.id}${m?' · UUID '+short(m.uuid)+' · '+m.tc:' · 尚無正式 UUID'}`,`<a href="${back}" class="btn secondary">‹ 返回列表</a>`)+`<div class="grid32"><div style="display:flex;flex-direction:column;gap:24px">
+    <div class="card">${tabs('cd_'+c.id,[['presale','售前輪次'],['trips','行程'],['tasks','任務'],['cases','案件']],'presale')}<div class="cbody">
+    ${tab('cd_'+c.id,'presale')==='presale'?`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div><div class="mini">本輪售前狀態</div><div style="font-size:20px;font-weight:600">${PRESALE[c.presale]}</div></div>${c.phase==='presale'?A('openModal',{m:'followup',id:c.id},'新增跟進','btn secondary'):badge('已轉行程','success')}</div>${fus.length?fus.map(f=>`<div class="card el pad" style="padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(f.ch)} · ${esc(f.by)}</b><span class="mini">${f.t}</span></div><div class="mini">${PRESALE[f.from]} → <b>${PRESALE[f.to]}</b></div><div style="margin-top:6px">${esc(f.sum)}</div><div class="hint">下一步：${esc(f.next)}</div></div>`).join(''):'<div class="mini">本輪尚無跟進紀錄；純粹未接通不等於無意願。</div>'}`:''}
+    ${tab('cd_'+c.id)==='trips'?(ts.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>行程</th><th>日期</th><th>階段</th><th>接待人</th></tr></thead><tbody>${ts.map(t=>`<tr><td class="mono">${t.id}</td><td>${t.cin.slice(5)}–${t.cout.slice(5)}</td><td>${stageBadge(t.stage)}</td><td>${esc(t.host||'—')}</td></tr>`).join('')}</tbody></table></div>`:empty('尚無行程','行程申請成立後才帶出行程狀態。')):''}
+    ${tab('cd_'+c.id)==='tasks'?(S.tasks.filter(t=>t.uuid===c.uuid||t.customer===c.name).map(t=>`<div class="row" style="padding:10px 0"><div class="g"><b>${esc(t.title)}</b><small>${t.id} · ${esc(t.assignee)} · ${t.status==='done'?'完成 '+t.done:'期限 '+t.due}</small></div>${t.status==='done'?dot(t.answer,'success'):dot('進行中','warning')}</div>`).join('')||empty('沒有任務','')):''}
+    ${tab('cd_'+c.id)==='cases'?(S.cases.filter(x=>x.by===c.name).map(x=>`<div class="row" style="padding:10px 0"><div class="g"><b>${esc(x.type)}</b><small>${x.id} · ${x.t}</small></div>${badge(x.status,'info')}</div>`).join('')||empty('沒有案件','')):''}
+    </div></div></div>
+    <div class="card pad">${kv([['階段',{presale:'售前',trip:'行程服務',maintain:'維護'}[c.phase]],['介紹人',esc(c.referrer)],['歸屬人',esc(c.owner)],['歸屬期限',c.ownerUntil],['輪次',c.rounds+' 輪'],['可用積分',m?pts(m.ledger-m.reserved)+' 分':'—'],['聯絡管道',m?esc(m.channel||'LINE'):'官方 LINE']],true)}${role==='admin'?`<div style="margin-top:12px">${A('goto',{role:'admin',page:'ownership'},'歸屬／轉派','btn secondary sm')}</div>`:''}</div></div>`;
+}
+MODALS.followup=p=>({title:'新增跟進',body:`<div class="field"><label>本輪狀態（固定五選項）</label><select class="input" data-bind="fu_to">${['UNASSESSED','CLARIFYING','INTENT_PRESENT','DEFERRED','NO_INTENT'].map(k=>`<option value="${k}">${PRESALE[k]}</option>`).join('')}</select></div><div class="grid2" style="gap:12px"><div class="field"><label>管道</label><select class="input" data-bind="fu_ch"><option>LINE</option><option>電話</option><option>WhatsApp</option><option>面談</option></select></div><div class="field"><label>實際聯繫時間</label><input class="input" data-bind="fu_t" value="${TODAY} ${NOW}"></div></div><div class="field"><label>摘要</label><textarea class="input" data-bind="fu_sum"></textarea></div><div class="field"><label>下一步／下次時間</label><input class="input" data-bind="fu_next" placeholder="2026/09/13 提供活動卡"></div>`,ok:{act:'addFollowup',p:{id:p.id},label:'儲存'}});
+MODALS.newLead=()=>({title:'建立 Lead',body:`<div class="field"><label>稱呼</label><input class="input" data-bind="nl_name" placeholder="張先生"></div><div class="field"><label>來源</label><select class="input" data-bind="nl_src"><option>官方 LINE</option><option>活動頁諮詢</option><option>介紹</option></select></div><div class="hint">Lead ID 與之後的申請編號、正式 UUID 是三個不同識別；不必上傳證件。</div>`,ok:{act:'newLead',p:{},label:'建立'}});
+MODALS.replyCase=p=>{const c=S.cases.find(x=>x.id===p.id);return {title:c.id+' · '+c.type,body:`${kv([['提出',esc(c.by)],['行程',c.tripId||'—'],['說明',esc(c.text||'（無）')],['狀態',badge(c.status,'info')]])}<div class="field"><label>公開回覆（不含內部資料）</label><textarea class="input" data-bind="case_reply">${esc(c.reply||'')}</textarea></div><div class="field"><label>更新狀態</label><select class="input" data-bind="case_status"><option>處理中</option><option>等待玩家／外部結果</option><option>已解決</option></select></div>`,ok:{act:'replyCase',p:{id:c.id},label:'送出回覆'}};};
+MODALS.newTask=()=>({title:'建立任務',body:`<div class="field"><label>範本</label><select class="input" data-bind="nt_tpl">${Object.entries(TPL).map(([k,v])=>`<option value="${k}">${k} ${v.name}</option>`).join('')}</select></div><div class="field"><label>行程</label><select class="input" data-bind="nt_trip">${S.trips.filter(t=>!['cancelled','archived'].includes(t.stage)).map(t=>`<option>${t.id}</option>`).join('')}</select></div><div class="field"><label>指派</label><select class="input" data-bind="nt_who"><option>Amy</option><option>Ken</option></select></div>`,ok:{act:'newTask',p:{},label:'建立並指派'}});
+ACT.approveTrip=p=>{ const t=trip(p.id); t.stage='approved'; hist(t,'王經理','核准並送訂天城'); audit('王經理','管理者',`${t.id} 核准送訂`); toast('已核准，等待天城回傳確認單'); };
+ACT.confirmHotel=p=>{ const t=trip(p.id); const m=member(t.uuid); t.hotel.conf=sel('conf_'+t.id)||'GHJ-NEW'; t.hotel.status='confirmed'; t.stage='confirmed'; const cov=Math.min(t.nights,Math.floor((m.ledger-m.reserved)/25000)); m.reserved+=cov*25000; t.deposit.due=(t.nights-cov)*300000; if(!t.host){t.host='Amy';} S.tasks.push({id:'TSK-'+(1050+S.tasks.length),tpl:'T06',title:'酒店入住追蹤',tripId:t.id,uuid:t.uuid,assignee:t.host,status:'open',due:t.cin+' 16:00'}); hist(t,'王經理',`登錄酒店確認單 ${t.hotel.conf}，保留 ${pts(cov*25000)} 分`); audit('王經理','管理者',`${t.id} 登錄有效住宿 ${t.hotel.conf}`); toast('已登錄有效住宿並保留積分；已建立 T06 任務給 '+t.host); };
+ACT.verifyChange=p=>{ const c=S.changeRequests.find(x=>x.id===p.id); const t=trip(c.tripId); c.stage='done'; c.history.push({t:nowStamp(),e:'管理者核對並正式登錄'}); if(c.result.ok!=='no'){ if(c.type==='extend'){ const add=Math.max(1,Math.round((new Date(c.want.cout)-new Date(t.cout))/86400000)); t.hotel.next={conf:c.result.conf,dates:`${t.cout} – ${c.want.cout} · ${add} 晚`}; t.cout=c.want.cout; t.nights+=add; } else if(c.type==='reschedule'&&c.want){ t.cin=c.want.cin; t.cout=c.want.cout; t.nights=Math.max(1,Math.round((new Date(t.cout)-new Date(t.cin))/86400000)); t.hotel.conf=c.result.conf; } t.version++; hist(t,'王經理',`核對天城回報並正式登錄，產生版本 v${t.version}（待玩家確認）`); } else hist(t,'王經理','天城無法辦理，維持原安排'); audit('王經理','管理者',`${c.id} 核對登錄`); toast('已正式登錄；玩家端出現新版本待確認'); };
+ACT.verifyCar=p=>{ const t=trip(p.id); t.pickup[p.k].verified=true; audit('王經理','管理者',`${t.id} 核對接送車輛`); toast('已核對，玩家端顯示車輛資訊'); };
+ACT.reviewApp=p=>{ const a=S.applications.find(x=>x.id===p.id); a.status=p.r; if(p.r==='need_docs') a.reason='請重新上傳清晰證件照'; audit('王經理','管理者',`${a.id} v${a.version} ${ {approved:'核准',need_docs:'要求補件',rejected:'拒絕'}[p.r]}`); toast({approved:'已核准 v'+a.version+'，等待雙驗證啟用',need_docs:'已要求補件',rejected:'已拒絕'}[p.r]); };
+ACT.approveImport=()=>{ const imp=S.pointsImport; imp.status='approved'; imp.approvedAt=nowStamp(); imp.rows.forEach(r=>{ if(r.kind==='miss') return; const m=S.members.find(x=>x.tc===r.tc); if(m) m.ledger+=(r.now-(r.prev||0)); }); audit('王經理','管理者',`${imp.id} 核准整批入帳`); toast('已整批入帳；未配對列留待處理'); };
+ACT.openSettlement=p=>{ const t=trip(p.id); const m=member(t.uuid); const red=Math.min(t.nights,Math.floor(m.ledger/25000)); t.settlement={id:'STL-'+t.id.slice(3),version:1,nights:t.nights,redeemed:red,points:red*25000,playerConfirmed:null,venueAligned:null}; S.tasks.push({id:'TSK-'+(1050+S.tasks.length),tpl:'T13',title:'跟進玩家結算',tripId:t.id,uuid:t.uuid,assignee:t.host||'Amy',status:'open',due:TODAY+' 20:00'}); hist(t,'王經理',`開放住宿結算 ${t.settlement.id} v1（兌換 ${red} 晚）`); audit('王經理','管理者',`${t.id} 開放結算`); toast('已開放；玩家端出現待確認結算，並建立 T13 任務'); };
+ACT.proposeTransfer=()=>{ const id='TRF-00'+(18+S.transfers.length); S.transfers.unshift({id,customer:sel('tr_c')||S.customers[0].name,from:'現歸屬',to:sel('tr_to')||'David Chen',reason:sel('tr_why')||'',proposedBy:'王經理',t:nowStamp(),status:'proposed'}); audit('王經理','管理者',`提出歸屬轉派 ${id}`); toast('已提出，待 Platform admin 執行'); };
+ACT.assignHost=p=>{ const h=S.hostRequests.find(x=>x.id===p.id); h.assignee=sel('hr_'+h.id)||'Amy'; h.status='assigned'; S.tasks.push({id:'TSK-'+(1050+S.tasks.length),tpl:'T01',title:'聯繫客戶',tripId:null,uuid:null,customer:h.customer,assignee:h.assignee,status:'open',due:'2026/09/12 18:00'}); audit('王經理','管理者',`${h.id} 指派 ${h.assignee} 代接待`); toast('已指派 '+h.assignee+'，並建立 T01 任務'); };
+ACT.addFollowup=p=>{ const c=S.customers.find(x=>x.id===p.id); const to=sel('fu_to')||'CLARIFYING'; S.followups.push({cust:c.id,t:sel('fu_t')||nowStamp(),by:S.ui.role==='agent'?'David Chen':'王經理',ch:sel('fu_ch')||'LINE',from:c.presale,to,sum:sel('fu_sum')||'',next:sel('fu_next')||'—'}); c.presale=to; c.last=nowStamp().slice(0,10)+' · '+PRESALE[to]; audit(S.ui.role==='agent'?'David Chen':'王經理',S.ui.role==='agent'?'Agent':'管理者',`${c.id} 跟進：${PRESALE[to]}`); S.ui.modal=null; ['fu_sum','fu_next'].forEach(k=>delete S.ui.sel[k]); toast('跟進已儲存'); };
+ACT.newLead=()=>{ const id='C-20'+(63+S.customers.length); S.customers.push({id,name:(sel('nl_name')||'新 Lead')+'（Lead L-09'+(41+S.customers.length)+'）',uuid:null,phase:'presale',presale:'UNASSESSED',owner:S.ui.role==='agent'?'David Chen':'王經理',referrer:'—',ownerUntil:'—',rounds:1,last:TODAY+' · 建立 Lead（'+(sel('nl_src')||'官方 LINE')+'）'}); S.ui.modal=null; toast('Lead 已建立'); };
+ACT.replyCase=p=>{ const c=S.cases.find(x=>x.id===p.id); c.reply=sel('case_reply')||c.reply; c.status=sel('case_status')||'處理中'; audit('王經理','管理者',`${c.id} 回覆並更新為 ${c.status}`); S.ui.modal=null; toast('已回覆玩家'); };
+ACT.newTask=()=>{ const tpl=sel('nt_tpl')||'T06'; const tid=sel('nt_trip')||S.trips[0].id; const t=trip(tid); S.tasks.push({id:'TSK-'+(1050+S.tasks.length),tpl,title:TPL[tpl].name,tripId:tid,uuid:t.uuid,assignee:sel('nt_who')||'Amy',status:'open',due:TODAY+' 18:00'}); S.ui.modal=null; toast('任務已建立並指派'); };
+ACT.publishCampaign=p=>{ const c=S.campaigns.find(x=>x.id===p.id); c.status='published'; audit('王經理','管理者',`${c.id} 送審發布（另一授權者核准）`); toast('已發布（示意：已由另一授權者核准）'); };
+</script>
+<script>
+/* ================= Platform admin ================= */
+PAGES.platform={
+  governance(){
+    const proposed=S.transfers.filter(t=>t.status==='proposed');
+    return pageHead('治理總覽','最高治理視野：權限政策、歸屬執行、高風險審批與稽核。不因此取得任意解密或代天城確認。')+`
+      <div class="kpis"><div class="kpi">${I.key}<div><div class="l">工作帳號</div><div class="v">${String(S.staffAccounts.length).padStart(2,'0')}</div></div></div><div class="kpi">${I.shield}<div><div class="l">MFA 未啟用</div><div class="v">${String(S.staffAccounts.filter(a=>!a.mfa).length).padStart(2,'0')}</div></div></div><div class="kpi">${I.check}<div><div class="l">待我審批</div><div class="v">${String(proposed.length+1).padStart(2,'0')}</div></div></div><div class="kpi">${I.list}<div><div class="l">今日稽核事件</div><div class="v">${String(S.audit.filter(a=>a.t.startsWith(TODAY)).length).padStart(2,'0')}</div></div></div></div>
+      <div class="grid2"><div class="card"><div class="chead"><h3>分權原則（SEC-03）</h3></div><div class="cbody">${kv([['查看 ≠ 修改','建立 ≠ 審批，審批 ≠ 支付'],['第二人','不同自然人、當下仍有授權、無本人受益'],['天城事實','押金收退、到場、核對只由天城授權者記錄'],['不可刪改','原始帳目、已支付、核對確認、稽核紀錄'],['敏感匯出','管理者提出、Platform admin 核准，不自批']],true)}</div></div>
+      <div class="card"><div class="chead"><h3>最近高風險事件</h3><a href="#/platform/audit" class="btn ghost sm">全部 ›</a></div><div class="cbody">${S.audit.slice(0,6).map(a=>`<div class="row" style="padding:8px 0"><div class="g"><b>${esc(a.e)}</b><small>${a.t} · ${esc(a.by)}（${esc(a.role)}）</small></div></div>`).join('')}</div></div></div>`;
+  },
+  accounts(){
+    return pageHead('工作帳號、邀請與 MFA','7 天單次邀請、密碼＋TOTP、5／15 分鐘鎖定、雙人人工恢復。無 Driver 帳號。',A('openModal',{m:'invite'},'邀請工作帳號'))+`<div class="card"><div class="tblwrap"><table class="tbl"><thead><tr><th>帳號</th><th>角色／職能</th><th>MFA</th><th>最後登入</th><th></th></tr></thead><tbody>${S.staffAccounts.map(a=>`<tr class="row"><td>${esc(a.name)}</td><td>${esc(a.role)}</td><td>${a.mfa?dot('TOTP 已啟用','success'):dot('未啟用','danger')}</td><td>${a.last}</td><td><div style="display:flex;gap:8px">${A('noop',{},'調整職能','btn secondary sm')}${a.name==='Mingyao'?'':A('noop',{},'停權','btn danger sm')}</div></td></tr>`).join('')}</tbody></table></div></div>
+      <div class="card"><div class="chead"><h3>邀請中</h3></div><div class="tblwrap"><table class="tbl"><thead><tr><th>Email</th><th>角色</th><th>送出</th><th>到期</th><th>狀態</th></tr></thead><tbody>${S.invites.map(i=>`<tr><td>${esc(i.email)}</td><td>${esc(i.role)}</td><td>${i.sent}</td><td>${i.expires}</td><td>${i.status==='pending'?dot('待接受','warning'):dot('已接受','success')}</td></tr>`).join('')}</tbody></table></div></div>`;
+  },
+  approvals(){
+    const proposed=S.transfers.filter(t=>t.status==='proposed');
+    return pageHead('高風險審批','歸屬指派／轉派執行、敏感匯出、積分重大更正。仍須迴避本人受益與自批。')+`<div class="grid2">
+      <div class="card"><div class="chead"><h3>歸屬轉派（管理者提出）</h3></div><div class="cbody">${proposed.length?proposed.map(x=>`<div class="card el pad" style="padding:14px;margin-bottom:12px">${kv([['申請',x.id+' · '+x.t],['客戶',esc(x.customer)],['轉派',`${esc(x.from)} → ${esc(x.to)}`],['理由',esc(x.reason)],['提出人',esc(x.proposedBy)]],true)}<div style="display:flex;gap:10px;margin-top:12px">${A('executeTransfer',{id:x.id},'執行轉派')}${A('noop',{},'退回','btn secondary')}</div></div>`).join(''):empty('沒有待執行的轉派','')}${S.transfers.filter(t=>t.status==='executed').map(x=>`<div class="row" style="padding:8px 0"><div class="g"><b>${esc(x.customer)} → ${esc(x.to)}</b><small>${x.id} · 已執行 ${x.executedAt}</small></div>${badge('已執行','success')}</div>`).join('')}</div></div>
+      <div class="card"><div class="chead"><h3>敏感匯出申請</h3></div><div class="cbody"><div class="card el pad" style="padding:14px">${kv([['申請','EXP-0042 · 2026/09/10 17:30'],['提出人','王經理'],['範圍','9 月濟州行程接待作業表（遮罩護照號、不含證件原圖）'],['用途','天城接待交接']],true)}<div style="display:flex;gap:10px;margin-top:12px">${A('noop',{},'核准範圍與欄位')}${A('noop',{},'退回','btn secondary')}</div></div><div class="hint" style="margin-top:12px">下載時再查權限；已發到外部的資料不能宣稱可自動收回。</div></div></div></div>`;
+  },
+  settings(){
+    return pageHead('參數與範本設定','允許的提醒／期限參數可調；核心答案與正式狀態映射唯讀。')+`<div class="grid2"><div class="card"><div class="chead"><h3>營運參數</h3></div><div class="cbody" style="display:flex;flex-direction:column;gap:14px">${[['每晚押金（KRW）','300,000'],['每晚兌換積分','25,000'],['OTP 有效','10 分鐘 · 5 次錯誤 · 60 秒重送'],['證件原圖查看上限','5 分鐘'],['歸屬延長公式','max(原期限, 有效活動日 + 6 月)'],['休息提醒範圍','5–180 分鐘，預設 60'],['案件附件','5 檔 × 20MB（JPG／PNG／HEIC／PDF）']].map(x=>`<div class="field"><label>${x[0]}</label><input class="input" value="${esc(x[1])}"></div>`).join('')}<div>${A('noop',{},'儲存（需另一授權者核准生效）','btn secondary')}</div></div></div>
+      <div class="card"><div class="chead"><h3>任務範本（唯讀 · 版本 v1）</h3></div><div class="tblwrap"><table class="tbl"><thead><tr><th>範本</th><th>名稱</th><th>固定回答</th></tr></thead><tbody>${Object.entries(TPL).map(([k,v])=>`<tr><td class="mono">${k}</td><td>${v.name}</td><td class="mini">${v.opts.join('／')}</td></tr>`).join('')}</tbody></table></div></div></div>`;
+  },
+  audit(){
+    const q=(sel('aq')||'').toLowerCase();
+    return pageHead('稽核紀錄','原始帳目與操作歷史不可刪改；業務修正走留歷史的更正。')+`<div class="card"><div style="padding:14px 24px"><div class="search">${I.search}<input placeholder="搜尋操作者、行程、案件" value="${esc(sel('aq')||'')}" data-bind="aq" data-rerender="1"></div></div><div class="tblwrap"><table class="tbl"><thead><tr><th>時間</th><th>操作者</th><th>角色</th><th>事件</th></tr></thead><tbody>${S.audit.filter(a=>!q||JSON.stringify(a).toLowerCase().includes(q)).map(a=>`<tr><td class="mono" style="font-weight:400">${a.t}</td><td>${esc(a.by)}</td><td>${badge(a.role,'neutral')}</td><td>${esc(a.e)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  },
+  checklist(){
+    const items=[['L01','Platform admin 首次具名初始化與 8 組備援碼',true],['L02','所有工作帳號 TOTP 啟用',false],['L03','OCR 供應商核准與加密金鑰輪替政策',true],['L04','Cloudflare WAF／私有路由／Webhook 防護',true],['L05','期初積分導入（截止 8/31）與對照表',true],['L06','既有行程接管來源核對',true],['L07','天城五類分權帳號（到場／異動／核對／押金／行銷費）',true],['L08','每日 Excel 真實樣本驗證',false],['L09','押金收退流程實機演練',true],['L10','玩家端五項導覽驗收（M 批次）',true],['L11','公開服務狀態頁',false],['L12','各角色手冊同版（繁中／英文）',false]];
+    return pageHead('上線切換 Checklist','L01–L17 版本／實際測試證據與未完責任；不另建接管帳本。')+`<div class="card"><div class="tblwrap"><table class="tbl"><thead><tr><th>項目</th><th>內容</th><th>狀態</th><th>證據</th></tr></thead><tbody>${items.map(x=>`<tr><td class="mono">${x[0]}</td><td>${x[1]}</td><td>${x[2]?dot('已完成','success'):dot('未完成','warning')}</td><td class="mini">${x[2]?'截圖／紀錄已附':'責任：王經理 · 9/20 前'}</td></tr>`).join('')}</tbody></table></div><div class="cfoot"><span>${items.filter(x=>x[2]).length} / ${items.length} 完成</span><span>未完成項目不得宣稱相關流程已可上線</span></div></div>`;
+  },
+};
+MODALS.invite=()=>({title:'邀請工作帳號',body:`<div class="field"><label>Email</label><input class="input" data-bind="inv_email" placeholder="name@pokernext.example"></div><div class="field"><label>角色／職能</label><select class="input" data-bind="inv_role"><option>管理者</option><option>客服</option><option>銷售</option><option>Host／接待</option><option>Travel／Hotel Coordinator</option><option>Finance</option><option>Audit</option><option>外部 Agent</option><option>Agent Manager</option><option>天城 Venue User</option></select></div><div class="hint">7 天單次邀請；首次登入設定密碼＋TOTP。沒有 Driver 角色。</div>`,ok:{act:'invite',p:{},label:'送出邀請'}});
+ACT.invite=()=>{ S.invites.push({email:sel('inv_email')||'new@pokernext.example',role:sel('inv_role')||'管理者',sent:nowStamp(),expires:'2026/09/18 '+NOW,status:'pending'}); audit('Mingyao','Platform admin',`邀請工作帳號 ${sel('inv_email')||'new@pokernext.example'}（${sel('inv_role')||'管理者'}）`); S.ui.modal=null; toast('邀請已送出，7 天內有效'); };
+ACT.executeTransfer=p=>{ const x=S.transfers.find(t=>t.id===p.id); x.status='executed'; x.executedAt=nowStamp(); const c=S.customers.find(c=>x.customer.startsWith(c.name)); if(c){ c.owner=x.to; c.ownerUntil='2027/03/11'; c.last=TODAY+' · 歸屬轉派至 '+x.to; } audit('Mingyao','Platform admin',`執行歸屬轉派 ${x.id}（→ ${x.to}）`); toast('已執行；原歸屬人失去現行存取，B 可讀完整跟進歷史'); };
+
+/* ================= 員工端（Host／接待，手機） ================= */
+const STAFF_ME='Amy';
+PAGES.staff={
+  tasks(id){
+    const mine=S.tasks.filter(t=>t.assignee===STAFF_ME);
+    if(id){ const t=mine.find(x=>x.id===id); if(t) return appHead()+taskDetail(t); }
+    const f=tab('stk','open'); const list=mine.filter(t=>f==='all'||t.status===f).sort((a,b)=>(a.due||a.done)<(b.due||b.done)?-1:1);
+    return appHead()+`<div class="mpage"><h1>我的任務</h1><div class="hint">${TODAY} · 被指派任務依期限排序；完成依據來自正式來源。</div>${seg('stk',[['open','進行中'],['done','已完成'],['all','全部']],'open')}<div class="list tasklist" style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden">${list.length?list.map(t=>`<button class="li" data-act="goto" data-p='${esc(JSON.stringify({role:'staff',page:'tasks',id:t.id}))}'><div class="t"><span>${badge(t.tpl,'neutral')} ${esc(t.title)}</span>${t.status==='done'?badge('已完成','success'):badge('待回報','warning')}</div><div class="m">${t.uuid?esc(member(t.uuid).name):esc(t.customer||'')}</div><div class="b"><span class="mono">${t.tripId||t.id}</span><span>${t.status==='done'?'完成 '+t.done.slice(5):'期限 '+t.due.slice(5)}</span></div></button>`).join(''):empty('沒有任務','指派給您的任務會出現在這裡。')}</div></div>`;
+  },
+  customers(){
+    const ts=S.trips.filter(t=>t.host===STAFF_ME&&!['cancelled','archived','settled'].includes(t.stage));
+    return appHead()+`<div class="mpage"><h1>我的客戶</h1><div class="hint">只看指派行程的必要資訊；任務結束後不持續開放。</div>${ts.map(t=>{const m=member(t.uuid);return `<div class="mcard"><div class="mh"><span>${esc(m.name)}</span>${stageBadge(t.stage)}</div>${kv([['行程',`<span class="mono">${t.id}</span> · ${t.cin.slice(5)}–${t.cout.slice(5)}`],['酒店',esc(t.hotel.name)+(t.hotelCheckin?' · 已入住':' · 未入住')],['接機',t.pickup.arr.status==='none'?'自行前往':`${esc(t.pickup.arr.flight)} ${esc(t.pickup.arr.time.slice(11)||'')}${t.pickup.arr.car?' · '+esc(t.pickup.arr.car):' · 車輛待安排'}`],['押金',t.deposit.due===0?'無須':t.deposit.collected?'已收取':'待收取 '+krw(t.deposit.due)+'（天城）'],['工作聯絡','LINE 工作帳號（不顯示私人號碼）']],true)}<div style="margin-top:10px;display:flex;gap:8px">${A('noop',{},'聯繫','btn secondary sm')}${A('goto',{role:'staff',page:'tasks'},'相關任務','btn secondary sm')}</div></div>`;}).join('')||empty('目前沒有指派客戶','')}</div>`;
+  },
+  today(){
+    const ts=S.trips.filter(t=>t.host===STAFF_ME&&(t.cin===TODAY||t.hotelCheckin&&!t.hotelCheckout));
+    return appHead()+`<div class="mpage"><h1>今日接待</h1>${ts.map(t=>{const m=member(t.uuid);return `<div class="mcard"><div class="mh"><span>${esc(m.name)}</span><span class="mono mini">${t.id}</span></div><div class="mtimeline">${[[t.pickup.arr.status==='done'?'done':'todo','接機 '+esc(t.pickup.arr.time.slice(11)||'—'),t.pickup.arr.terminal||''],[t.hotelCheckin?'done':'todo','酒店入住',t.hotelCheckin||'待回報'],[t.venueCheckin?'done':'todo','PokerRoom 報到',t.venueCheckin||'引導至櫃檯'],[t.deposit.due===0?'done':t.deposit.collected?'done':'todo','押金（天城收）',t.deposit.due===0?'無須':t.deposit.collected?'已收':krw(t.deposit.due)]].map(x=>`<div class="mtl" style="${x[0]==='done'?'':'opacity:.7'}"><div>${x[1]}<small>${esc(x[2])}</small></div></div>`).join('')}</div></div>`;}).join('')||empty('今日沒有接待','')}</div>`;
+  },
+};
+function taskDetail(t){
+  const tpl=TPL[t.tpl]; const tr=t.tripId&&trip(t.tripId); const m=t.uuid&&member(t.uuid);
+  const ans=sel('ans_'+t.id);
+  const src=tr?[['酒店入住',tr.hotelCheckin?'已入住 '+tr.hotelCheckin:'尚無回報'],['PokerRoom 報到',tr.venueCheckin?'已報到 '+tr.venueCheckin:'尚無'],['接機',tr.pickup.arr.status==='done'?'已接到':tr.pickup.arr.car?'車輛已安排':'待安排']]:[];
+  return `<div class="mpage"><a href="#/staff/tasks" class="btn ghost" style="align-self:flex-start;padding:0">‹ 我的任務</a><h1>${badge(t.tpl,'gold')} ${esc(tpl.name)}</h1>
+    <div class="mcard"><div class="mh"><span>客戶與業務參照</span></div>${kv([['客戶',m?esc(m.name):esc(t.customer||'')],['行程',t.tripId?`<span class="mono">${t.tripId}</span>`:'—'],['住宿單',tr?`<span class="mono">${tr.hotel.conf}</span>`:'—'],['期限',t.due||'—']],true)}</div>
+    ${src.length?`<div class="mcard"><div class="mh"><span>來源狀態／既有回報</span></div>${kv(src,true)}</div>`:''}
+    ${t.status==='done'?`<div class="mcard" style="border-color:var(--success)"><div class="mh"><span>已完成</span>${badge(t.answer,'success')}</div><div class="mini">${t.done} · ${esc(t.assignee)}${t.detail?' · '+esc(t.detail):''}</div></div>`:`
+    <div class="mcard"><div class="mh"><span>固定回答</span></div><div class="radio">${tpl.opts.map(o=>`<label><input type="radio" name="ans_${t.id}" value="${esc(o)}" data-bind="ans_${t.id}" data-rerender="1" ${ans===o?'checked':''}> ${esc(o)}</label>`).join('')}</div>
+      ${ans?`<div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">${(ans===tpl.opts[0]?tpl.fields:['下一步','下次跟進時間']).map((f,i)=>`<div class="field"><label>${esc(f)}${ans===tpl.opts[0]?' *':''}</label><input class="input" data-bind="f${i}_${t.id}" value="${esc(sel('f'+i+'_'+t.id)||(i===0&&ans===tpl.opts[0]?TODAY+' '+NOW:''))}"></div>`).join('')}<div class="field"><label>補充說明／附件</label><textarea class="input" data-bind="memo_${t.id}" style="min-height:64px"></textarea></div></div>`:''}
+    </div>${A('submitTask',{id:t.id},'提交回報','btn m block'+(ans?'':' disabled'))}<div class="hint">送出一次回答不等於完成；肯定回答必填實際時間及來源。</div>`}
+  </div>`;
+}
+ACT.submitTask=p=>{ const t=S.tasks.find(x=>x.id===p.id); const ans=sel('ans_'+t.id); if(!ans) return false; const tpl=TPL[t.tpl]; const positive=ans===tpl.opts[0]; const tr=t.tripId&&trip(t.tripId); const f0=sel('f0_'+t.id)||nowStamp();
+  if(positive){ t.status='done'; t.answer=ans; t.done=nowStamp(); t.detail=f0;
+    if(tr){ if(t.tpl==='T05'){ tr.pickup.arr.status='done'; hist(tr,STAFF_ME,'接待回報：已接到本人 '+f0); }
+      if(t.tpl==='T06'){ tr.hotelCheckin=f0; if(['confirmed','arrived'].includes(tr.stage)) tr.stage='checked_in'; hist(tr,STAFF_ME,'接待回報：酒店已入住 '+f0); }
+      if(t.tpl==='T07'){ hist(tr,STAFF_ME,'接待回報：已引導至櫃檯 '+f0); }
+      if(t.tpl==='T10'){ tr.hotelCheckout=f0; tr.stage='checked_out'; hist(tr,STAFF_ME,'接待回報：已實際退房 '+f0+'（營運已離境）'); }
+      if(t.tpl==='T11'){ tr.pickup.dep.status='done'; hist(tr,STAFF_ME,'接待回報：已送達機場 '+f0); }
+      if(t.tpl==='T13'){ hist(tr,STAFF_ME,'接待回報：已提醒本人操作結算'); }
+    }
+    audit(STAFF_ME,'Host',`${t.id} ${tpl.name}：${ans}`); toast('已回報：'+ans+(t.tpl==='T06'?'；在島玩家已更新':t.tpl==='T10'?'；管理端可開放結算':''));
+  } else { t.lastAnswer=ans; t.lastAt=nowStamp(); if(tr) hist(tr,STAFF_ME,`接待回報：${ans}`); audit(STAFF_ME,'Host',`${t.id} ${tpl.name}：${ans}（持續追蹤）`); toast('已記錄，任務持續追蹤'); }
+  go('staff','tasks'); return true; };
+
+/* ================= Agent端 ================= */
+const AGENT_ME='David Chen';
+PAGES.agent={
+  customers(id){
+    const mine=S.customers.filter(c=>c.owner===AGENT_ME);
+    const c=id?mine.find(x=>x.id===id):null; if(c) return customerDetail(c,'agent');
+    return pageHead('名下客戶','只看本人名下客戶與本人業績；不得操作非名下行程。',A('openModal',{m:'newLead'},'建立 Lead','btn secondary'))+`<div class="kpis"><div class="kpi">${I.users}<div><div class="l">名下客戶</div><div class="v">${String(mine.length).padStart(2,'0')}</div></div></div><div class="kpi">${I.briefcase}<div><div class="l">進行中行程</div><div class="v">${String(mine.filter(x=>x.phase==='trip').length).padStart(2,'0')}</div></div></div><div class="kpi">${I.chat}<div><div class="l">售前跟進中</div><div class="v">${String(mine.filter(x=>x.phase==='presale').length).padStart(2,'0')}</div></div></div><div class="kpi">${I.clock}<div><div class="l">歸屬 30 天內到期</div><div class="v">00</div></div></div></div>
+      <div class="card"><div class="tblwrap"><table class="tbl"><thead><tr><th>客戶</th><th>階段</th><th>售前進度</th><th>歸屬期限</th><th>最近紀錄</th><th></th></tr></thead><tbody>${mine.map(x=>`<tr class="row"><td>${esc(x.name)}</td><td>${badge({presale:'售前',trip:'行程服務',maintain:'維護'}[x.phase],{presale:'warning',trip:'info',maintain:'neutral'}[x.phase])}</td><td>${PRESALE[x.presale]}</td><td>${x.ownerUntil}</td><td class="mini">${esc(x.last)}</td><td><div style="display:flex;gap:8px">${A('goto',{role:'agent',page:'customers',id:x.id},'詳情','btn secondary sm')}${x.phase==='presale'?A('openModal',{m:'followup',id:x.id},'跟進','btn secondary sm'):''}</div></td></tr>`).join('')}</tbody></table></div></div>`;
+  },
+  followup(){
+    const mine=S.customers.filter(c=>c.owner===AGENT_ME&&c.phase==='presale');
+    return pageHead('Engagement 跟進工作頁','五種固定狀態、聯繫摘要、輪次／下一步同頁。轉派後歷史不覆寫。')+`<div class="grid2">${mine.map(c=>{const fus=S.followups.filter(f=>f.cust===c.id);return `<div class="card"><div class="chead"><h3>${esc(c.name)}</h3>${badge(PRESALE[c.presale],'gold')}</div><div class="cbody">${fus.length?fus.slice(-2).map(f=>`<div class="row" style="padding:8px 0"><div class="g"><b>${esc(f.sum)}</b><small>${f.t} · ${esc(f.ch)} · 下一步：${esc(f.next)}</small></div></div>`).join(''):'<div class="mini">尚無跟進</div>'}<div style="display:flex;gap:10px;margin-top:14px">${A('openModal',{m:'followup',id:c.id},'新增跟進','btn secondary')}${c.presale==='INTENT_PRESENT'?A('openModal',{m:'hostReq',id:c.id},'申請代接待'):''}</div></div></div>`;}).join('')||empty('沒有售前中的客戶','')}</div>`;
+  },
+  hosting(){
+    const mine=S.hostRequests.filter(h=>h.agent===AGENT_ME);
+    return pageHead('代接待申請','歸屬人提出需求，由管理者指派服務人；歸屬不變。',A('openModal',{m:'hostReq',id:null},'新增申請'))+`<div class="card"><div class="tblwrap"><table class="tbl"><thead><tr><th>申請</th><th>客戶</th><th>需求</th><th>指派服務人</th></tr></thead><tbody>${mine.map(h=>`<tr><td class="mono">${h.id}<span class="sub">${h.t}</span></td><td>${esc(h.customer)}</td><td>${esc(h.want)}</td><td>${h.assignee?dot(h.assignee,'success'):dot('待管理者指派','warning')}</td></tr>`).join('')||'<tr><td colspan="4">尚無申請</td></tr>'}</tbody></table></div></div>`;
+  },
+  performance(){
+    const rows=[['2026/08','LIN, MAY','TR-260820-011',18400,'v3 · KRW 40／分','已支付 9/05'],['2026/08','KIM, JISOO','TR-260812-004',9600,'v3','已支付 9/05'],['2026/09','LIN, MAY','TR-260911-029',S.pointsImport.status==='approved'?6200:0,'v3',S.pointsImport.status==='approved'?'已入帳，待月結':'來源未入帳'],['2026/09','CHEN, ALEX','TR-260911-028',S.pointsImport.status==='approved'?5500:0,'v3',S.pointsImport.status==='approved'?'已入帳，待月結':'來源未入帳']];
+    return pageHead('本人業績與獎金結算','依活動日期的歸屬及個人適用單價計算；只看本人，不看全公司或他人獎金。')+`<div class="kpis"><div class="kpi">${I.coins}<div><div class="l">9 月名下新增積分</div><div class="v">${pts(rows.filter(r=>r[0]==='2026/09').reduce((a,r)=>a+r[3],0))}</div></div></div><div class="kpi">${I.chart}<div><div class="l">8 月已結算</div><div class="v">${pts(28000)}</div></div></div><div class="kpi">${I.wallet}<div><div class="l">8 月獎金（已支付）</div><div class="v" style="font-size:24px">KRW 1,120,000</div></div></div><div class="kpi">${I.clock}<div><div class="l">待本人確認明細</div><div class="v">00</div></div></div></div>
+      <div class="card"><div class="tblwrap"><table class="tbl"><thead><tr><th>月份</th><th>客戶</th><th>行程</th><th>入帳積分</th><th>單價版本</th><th>狀態</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${esc(r[1])}</td><td class="mono">${r[2]}</td><td class="num" style="font-weight:400">${pts(r[3])}</td><td>${r[4]}</td><td>${r[5].startsWith('已支付')?dot(r[5],'success'):r[5].startsWith('已入帳')?dot(r[5],'info'):dot(r[5],'neutral')}</td></tr>`).join('')}</tbody></table></div><div class="cfoot"><span>個人單價實際值仍待定（PRD 15.4）</span><span>匯出：僅本人結算單</span></div></div>`;
+  },
+};
+MODALS.hostReq=p=>{const c=p.id&&S.customers.find(x=>x.id===p.id);return {title:'申請代接待',body:`<div class="field"><label>客戶</label><input class="input" data-bind="hr_c" value="${esc(c?c.name:'')}" placeholder="名下客戶"></div><div class="field"><label>需求</label><textarea class="input" data-bind="hr_want" placeholder="日期、是否需接機、特別需求"></textarea></div><div class="hint">歸屬仍是您；服務人只按任務存取必要資料。</div>`,ok:{act:'hostReq',p:{},label:'送出申請'}};};
+ACT.hostReq=()=>{ const id='HR-00'+(89+S.hostRequests.length); S.hostRequests.push({id,customer:sel('hr_c')||'名下客戶',agent:AGENT_ME,want:sel('hr_want')||'',t:nowStamp(),status:'pending',assignee:null}); audit(AGENT_ME,'Agent',`提出代接待申請 ${id}`); S.ui.modal=null; toast('已送出，等待管理者指派'); };
+
+/* ---------- boot ---------- */
+load(); if(!location.hash) location.hash='#/player/home'; render();
+</script>
+</head><body></body></html>
