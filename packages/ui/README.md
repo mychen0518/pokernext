@@ -65,8 +65,11 @@ Pages are addressed by query. `/` lists every registered page.
 data containers. Demo data for these pages lives in
 `kitchen_sink/fixtures/partner_workspace.ts`, never in `lib/`.
 
-Button hover and focus-visible are pinned for screenshots with
-`data-state="hover"` or `data-state="focus-visible"` on the `Button`.
+Components carry no catalogue-only props or styles. The base page shows
+Button hover and focus-visible as plain buttons; its screenshot spec forces
+the real `:hover` and `:focus-visible` states on the buttons in those
+columns through the Chrome DevTools Protocol (`CSS.forcePseudoState`), so
+open the page in a browser and they look like default buttons.
 
 ## Tests
 

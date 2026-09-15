@@ -34,11 +34,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
-/**
- * Renders a DESIGN.md `Button`. Hover and focus-visible can also be pinned
- * with `data-state="hover" | "focus-visible"` so a static catalogue page can
- * show every state at once.
- */
+/** Renders a DESIGN.md `Button`. */
 export function Button({
   variant = 'primary',
   size = 'md',

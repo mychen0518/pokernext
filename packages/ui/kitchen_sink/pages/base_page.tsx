@@ -129,14 +129,10 @@ export function BasePage() {
               <Button variant={variant}>{label}</Button>
             </Specimen>
             <Specimen caption="hover">
-              <Button variant={variant} data-state="hover">
-                {label}
-              </Button>
+              <Button variant={variant}>{label}</Button>
             </Specimen>
             <Specimen caption="focus-visible">
-              <Button variant={variant} data-state="focus-visible">
-                {label}
-              </Button>
+              <Button variant={variant}>{label}</Button>
             </Specimen>
             <Specimen caption="disabled">
               <Button variant={variant} disabled>
