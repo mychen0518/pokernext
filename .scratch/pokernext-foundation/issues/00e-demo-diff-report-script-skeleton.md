@@ -159,3 +159,8 @@ number. Screenshot of the report: `.scratch/pokernext-foundation/screenshots/00e
 - In the captures the formal shells' CJK glyphs look like a system fallback
   font, while the prototype loads Noto Sans TC from Google Fonts; worth a
   look in a UI ticket, since font differences alone show up in the diff.
+
+### 2026-09-15 review fixes
+
+- Batch B expectation (open issue above) fixed in RUNBOOK §7 and §8. Checked the blockers: ticket 27 is blocked by 19 and 26, 26 by 25, 25 by 16 and 24, and 30 by 20, 21, 26 and 27. Per the `ticket` annotations in `tooling/demo/tests/demo_script.spec.ts`, batch B (15–22) turns steps 1–3 and 7–9 green; steps 4 and 5 (27) and 6 (20, 22, 30) move to batch C with 10–13. 27 is no longer listed in the batch B frontier. Also noted in §8: 28 and 29 are blocked by 14, which RUNBOOK puts in batch D.
+- Recordings are committed now: `.gitignore` ignores `tooling/demo/recordings/*` except `*.webm`, and still ignores `latest.webm`; `.gitattributes` marks `*.webm` (and `*.png`) binary. RUNBOOK 「每批固定收尾」 step 6 says to commit `<batch>.webm`.
