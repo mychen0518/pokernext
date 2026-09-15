@@ -14,6 +14,8 @@ import {ensureDemoAccounts} from '@pokernext/app/demo';
 import {LOCAL_CLUSTERS, startDatabaseServer} from '@pokernext/db/local_cluster';
 import {migrateDatabase} from '@pokernext/db/migrate';
 
+import {STOP_MESSAGE, STOP_ON_IPC_ENV} from './demo_ipc';
+
 const WEB_ROOT = fileURLToPath(new URL('../../../apps/web/', import.meta.url));
 const DEFAULT_PORT = 3000;
 const READY_TIMEOUT_MILLISECONDS = 180_000;
@@ -27,6 +29,7 @@ interface DemoEnvironment {
   readonly POKERNEXT_PLAYER_HOST?: string;
   readonly POKERNEXT_WORK_HOST?: string;
   readonly NODE_ENV?: string;
+  readonly POKERNEXT_DEMO_STOP_ON_IPC?: string;
 }
 
 /** Runs the demo until the process receives Ctrl+C or Next exits. */
@@ -68,6 +71,23 @@ export async function runDemo(
     process.once(signal, () => {
       void stop().then(() => process.exit(0));
     });
+  }
+  // Started by `demo:diff` / `demo:script` (lib/demo_server.ts) with an IPC
+  // channel: Windows has no catchable signal for a child process, so the
+  // parent asks for a clean stop, and a parent that dies disconnects. The
+  // environment flag tells that channel apart from the one tsx's own CLI
+  // opens under `pnpm demo`.
+  if (env[STOP_ON_IPC_ENV] === '1' && process.send !== undefined) {
+    process.on('message', message => {
+      if (message === STOP_MESSAGE) {
+        void stop().then(() => process.exit(0));
+      }
+    });
+    process.once('disconnect', () => {
+      void stop().then(() => process.exit(0));
+    });
+    // Listening must not keep the process alive once Next has exited.
+    process.channel?.unref();
   }
 
   try {

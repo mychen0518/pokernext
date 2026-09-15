@@ -14,7 +14,7 @@ import {type AccountSummary, createAccountUseCases} from './accounts';
 import {SYSTEM_CLOCK} from './system_clock';
 
 /** One demo account as seeded. */
-interface DemoAccount {
+export interface DemoAccount {
   readonly id: string;
   readonly workspace: Workspace;
   readonly displayName: string;
@@ -22,7 +22,7 @@ interface DemoAccount {
 }
 
 /** The six demo accounts; ids never change so reruns find them. */
-const DEMO_ACCOUNTS: readonly DemoAccount[] = [
+export const DEMO_ACCOUNTS: readonly DemoAccount[] = [
   {
     id: '5e3d0000-de30-4000-8000-000000000001',
     workspace: 'player',

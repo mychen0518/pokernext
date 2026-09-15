@@ -5,6 +5,13 @@
   "type": "module",
   "dependencies": {
     "@pokernext/app": "workspace:*",
-    "@pokernext/db": "workspace:*"
+    "@pokernext/db": "workspace:*",
+    "@pokernext/domain": "workspace:*",
+    "@pokernext/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0"
   }
 }

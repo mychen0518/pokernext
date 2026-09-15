@@ -90,8 +90,48 @@ frontier 預期：23、24、25、26、28、29、30。完成：劇本 13 步全�
 1. `/code-review <上一批的 commit>`：兩軸報告，只修你同意的。
 2. `/retro`：把摩擦回寫成 CLAUDE.md 導航指標、`docs/CODING_STANDARDS.md` 規則或 lint。
 3. 更新 `docs/design/DESIGN.md`（若元件有新增）與 `.scratch/.../issues/*.md` 的 `## Comments`（截圖、決策）。
-4. 確認這批每張票都補了自己那段 demo seed（呼叫 use-case，不直接寫 SQL），並解除 `demo:script` 裡對應步驟的 `test.fixme`。
-5. commit；`pnpm demo:script` 錄影存 `tooling/demo/recordings/<batch>.webm`。
+4. 確認這批每張票都補了自己那段 demo seed（呼叫 use-case，不直接寫 SQL），並解除 `demo:script` 裡對應步驟的 `test.fixme`（做法見下方「解除劇本步驟」）。
+5. 這批新增或改動了畫面時，在 `tooling/demo/diff_pages.json` 補上對照表列（見下方「新增對照表列」），跑 `pnpm demo:diff` 看報告，把差異最大的幾頁寫進票的 `## Comments`。
+6. commit；`DEMO_BATCH=<batch> pnpm demo:script`，錄影存 `tooling/demo/recordings/<batch>.webm`。
+
+兩個指令都會自己處理 demo：`http://work.localhost:3000/api/health` 有回應就沿用正在跑的 `pnpm demo`（跑完不關）；沒有就啟動一個（與 `pnpm demo` 同一個入口），跑完停掉 Next.js 與 Postgres。`DEMO_PORT`、`POKERNEXT_PLAYER_HOST`、`POKERNEXT_WORK_HOST` 與 `pnpm demo` 相同。
+
+### 新增對照表列（`pnpm demo:diff`）
+
+在 `tooling/demo/diff_pages.json` 的 `pages` 加一個物件，不需改工具程式：
+
+```json
+{
+  "id": "venue_checkin",
+  "title": "到場報到",
+  "formal": {
+    "host": "work",
+    "path": "/venue/checkin",
+    "signInAs": {"workspace": "venue"}
+  },
+  "prototype": {"route": "#/venue/checkin"},
+  "viewports": ["desktop"]
+}
+```
+
+- `id`：小寫英數與 `_`，不可重複（報告圖檔以它命名）。
+- `formal.host`：`player` 或 `work`；`formal.path` 以 `/` 開頭。
+- `formal.signInAs`：`{"workspace": "<工作區>"}`（該工作區的 demo 帳號）或 `{"accountId": "<id>"}`，二選一；不需登入的頁面省略。登入一律經開發用角色切換路由，每列每個寬度都用新的瀏覽器 context。
+- `prototype.route`：原型的 hash route（`#/<角色>/<頁面>`）；截圖前會清除原型的瀏覽器儲存（`pn-proto-v1`）再重新載入。
+- `viewports`：`desktop`（1440×1024）、`mobile`（390×844），可兩個都列；預設依頁面所屬端選一個。
+- 寫錯的列會在啟動 demo 之前就被指出檔案、第幾列與欄位。
+
+報告在 `tooling/demo/reports/diff/index.html`（gitignored，每次重寫），每頁每個寬度並排正式頁、原型頁與差異圖，依差異比例由大到小排列；高度不同時多出的部分算作差異。
+
+### 解除劇本步驟（`pnpm demo:script`）
+
+13 步在 `tooling/demo/tests/demo_script.spec.ts`，測試名稱是原型劇本的步驟名稱，`ticket` 註記是對應票號。某步的票都完成後：
+
+1. 把該步的 `test.fixme(` 改成 `test(`。
+2. 在步驟內容用 `openWorkspace(scriptPage, '<工作區>')` 以該工作區的 demo 帳號進入，接著像使用者一樣操作並用 `expect` 驗證畫面；需要的資料來自票自己補的 demo seed。
+3. 不改 `playwright.config.ts`。步驟依序執行並共用同一個頁面，所以前一步留下的狀態下一步看得到；某步失敗時後面的步驟會被跳過。
+
+錄影是整段劇本一支影片，存到 `tooling/demo/recordings/<DEMO_BATCH>.webm`（未設 `DEMO_BATCH` 時為 `latest.webm`，gitignored）；全部步驟都還是 fixme 時不產生影片。
 
 ## `pnpm demo` 怎麼用
 
