@@ -8,6 +8,7 @@ import {describe, expect, it} from 'vitest';
 
 import {
   type AccountKind,
+  decideSessionEnd,
   decideSessionStart,
   decideWorkspaceEntry,
   type HostKind,
@@ -145,5 +146,24 @@ describe('工作區進入判定', () => {
         reason: 'accountNotAllowedOnHost',
       });
     }
+  });
+});
+
+describe('結束 session 判定', () => {
+  it('在開 session 的 host 上結束自己的 session 可以', () => {
+    for (const host of HOSTS) {
+      expect(decideSessionEnd({sessionHost: host, requestHost: host})).toEqual({
+        allowed: true,
+      });
+    }
+  });
+
+  it('把 session 帶到另一個 host 結束被拒，原因是 session 來自另一個 host', () => {
+    expect(
+      decideSessionEnd({sessionHost: 'work', requestHost: 'player'}),
+    ).toEqual({allowed: false, reason: 'sessionFromOtherHost'});
+    expect(
+      decideSessionEnd({sessionHost: 'player', requestHost: 'work'}),
+    ).toEqual({allowed: false, reason: 'sessionFromOtherHost'});
   });
 });
