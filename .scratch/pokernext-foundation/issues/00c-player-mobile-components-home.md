@@ -147,3 +147,8 @@ desktop project.
   so `main.tsx` and `kitchen_sink.css` stay untouched for the 00b merge.
 - Nav links point back to `?page=player-home`; the real routes belong to
   ticket 13. No new dependencies.
+
+### 2026-09-15 review fixes
+
+- 可用積分 5,000 vs 30,000, decided: PRD 5.7.4 (「新申請只能使用扣除所有有效保留後的可用積分」), PRD 6.7.1 (member sees 帳面餘額, 有效保留 and 可用積分 separately) and ticket 25 (「帳面 60,000、正式保留 50,000 → 可用 10,000」) define 可用積分 as 帳面餘額 minus 有效保留. The foundation spec story 6 literal 30,000 分 is Alex's 帳面餘額 (prototype seed `ledger:30000, reserved:25000`), so the home keeps 可用積分 **5,000 分** and 已保留 **25,000 分**. The reference image labelling 30,000 as 可用積分 is illustrative only. The home `PointsPanel` has no ledger figure; 帳面餘額 belongs to the 我的積分 page (tickets 23 and 25). Recorded in DESIGN.md §3.1 and the `PointsPanel` row; the fixture comment in `kitchen_sink/pages/player_home_copy.ts` cites the PRD, and the accessibility test is named for Alex's 30,000 分 balance. Values unchanged, so no baseline changed.
+- Hero placeholder: `kitchen_sink/assets/jeju_night_placeholder.svg` (hard-coded hex) was replaced by `kitchen_sink/pages/jeju_night_placeholder.ts`, which builds the same night-coast SVG as a data URL at render with fills read from the loaded `--pn-*` tokens (an `<img>` cannot resolve custom properties). Player-home baselines are pixel-identical. `tests/component_styles_use_tokens.test.ts` now also fails on hex, functional or named colour literals in `lib/**/*.ts(x)` and `kitchen_sink/**/*.{ts,tsx,svg,html}`.

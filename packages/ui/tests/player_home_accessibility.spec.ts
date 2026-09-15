@@ -236,7 +236,7 @@ test('player home without a trip explains why instead of showing zero or 已完�
   await expect(page.locator('table')).toHaveCount(0);
 });
 
-test('player home with a trip shows points as 5,000 分 available and 25,000 分 reserved', async ({
+test('Alex sees 5,000 分 available of his 30,000 分 balance, with 25,000 分 reserved for the stay', async ({
   page,
 }) => {
   await openKitchenSinkPage(page, 'player-home', {state: 'ready'});
