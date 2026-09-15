@@ -46,8 +46,14 @@ rest in `lib/`.
 - `packages/domain` imports no other workspace package and no React, Next or
   database library.
 - `packages/ui` imports no other workspace package.
-- `packages/ports/testing.ts` (fakes) is imported only from `tests/` folders,
-  never from `apps/web`.
+- `packages/ports/testing.ts` (fakes) is imported only from `tests/` folders
+  and the `@pokernext/app/testing` wiring, never from `apps/web`.
+- `packages/app/testing.ts` (test app, legal-operation builder, concurrency
+  tool) is imported only from `tests/` folders; `packages/db/testing.ts`
+  (cloned test databases) only from `tests/` folders and that wiring.
+- A package's `lib/testing/` is reachable only through its own `testing.ts`.
+- `packages/db/local_cluster.ts` (embedded Postgres) is imported only from
+  `tooling/` and tests, so production code never loads embedded-postgres.
 - `packages/app/demo.ts` is imported only from `tooling/demo`.
 - Nothing imports `apps/*` or `tooling/*`.
 

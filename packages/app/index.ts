@@ -4,4 +4,14 @@
  * (ADR-0001). The only package `apps/web` may call for business behaviour.
  */
 
-export {};
+export {createApp, createAppFromEnvironment} from './lib/app';
+export type {App, AppDependencies, AppEnvironment} from './lib/app';
+export type {
+  HealthCheck,
+  HealthCheckRecorded,
+  HealthCheckRejected,
+  HealthCheckUseCases,
+  ListHealthChecksRequest,
+  RecordHealthCheckRequest,
+} from './lib/health_check';
+export {PortNotConfiguredError} from './lib/unconfigured_ports';

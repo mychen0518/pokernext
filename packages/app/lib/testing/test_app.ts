@@ -1,0 +1,58 @@
+/**
+ * @fileoverview Builds the application for a test: its own database cloned
+ * from the migrated template, fake external ports and a controllable clock.
+ */
+
+import {connectDatabase} from '@pokernext/db';
+import {createTestDatabase} from '@pokernext/db/testing';
+import {
+  ControllableClock,
+  type ControllableClockOptions,
+  createFakePorts,
+  type FakeExternalPorts,
+} from '@pokernext/ports/testing';
+
+import {type App, createApp} from '../app';
+
+/** How to set up a test app. */
+export interface TestAppOptions extends ControllableClockOptions {
+  /**
+   * Pool size of the app's database connection. Concurrency tests with more
+   * parallel attempts than this still run, but queue for connections.
+   */
+  maxConnections?: number;
+}
+
+/** The application under test, with handles on its fakes and clock. */
+export interface TestApp extends App {
+  readonly clock: ControllableClock;
+  readonly ports: FakeExternalPorts;
+  /** Closes connections and drops the test's database. */
+  close(): Promise<void>;
+}
+
+/**
+ * Creates an application on a fresh database. Tests arrange state only by
+ * calling its use-cases (see `given`), never by writing tables.
+ */
+export async function createTestApp(
+  options: TestAppOptions = {},
+): Promise<TestApp> {
+  const testDatabase = await createTestDatabase();
+  const database = connectDatabase({
+    url: testDatabase.url,
+    maxConnections: options.maxConnections ?? 10,
+  });
+  const clock = new ControllableClock(options);
+  const ports = createFakePorts(clock);
+  const app = createApp({database, clock, ports});
+  return {
+    ...app,
+    clock,
+    ports,
+    close: async () => {
+      await app.close();
+      await testDatabase.drop();
+    },
+  };
+}

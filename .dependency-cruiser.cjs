@@ -27,6 +27,12 @@ const PKG = `${PACKAGE_ROOTS}/[^/]+`;
 const PACKAGE_INTERNALS = `^${PKG}/[^/]+/`;
 /** Test code: files in a package's tests/ folder. */
 const TEST_CODE = `^${PKG}/tests/`;
+/**
+ * The test wiring behind `@pokernext/app/testing`: the entry point and its
+ * `lib/testing/` implementation. It builds test apps from fakes, so it may
+ * import other packages' test-only entry points; only test code may import it.
+ */
+const APP_TEST_WIRING = '^packages/app/(testing\\.ts$|lib/testing/)';
 
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
@@ -99,10 +105,49 @@ module.exports = {
     {
       name: 'fake-ports-only-in-tests',
       comment:
-        'packages/ports/testing.ts (fakes and failure injection) may be imported only from test code, so fakes never ship.',
+        'packages/ports/testing.ts (fakes and failure injection) may be imported only from test code and the @pokernext/app/testing wiring, so fakes never ship.',
+      severity: 'error',
+      from: {pathNot: [TEST_CODE, APP_TEST_WIRING]},
+      to: {path: '^packages/ports/testing\\.ts$'},
+    },
+    {
+      name: 'app-testing-only-in-tests',
+      comment:
+        'packages/app/testing.ts (test app, legal-operation builder, concurrency tool) may be imported only from test code, so test wiring never ships.',
       severity: 'error',
       from: {pathNot: TEST_CODE},
-      to: {path: '^packages/ports/testing\\.ts$'},
+      to: {path: '^packages/app/testing\\.ts$'},
+    },
+    {
+      name: 'db-testing-only-in-tests',
+      comment:
+        'packages/db/testing.ts (template and cloned test databases) may be imported only from test code and the @pokernext/app/testing wiring.',
+      severity: 'error',
+      from: {pathNot: [TEST_CODE, APP_TEST_WIRING]},
+      to: {path: '^packages/db/testing\\.ts$'},
+    },
+    {
+      name: 'testing-internals-behind-testing-entry',
+      comment:
+        "A package's lib/testing/ implementation is reachable only through that package's testing.ts, never from its production files.",
+      severity: 'error',
+      // importer is in package $1 but is neither testing.ts nor lib/testing/
+      from: {path: '^(packages/[^/]+)/(?!testing\\.ts$|lib/testing/)'},
+      to: {path: '^$1/lib/testing/'},
+    },
+    {
+      name: 'embedded-postgres-not-in-production',
+      comment:
+        'Only packages/db/lib/local_cluster.ts may load embedded-postgres, and only tooling, test code and the db test databases may reach it, so the local cluster never ships.',
+      severity: 'error',
+      from: {
+        pathNot: [
+          TEST_CODE,
+          '^tooling/',
+          '^packages/db/(local_cluster\\.ts|lib/test_databases\\.ts)$',
+        ],
+      },
+      to: {path: '^packages/db/(lib/)?local_cluster\\.ts$'},
     },
     {
       name: 'demo-entry-only-from-tooling-demo',
