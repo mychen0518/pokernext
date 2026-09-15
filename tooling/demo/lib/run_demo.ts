@@ -1,8 +1,9 @@
 /**
  * @fileoverview `pnpm demo`: starts the demo database (embedded Postgres 16,
- * no Docker, or `DATABASE_URL`), applies migrations, ensures the six demo
- * accounts, and runs `next dev` for apps/web on the player and work-account
- * hosts until Ctrl+C, which stops Next and Postgres.
+ * no Docker, or `DEMO_DATABASE_URL`; never `DATABASE_URL`), applies
+ * migrations, ensures the six demo accounts, and runs `next dev` for apps/web
+ * on the player and work-account hosts, passing it the demo database as its
+ * `DATABASE_URL`, until Ctrl+C, which stops Next and Postgres.
  */
 
 import {type ChildProcess, spawn, spawnSync} from 'node:child_process';
@@ -24,7 +25,7 @@ const DEMO_DIST_DIR = '.next/demo';
 
 /** The environment `pnpm demo` reads. */
 interface DemoEnvironment {
-  readonly DATABASE_URL?: string;
+  readonly DEMO_DATABASE_URL?: string;
   readonly DEMO_PORT?: string;
   readonly POKERNEXT_PLAYER_HOST?: string;
   readonly POKERNEXT_WORK_HOST?: string;
@@ -42,14 +43,14 @@ export async function runDemo(
       `Port ${port} is already in use; stop that process or set DEMO_PORT.`,
     );
   }
-  const usesDatabaseUrl = Boolean(env.DATABASE_URL);
+  const usesDatabaseUrl = Boolean(env.DEMO_DATABASE_URL);
   log(
     usesDatabaseUrl
-      ? 'Database: DATABASE_URL'
+      ? 'Database: DEMO_DATABASE_URL'
       : `Database: embedded Postgres 16, .data/${LOCAL_CLUSTERS.demo.dataDirectoryName} ` +
           `(port ${LOCAL_CLUSTERS.demo.port})`,
   );
-  const server = await startDatabaseServer('demo');
+  const server = await startDatabaseServer('demo', env);
   let next: ChildProcess | undefined;
   let stopping: Promise<void> | undefined;
   const stop = () => {

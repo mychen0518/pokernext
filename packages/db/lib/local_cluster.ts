@@ -16,6 +16,7 @@ import {
   type DatabaseEnvironment,
   LOCAL_CLUSTERS,
   type LocalClusterName,
+  localClusterOverride,
   localClusterUrl,
   resolveDatabaseUrl,
 } from './config';
@@ -31,7 +32,8 @@ export interface DatabaseServer {
 }
 
 /**
- * Makes the server for a purpose reachable. With `DATABASE_URL` set it only
+ * Makes the server for a purpose reachable. With the purpose's override set
+ * (`DATABASE_URL` for tests, `DEMO_DATABASE_URL` for the demo) it only
  * returns that URL. Otherwise it starts the local cluster, or reuses it when
  * another process already runs it, and creates the purpose's database.
  */
@@ -40,7 +42,7 @@ export async function startDatabaseServer(
   env: DatabaseEnvironment = process.env,
 ): Promise<DatabaseServer> {
   const url = resolveDatabaseUrl(purpose, env);
-  if (env.DATABASE_URL !== undefined && env.DATABASE_URL !== '') {
+  if (localClusterOverride(purpose, env) !== undefined) {
     return {url, stop: async () => {}};
   }
   const stop = await startLocalCluster(purpose);
