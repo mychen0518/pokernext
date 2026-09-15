@@ -1,0 +1,17 @@
+/*
+ * POKERNEXT typefaces, self-hosted (DESIGN.md §2.2): registers "Noto Sans TC"
+ * and "Noto Serif TC", the first families of --pn-font-sans and
+ * --pn-font-serif, from the bundled Fontsource files. No external font host.
+ * Only the weights the type tokens and components use are loaded: sans 400,
+ * 500, 600 and 700; serif 700. Each weight is split into unicode-range
+ * subsets, so a browser downloads only the subsets of the glyphs on the page.
+ * Import once per app, before the tokens:
+ * `import '@pokernext/ui/fonts.css'; import '@pokernext/ui/tokens.css';`.
+ * Noto fonts are licensed under the SIL Open Font License 1.1.
+ */
+
+@import '@fontsource/noto-sans-tc/400.css';
+@import '@fontsource/noto-sans-tc/500.css';
+@import '@fontsource/noto-sans-tc/600.css';
+@import '@fontsource/noto-sans-tc/700.css';
+@import '@fontsource/noto-serif-tc/700.css';

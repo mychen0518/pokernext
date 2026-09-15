@@ -1,8 +1,10 @@
 /**
- * @fileoverview The root layout: design tokens, the page background and the
- * viewport. `viewport-fit=cover` lets BottomNav pad the safe-area inset.
+ * @fileoverview The root layout: the self-hosted typefaces, design tokens, the
+ * page background and the viewport. `viewport-fit=cover` lets BottomNav pad
+ * the safe-area inset.
  */
 
+import '@pokernext/ui/fonts.css';
 import '@pokernext/ui/tokens.css';
 import '@pokernext/ui/base.css';
 

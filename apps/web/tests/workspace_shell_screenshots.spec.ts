@@ -42,6 +42,11 @@ test.beforeAll(() => {
 });
 
 async function capture(page: Page, name: string): Promise<string> {
+  // New text (a refusal page, an opened Drawer) can need font subsets that
+  // are still loading.
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
   const path = join(OUTPUT_DIR, `${name}.png`);
   await page.screenshot({path});
   return path;
