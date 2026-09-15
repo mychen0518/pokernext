@@ -267,3 +267,17 @@ afterwards.
   frame with EmptyState only; the prototype's AppHeader, 我的任務 title,
   segmented Tabs and task list belong to ticket 22. The shells have only an
   empty state: a ready state does not exist until business tickets add data.
+
+### 2026-09-15 self-hosted fonts
+
+- The web root layout imports `@pokernext/ui/fonts.css` before the tokens, so
+  every shell renders with the bundled Noto Sans TC; both production builds
+  (Turbopack, webpack) emit the font files under `static/media`.
+- New test 「工作區頁面以自帶的 Noto Sans TC 顯示，不向外部字體主機請求」
+  (`apps/web/tests/workspace_fonts.spec.ts`): after switching to 琪琪, Noto
+  Sans TC has loaded and every font request goes to the app's own origin.
+- `switchAccount` and the capture spec wait a frame before
+  `document.fonts.ready`; without it the reception capture still showed the
+  system fallback. All 00d screenshots and side-by-sides were recaptured with
+  `CAPTURE_00D_SCREENSHOTS=1`; the reception shell now uses the same typeface
+  as the prototype's `#/staff/tasks`.

@@ -147,3 +147,19 @@ on `--pn-bg`, under 4.5:1; DESIGN.md §6 only gates `--pn-text` and
   reason is recorded in `packages/ui/README.md`.
 - Test names in `packages/ui/tests` are business sentences now (for example
   「only Modal and Drawer cast a shadow」).
+
+### 2026-09-15 self-hosted fonts
+
+- Fonts are bundled now: `@pokernext/ui/fonts.css` registers Noto Sans TC
+  (400, 500, 600, 700) and Noto Serif TC (700) from Fontsource, imported
+  before the tokens by the kitchen-sink and the web root layout. Pages no
+  longer fall back to Microsoft JhengHei, and nothing loads from an external
+  font host (DESIGN.md §2.2).
+- `openKitchenSinkPage` waits a frame before `document.fonts.ready`, because a
+  unicode-range subset starts loading only when layout first needs it.
+- New test 「設計系統頁面以 Noto Sans TC 與 Noto Serif TC 顯示」
+  (`tests/kitchen_sink_fonts.spec.ts`, both projects).
+- `base-{desktop,mobile}-win32.png` regenerated with `test:e2e:update`: glyphs
+  change, layout does not (the mobile page is 1px taller). The evidence
+  screenshots and side-by-sides in `screenshots/00a/` were recaptured the same
+  way (Button section scrolled to the top, hover and focus-visible forced).

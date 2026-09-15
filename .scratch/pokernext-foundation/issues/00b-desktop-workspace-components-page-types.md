@@ -168,3 +168,13 @@ ActivityTimeline, TodoPanel/TodoCard, and the `DataState` type.
 - Tabs and ListPanel share one private roving-focus helper,
   `lib/roving_focus.ts` (orientation and wrap options); the keyboard specs
   stayed green and the desktop baselines unchanged.
+
+### 2026-09-15 self-hosted fonts
+
+- Pages render with the bundled Noto Sans TC and Noto Serif TC
+  (`@pokernext/ui/fonts.css`, see 00a). All ten desktop baselines were
+  regenerated and checked: glyphs change, page heights and column layout do
+  not. Every screenshot and side-by-side in `screenshots/00b/` was recaptured;
+  against the references the KPI numbers, 300,000 and the headings now use the
+  same typefaces, so the remaining differences are the deliberate ones listed
+  above.
