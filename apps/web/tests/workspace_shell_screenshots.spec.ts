@@ -42,9 +42,10 @@ test.beforeAll(() => {
 });
 
 async function capture(page: Page, name: string): Promise<string> {
-  // New text (a refusal page, an opened Drawer) can need font subsets that
-  // are still loading.
+  // A font subset starts loading when layout first needs one of its glyphs,
+  // so after a frame `ready` covers every subset the page's text needs.
   await page.evaluate(async () => {
+    await new Promise(resolve => requestAnimationFrame(resolve));
     await document.fonts.ready;
   });
   const path = join(OUTPUT_DIR, `${name}.png`);

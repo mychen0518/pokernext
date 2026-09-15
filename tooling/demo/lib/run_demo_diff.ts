@@ -10,7 +10,12 @@ import {mkdirSync, rmSync, writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-import {type Browser, type BrowserContext, chromium} from '@playwright/test';
+import {
+  type Browser,
+  type BrowserContext,
+  chromium,
+  type Page,
+} from '@playwright/test';
 
 import {ensureDemoServer, roleSwitchUrl} from './demo_server';
 import {
@@ -117,6 +122,18 @@ async function compareOne(
   };
 }
 
+/**
+ * Waits until the fonts the page's text needs have loaded. A unicode-range
+ * subset starts loading at the first layout that needs one of its glyphs, so
+ * wait a frame before `document.fonts.ready`.
+ */
+async function waitForFonts(tab: Page): Promise<void> {
+  await tab.evaluate(async () => {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    await document.fonts.ready;
+  });
+}
+
 async function captureFormal(
   browser: Browser,
   {page, viewport}: Capture,
@@ -135,9 +152,7 @@ async function captureFormal(
       }
     }
     await tab.goto(formalUrl);
-    await tab.evaluate(async () => {
-      await document.fonts.ready;
-    });
+    await waitForFonts(tab);
     return tab.screenshot({
       fullPage: true,
       animations: 'disabled',
@@ -160,9 +175,7 @@ async function capturePrototype(
       sessionStorage.clear();
     });
     await tab.reload();
-    await tab.evaluate(async () => {
-      await document.fonts.ready;
-    });
+    await waitForFonts(tab);
     return tab.screenshot({
       fullPage: true,
       animations: 'disabled',

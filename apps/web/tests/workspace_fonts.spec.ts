@@ -24,6 +24,7 @@ test('工作區頁面以自帶的 Noto Sans TC 顯示，不向外部字體主機
   await switchAccount(page, '琪琪');
 
   const fonts = await page.evaluate(async () => {
+    await new Promise(resolve => requestAnimationFrame(resolve));
     await document.fonts.ready;
     const loaded = new Set<string>();
     document.fonts.forEach(face => {
