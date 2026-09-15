@@ -135,3 +135,9 @@ DetailPanel, Stepper, ActivityTimeline, TodoPanel/TodoCard, and the
   figures; KpiTile has no state spec in DESIGN.md.
 - For the 00c merge: the extended scanner rejects literal `letter-spacing`
   and `box-shadow` in any `packages/ui` CSS Module.
+
+### 2026-09-15 review fixes
+
+- Gold-button rule (open issue above), decided in DESIGN.md §2.1: at most one `Button/primary` per block (a card, one 作業頁 column, the `PageHeader` action area, a Modal or Drawer action row), matching §3.2, §4 `Button` and §4 `TodoCard`. The visual intent is unchanged: no two gold buttons side by side in one block; player screens still keep §3.1's one main action per screen.
+- Tabs `segmented` (open issue above) is implemented: `<Tabs variant="segmented">`, equal segments at least 44px high in a `--pn-surface-2` track, the current segment `--pn-gold` with `--pn-text-inverse`, same roving keyboard as `underline`. DESIGN.md §4 `Tabs` now specifies it. Shown on `/?page=base` (section Tabs, both variants); `base-{desktop,mobile}-win32.png` updated and checked; `tests/keyboard_focus.spec.ts` adds 「a member switches the segmented tabs with the arrow keys」 (red before the variant existed) and its Tab walk now skips `tabindex="-1"` tabs.
+- Tabs and ListPanel share one private roving-focus helper, `lib/roving_focus.ts` (orientation and wrap options); the keyboard specs stayed green and the desktop baselines unchanged.
