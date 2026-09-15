@@ -27,7 +27,14 @@ test.skip(
   'player home is phone-first',
 );
 
-/** Box of one text run, in page coordinates. */
+/**
+ * Box of one text run, in page coordinates. Vertically it spans the run's
+ * line boxes (each line's `line-height` around the line's centre), the space
+ * layout gives the text. The font's content area is taller than a tight
+ * display `line-height` (Noto Serif TC's ascent plus descent is about 1.45em
+ * against 1.1), so it reaches into the neighbouring lines without any glyph
+ * touching them.
+ */
 interface TextBox {
   readonly text: string;
   readonly left: number;
@@ -79,12 +86,21 @@ async function readTextBoxes(page: Page): Promise<TextBox[]> {
       if (rect.width === 0 || rect.height === 0) {
         continue;
       }
+      const lineHeight = parseFloat(getComputedStyle(parent).lineHeight);
+      const lines = Array.from(range.getClientRects()).map(line => {
+        const centre = (line.top + line.bottom) / 2;
+        // `normal` line height parses as NaN: keep the content area.
+        const half = Number.isNaN(lineHeight)
+          ? line.height / 2
+          : lineHeight / 2;
+        return {top: centre - half, bottom: centre + half};
+      });
       const box = {
         text,
         left: rect.left + window.scrollX,
-        top: rect.top + window.scrollY,
+        top: Math.min(...lines.map(line => line.top)) + window.scrollY,
         right: rect.right + window.scrollX,
-        bottom: rect.bottom + window.scrollY,
+        bottom: Math.max(...lines.map(line => line.bottom)) + window.scrollY,
       };
       let clippedBy: string | undefined;
       if (
