@@ -4,10 +4,11 @@
  * embedded-postgres.
  */
 
-import {spawn} from 'node:child_process';
+import {execFile, spawn} from 'node:child_process';
+import {randomBytes} from 'node:crypto';
 import {existsSync} from 'node:fs';
-import {mkdir, readFile, rm} from 'node:fs/promises';
-import {platform} from 'node:os';
+import {mkdir, readFile, rm, writeFile} from 'node:fs/promises';
+import {platform, tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -18,6 +19,7 @@ import {
   type DatabaseEnvironment,
   LOCAL_CLUSTERS,
   type LocalClusterName,
+  type LocalClusterSettings,
   localClusterOverride,
   localClusterUrl,
   resolveDatabaseUrl,
@@ -27,6 +29,10 @@ const REPO_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 
 /** How long `pg_ctl` waits for the server to start or stop. */
 const PG_CTL_TIMEOUT_SECONDS = 120;
+
+// UTF-8 with the C locale, whatever the OS locale is (a zh-TW Windows would
+// otherwise pick a Big5 code page).
+const INITDB_LOCALE_FLAGS = ['--encoding=UTF8', '--locale=C'];
 
 /** A database server this process may have started. */
 export interface DatabaseServer {
@@ -66,68 +72,81 @@ async function startLocalCluster(
   }
   const databaseDir = join(REPO_ROOT, '.data', settings.dataDirectoryName);
   const log: string[] = [];
-  const cluster = new EmbeddedPostgres({
-    databaseDir,
-    port: settings.port,
-    user: settings.user,
-    password: settings.password,
-    persistent: true,
-    // UTF-8 with the C locale, whatever the OS locale is (a zh-TW Windows
-    // would otherwise pick a Big5 code page).
-    initdbFlags: ['--encoding=UTF8', '--locale=C'],
-    postgresFlags: Object.entries(settings.serverSettings).flatMap(
-      ([name, value]) => ['-c', `${name}=${value}`],
-    ),
-    onLog: message => {
-      log.push(String(message));
-    },
-    onError: message => {
-      log.push(String(message));
-    },
-  });
-  const serverFlags = [
-    '-p',
-    String(settings.port),
-    ...Object.entries(settings.serverSettings).flatMap(([setting, value]) => [
-      '-c',
-      `${setting}=${value}`,
-    ]),
-  ];
   try {
-    if (!existsSync(join(databaseDir, 'PG_VERSION'))) {
+    const initialised = existsSync(join(databaseDir, 'PG_VERSION'));
+    if (!initialised) {
       // initdb refuses a non-empty directory left by an interrupted init.
       await rm(databaseDir, {recursive: true, force: true});
       await mkdir(databaseDir, {recursive: true});
-      await cluster.initialise();
     }
     if (platform() === 'win32') {
-      return await startWithPgCtl(databaseDir, serverFlags, log);
+      return await startOnWindows(settings, databaseDir, initialised, log);
+    }
+    const cluster = new EmbeddedPostgres({
+      databaseDir,
+      port: settings.port,
+      user: settings.user,
+      password: settings.password,
+      persistent: true,
+      initdbFlags: INITDB_LOCALE_FLAGS,
+      postgresFlags: serverSettingFlags(settings),
+      onLog: message => {
+        log.push(String(message));
+      },
+      onError: message => {
+        log.push(String(message));
+      },
+    });
+    if (!initialised) {
+      await cluster.initialise();
     }
     await cluster.start();
+    return () => cluster.stop();
   } catch (error: unknown) {
     throw new Error(
       `Could not start the local ${name} Postgres cluster in ${databaseDir} ` +
-        `on port ${settings.port}.\n${log.slice(-20).join('')}`,
+        `on port ${settings.port}.\n${log.slice(-40).join('\n')}`,
       {cause: error},
     );
   }
-  return () => cluster.stop();
+}
+
+/** Turns a cluster's server settings into `-c name=value` flags. */
+function serverSettingFlags(settings: LocalClusterSettings): string[] {
+  return Object.entries(settings.serverSettings).flatMap(([setting, value]) => [
+    '-c',
+    `${setting}=${value}`,
+  ]);
 }
 
 /**
- * Starts the cluster through `pg_ctl` on Windows and returns its stopper.
- * embedded-postgres spawns `postgres.exe` directly, which Postgres refuses
- * under an administrator token (GitHub's Windows runners run as one);
- * `pg_ctl` drops to a restricted token first. Stopping with `pg_ctl stop`
+ * Initialises (when needed) and starts the cluster on Windows with the
+ * bundled `initdb` and `pg_ctl`, and returns its stopper. GitHub's Windows
+ * runners run as administrator, where Postgres binaries must re-launch
+ * themselves with a restricted token. embedded-postgres breaks that: it
+ * starts `postgres.exe` directly, which refuses an administrator token, and it
+ * runs `initdb` with an environment stripped of `SystemRoot`, `PATH` and
+ * `TEMP`, so the re-launch fails. Here both run with the full environment and
+ * their output is kept for the error message. Stopping with `pg_ctl stop`
  * also shuts down cleanly instead of `taskkill /f`, so no stale
  * `postmaster.pid` is left behind.
  */
-async function startWithPgCtl(
+async function startOnWindows(
+  settings: LocalClusterSettings,
   databaseDir: string,
-  serverFlags: readonly string[],
+  initialised: boolean,
   log: string[],
 ): Promise<() => Promise<void>> {
-  const {pg_ctl: pgCtl} = await import('@embedded-postgres/windows-x64');
+  const {initdb, pg_ctl: pgCtl} =
+    await import('@embedded-postgres/windows-x64');
+  if (!initialised) {
+    await runInitdb(initdb, settings, databaseDir, log);
+  }
+  const serverFlags = [
+    '-p',
+    String(settings.port),
+    ...serverSettingFlags(settings),
+  ];
   const logFile = `${databaseDir}.log`;
   await runPgCtl(pgCtl, [
     'start',
@@ -147,6 +166,49 @@ async function startWithPgCtl(
   return async () => {
     await runPgCtl(pgCtl, ['stop', '-D', databaseDir, '-m', 'fast', '-w']);
   };
+}
+
+/**
+ * Runs `initdb` into an empty data directory with password authentication,
+ * collecting its stdout and stderr into `log`. `initdb` leaves no child
+ * process behind, so piping its output is safe.
+ */
+async function runInitdb(
+  initdb: string,
+  settings: LocalClusterSettings,
+  databaseDir: string,
+  log: string[],
+): Promise<void> {
+  const passwordFile = join(
+    tmpdir(),
+    `pokernext-pg-password-${randomBytes(6).toString('hex')}`,
+  );
+  await writeFile(passwordFile, `${settings.password}\n`);
+  try {
+    await new Promise<void>((resolve, reject) => {
+      execFile(
+        initdb,
+        [
+          `--pgdata=${databaseDir}`,
+          '--auth=password',
+          `--username=${settings.user}`,
+          `--pwfile=${passwordFile}`,
+          ...INITDB_LOCALE_FLAGS,
+        ],
+        {windowsHide: true},
+        (error, stdout, stderr) => {
+          log.push(stdout, stderr);
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        },
+      );
+    });
+  } finally {
+    await rm(passwordFile, {force: true});
+  }
 }
 
 /**
