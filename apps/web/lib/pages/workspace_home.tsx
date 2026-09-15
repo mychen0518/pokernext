@@ -39,6 +39,9 @@ export async function WorkspaceHome({workspace}: WorkspaceHomeProps) {
   const app = getRuntimeApp();
   const outcome = await app.sessions.resolve({token, host, workspace});
   if (outcome.status === 'refused') {
+    if (outcome.reason === 'noSession') {
+      return <RefusalPage reason="noSession" />;
+    }
     const home = await app.sessions.home({token, host});
     return (
       <RefusalPage
@@ -67,12 +70,10 @@ function WorkspaceShellFor({workspace, actor}: WorkspaceShellForProps) {
   const route = WORKSPACE_ROUTES[workspace];
   return (
     <DesktopWorkspaceShell
-      workspaceName={route.name}
-      breadcrumb={route.breadcrumb}
+      route={route}
+      // A client component: send the browser only what the UserChip shows.
+      actor={{displayName: actor.displayName, roleLabel: actor.roleLabel}}
       dateTime={formatKoreaDateTime(new Date())}
-      homeHref={route.path}
-      displayName={actor.displayName}
-      roleLabel={actor.roleLabel}
     >
       <PageHeader
         title={HOME_NAV_LABEL}
