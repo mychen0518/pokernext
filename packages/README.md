@@ -36,7 +36,10 @@ even their own package's `lib/`.
 
 **No barrels.** Do not funnel a whole subtree through one `index.ts` that
 re-exports everything. Expose several small entry points instead and keep the
-rest in `lib/`.
+rest in `lib/`. The one exception is `@pokernext/ui`, whose `index.ts` names
+every DESIGN.md §4 component because the foundation spec requires root
+imports; it re-exports by name only and keeps its helpers private (see
+`packages/ui/README.md`).
 
 ## Layering (ADR-0001)
 
