@@ -35,6 +35,12 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium
+      # Chromium on Windows formats native date fields with the OS regional
+      # format, not the Playwright locale; the baselines use zh-TW
+      # (2026/09/14), the runner defaults to en-US (09/14/2026).
+      - name: Use the zh-TW regional format of the screenshot baselines
+        shell: pwsh
+        run: Set-Culture zh-TW
       - name: Check
         run: pnpm check
       - name: Keep Playwright results of a failed run

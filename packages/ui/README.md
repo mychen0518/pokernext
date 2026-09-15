@@ -131,6 +131,13 @@ green there while the keyboard, layout and accessibility specs still run; CI
 compares screenshots in its Windows job. To add an OS, list it there and run
 `test:e2e:update` on it.
 
+The Windows baselines also assume the zh-TW regional format: Chromium on
+Windows formats native date fields (`DateInput`) with the OS short-date
+format, not the Playwright `locale`, so an en-US machine shows `09/14/2026`
+where the baseline has `2026/09/14` and the base page fails. Set Windows
+「地區格式」 to 中文（台灣）, or run `Set-Culture zh-TW` in PowerShell and open a
+new terminal; the CI Windows job does the latter.
+
 Updating baselines is always explicit: run `test:e2e:update`, look at every
 changed PNG in the diff, and commit them with the change that caused them.
 
