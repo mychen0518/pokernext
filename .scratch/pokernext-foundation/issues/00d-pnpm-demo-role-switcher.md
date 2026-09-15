@@ -183,3 +183,9 @@ console printed `Stopping Next.js and Postgres… Stopped.` with ports 3000 and
 - `pnpm demo` on Windows prints cmd's "Terminate batch job (Y/N)?" after
   Ctrl+C because pnpm runs through a `.cmd` shim; Next and Postgres are
   already stopped by then.
+
+### 2026-09-15 review fixes
+
+- Scope of the domain rule: the foundation spec's Out of Scope said 「`packages/domain` 在此不加入規則」, but the workspace-entry rule (`lib/workspace_access.ts`) had to live there because ADR-0001 puts authorization in `packages/domain` as pure functions called by every use-case. The spec's Out of Scope and its 00d Implementation Decisions bullet now say so: the workspace-entry authorization rule and the minimal AuditLog on denial are in scope for 00d; business rules still are not (roles, scopes and fields stay with ticket 04, the full AuditLog with ticket 03). Its Solution paragraph also said "00b" builds the minimal accounts and sessions; corrected to 00d.
+- Sign-out server action (`apps/web/lib/sign_out_action.ts`), flagged in review as unrequested: it exists because DESIGN.md §4 `Sidebar` requires 「底部 `UserChip` + 登出」 in every desktop workspace shell, and DESIGN.md §3.4 gives the refusal page a 「登出」 action. It ends the session through `app.sessions.end`, the same use-case the role switcher uses, so there is still one session path.
+- The shared `body` rule moved from `apps/web/lib/root_layout.css` (deleted) to `@pokernext/ui/base.css`, which `apps/web/lib/root_layout.tsx` imports after `tokens.css`; the kitchen-sink imports the same file.

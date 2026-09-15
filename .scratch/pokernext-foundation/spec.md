@@ -15,7 +15,7 @@
 在業務票之前與旁邊，先做兩個可被 import、可被重跑的東西：
 
 1. **`packages/ui`（00a–00c）**：設計系統套件。token 與 `docs/design/DESIGN.md` §2 一致，元件名與 §4 一致；附一頁 kitchen-sink 供截圖比對。
-2. **`tooling/demo`（00d–00e）**：示範工具鏈。`pnpm demo`（起 DB、跑 migration、灌 seed、啟 app、開發模式角色切換列）、`pnpm demo:script`（Playwright 依 13 步劇本跨工作區操作並錄影）、`pnpm demo:diff`（正式頁 vs 原型頁截圖並排報告）。為了讓角色切換列走真實的 session 建立路徑，00b 同時建立最小的帳號與 session。
+2. **`tooling/demo`（00d–00e）**：示範工具鏈。`pnpm demo`（起 DB、跑 migration、灌 seed、啟 app、開發模式角色切換列）、`pnpm demo:script`（Playwright 依 13 步劇本跨工作區操作並錄影）、`pnpm demo:diff`（正式頁 vs 原型頁截圖並排報告）。為了讓角色切換列走真實的 session 建立路徑，00d 同時建立最小的帳號與 session。
 
 ## User Stories
 
@@ -36,6 +36,7 @@
   - `packages/db` 建立帳號（會員或工作帳號＋所屬工作區與角色）與 session 資料表；不含密碼、TOTP、備援碼、邀請、OTP，這些由第 03、10 票加欄位與流程。
   - `packages/app` 提供建立與結束 session 的 use-case；session 存 Postgres，cookie 只放不透明 token，玩家 host 與工作帳號 host 各一組。本機以兩個 `*.localhost` 子網域模擬兩個 host。
   - 建立 demo 帳號的 use-case 放在 `packages/app` 的獨立入口 `demo.ts`，dependency-cruiser 只允許 `tooling/demo` 引用；它和角色切換列一樣在 production build 中不存在。
+  - 工作區進入的授權規則（帳號種類、所屬工作區、session 的 host 與要進入的工作區，哪些組合可進）在範圍內：ADR-0001 要求授權規則是 `packages/domain` 的純函式，`packages/app` 每次解析 session 都呼叫它；被拒絕時寫最小的 AuditLog。這是本 spec 唯一加入 `packages/domain` 的規則；角色、範圍與欄位授權仍屬第 04 票，完整 AuditLog 屬第 03 票。
 - 角色切換列只在開發模式掛載，以建置期條件整段移除；它列出各工作區的 demo 帳號，切換時結束目前 session、呼叫同一個建立 session 的 use-case，不繞過授權檢查。
 - demo seed：
   - 00d 只 seed 六個工作區各一個 demo 帳號，名稱取自原型 `ROLES`（Alex Chen、琪琪、王經理、Mingyao、Amy、David Chen）。
@@ -55,7 +56,7 @@
 
 ## Out of Scope
 
-- 任何業務功能與業務規則（那是 01–34 票）；`packages/domain` 在此不加入規則。
+- 任何業務功能與業務規則（那是 01–34 票）；`packages/domain` 在此不加入業務規則。例外只有 00d 的工作區進入授權規則與拒絕時的最小 AuditLog（見 Implementation Decisions），因為 ADR-0001 要求授權檢查放在 `packages/domain`、由 use-case 呼叫。
 - 可控時鐘、合法業務操作建構器、外部埠假實作、併發測試工具（第 01 票）。
 - 真正的邀請、密碼、TOTP、OTP（第 03、10 票）；KMS、OCR 埠實作。
 - 管理端專屬視覺（沿用合作端桌面版面，DESIGN.md §3.2）；接待端版面（DESIGN.md §3.3）。
