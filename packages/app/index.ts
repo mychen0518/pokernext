@@ -10,7 +10,6 @@ export type {
   Workspace,
   WorkspaceEntryRefusal,
 } from '@pokernext/domain';
-export {DEFAULT_DEMO_PORT, LOCAL_HOST_NAMES} from '@pokernext/domain';
 export type {AccountSummary} from './lib/accounts';
 export {createApp, createAppFromEnvironment} from './lib/app';
 export type {App, AppDependencies, AppEnvironment} from './lib/app';

@@ -17,14 +17,10 @@ import {fileURLToPath} from 'node:url';
 import type {NextConfig} from 'next';
 import {PHASE_DEVELOPMENT_SERVER} from 'next/constants';
 
+import {configuredHosts} from './lib/hosts';
+
 /** Where `#role_switcher` points outside the development server. */
 const REMOVED_ROLE_SWITCHER = './dev_tools/role_switcher_removed.tsx';
-
-/** The local hosts, overridable like `apps/web/lib/hosts.ts`. */
-const DEV_HOSTS = [
-  process.env.POKERNEXT_PLAYER_HOST || 'player.localhost',
-  process.env.POKERNEXT_WORK_HOST || 'work.localhost',
-];
 
 /**
  * Returns the Next.js config for a phase: development tools are routed and
@@ -40,7 +36,7 @@ export default function nextConfig(phase: string): NextConfig {
       ? ['tsx', 'ts', 'dev.tsx', 'dev.ts']
       : ['tsx', 'ts'],
     // The player and work-account hosts both reach the one dev server.
-    allowedDevOrigins: DEV_HOSTS,
+    allowedDevOrigins: Object.values(configuredHosts()),
     // The floating dev indicator would cover BottomNav and 登出.
     devIndicators: false,
     // Workspace packages ship TypeScript source.

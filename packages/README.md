@@ -36,14 +36,18 @@ even their own package's `lib/`.
 
 **No barrels.** Do not funnel a whole subtree through one `index.ts` that
 re-exports everything. Expose several small entry points instead and keep the
-rest in `lib/`.
+rest in `lib/`. The one exception is `@pokernext/ui`, whose `index.ts` names
+every DESIGN.md §4 component because the foundation spec requires root
+imports; it re-exports by name only and keeps its helpers private (see
+`packages/ui/README.md`).
 
 ## Layering (ADR-0001)
 
 `apps/web` → `packages/app` → `packages/domain`, `packages/db`,
 `packages/ports`.
 
-- `apps/web` imports `packages/app` and `packages/ui` only.
+- `apps/web` imports `packages/app` and `packages/ui` only; its `tests/` may
+  also import `packages/dev_process`.
 - `packages/domain` imports no other workspace package and no React, Next or
   database library.
 - `packages/ui` imports no other workspace package.
@@ -70,11 +74,21 @@ rest in `lib/`.
   `lib/role_switcher_accounts.ts` only through `dev.ts`, and the
   unauthorized `lib/account_listing.ts` only from that implementation and the
   demo account implementation.
+- `packages/app/routing.ts` (the workspaces, `hostOfWorkspace`,
+  `LOCAL_HOST_NAMES`, `DEFAULT_DEMO_PORT`) re-exports `packages/domain` only,
+  so `apps/web/next.config.ts` and `proxy.ts` can import it without loading
+  the database or any use-case. Those two files and the `lib/hosts.ts` and
+  `lib/workspace_routes.ts` they load reach no other workspace file.
 - `apps/web/dev_tools/` (the role switcher) is reached only through the
   `#role_switcher` import and `app/dev/**/route.dev.ts`; `next.config.ts`
   removes both outside `next dev` for Turbopack and webpack alike, and
   `apps/web/tests/production_bundles_exclude_dev_tools.test.ts` builds with
   both bundlers and checks the output.
+- `packages/dev_process` (wait until a local server answers, check a port,
+  stop a process tree) is development tooling: only `tooling/` and test code
+  may import it, and it imports no other workspace package. It exists because
+  `tooling/demo` and `apps/web/tests/support` both start and stop `next dev`
+  but may not import each other.
 - Nothing imports `apps/*` or `tooling/*`.
 
 ## Checking

@@ -6,6 +6,7 @@
  */
 
 import {expect, type Page, test} from '@playwright/test';
+import {LOCAL_HOST_NAMES} from '@pokernext/app/routing';
 
 import {
   DEMO_ACCOUNT_HOMES,
@@ -140,7 +141,7 @@ test.describe('工作區空殼與角色切換列', () => {
     );
     const cookies = await context.cookies([PLAYER_ORIGIN, WORK_ORIGIN]);
     expect(cookies.map(({name, domain}) => ({name, domain}))).toEqual([
-      {name: 'pn_player_session', domain: 'player.localhost'},
+      {name: 'pn_player_session', domain: LOCAL_HOST_NAMES.player},
     ]);
     expect(cookies[0]).toMatchObject({httpOnly: true, sameSite: 'Lax'});
     expect(cookies[0]?.value).toMatch(/^[A-Za-z0-9_-]{43}$/);

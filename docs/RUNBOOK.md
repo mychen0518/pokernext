@@ -187,11 +187,14 @@ commit，見「每批固定收尾」第 6 步）；全部步驟都還是 fixme �
 
 - 在 repo 根目錄執行 `pnpm demo`：起本機 demo 資料庫（embedded Postgres 16，
   資料在 `.data/postgres-demo`、port 55433，與測試用的 `.data/postgres-test`
-  分開；設了 `DATABASE_URL` 就改用它）、跑 migration、確保六個 demo
+  分開；設了 `DEMO_DATABASE_URL` 就改用它）、跑 migration、確保六個 demo
   帳號（重跑不重複建立），再啟動 `next dev`。
 - 開 `http://player.localhost:3000/`（玩家 host）或
   `http://work.localhost:3000/`（工作帳號 host），按「切換角色」選帳號。port 以
-  `DEMO_PORT` 改，host 名以 `POKERNEXT_PLAYER_HOST`／`POKERNEXT_WORK_HOST` 改。
+  `DEMO_PORT` 改，host 名以 `POKERNEXT_PLAYER_HOST`／`POKERNEXT_WORK_HOST` 改，
+  demo 資料庫以 `DEMO_DATABASE_URL` 改。`DATABASE_URL` 是測試（CI 的 Postgres）
+  與正式 app 用的，`pnpm demo` 不讀它，只把 demo 資料庫以 `DATABASE_URL` 交給
+  `next dev`。
 - Ctrl+C 會停掉 Next.js 與 Postgres；資料保留到下次執行。
 
 ## 遇到問題時

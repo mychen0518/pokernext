@@ -193,6 +193,24 @@ module.exports = {
       to: {path: '^packages/app/lib/account_listing\\.ts$'},
     },
     {
+      name: 'routing-entry-stays-light',
+      comment:
+        'packages/app/routing.ts is loaded by apps/web/next.config.ts and proxy.ts: it re-exports packages/domain only, so config evaluation and the proxy bundle never load the database, the ports or any use-case.',
+      severity: 'error',
+      from: {path: '^packages/app/routing\\.ts$'},
+      to: {pathNot: '^packages/domain/'},
+    },
+    {
+      name: 'web-config-and-proxy-stay-light',
+      comment:
+        'apps/web/next.config.ts and proxy.ts (and the host and route modules they load) reach workspace packages only through packages/app/routing.ts, so config evaluation and the proxy never load the database or a use-case.',
+      severity: 'error',
+      from: {
+        path: '^apps/web/(next\\.config\\.ts|proxy\\.ts|lib/(hosts|workspace_routes)\\.ts)$',
+      },
+      to: {path: '^packages/', pathNot: '^packages/app/routing\\.ts$'},
+    },
+    {
       name: 'app-no-upward-deps',
       comment:
         'packages/app sits below apps/web: it may not import apps, tooling or packages/ui.',
@@ -236,6 +254,22 @@ module.exports = {
       severity: 'error',
       from: {pathNot: '^packages/ui/kitchen_sink/'},
       to: {path: '^packages/ui/kitchen_sink/'},
+    },
+    {
+      name: 'dev-process-only-in-tooling-and-tests',
+      comment:
+        'packages/dev_process (starting, waiting on and stopping local servers) is development tooling: only tooling/ and test code may import it, so it never reaches production code or a bundle.',
+      severity: 'error',
+      from: {pathNot: ['^tooling/', TEST_CODE, '^packages/dev_process/']},
+      to: {path: '^packages/dev_process/'},
+    },
+    {
+      name: 'dev-process-is-independent',
+      comment:
+        'packages/dev_process may not import any other workspace package, so tooling and every test layer can share it without new layering edges.',
+      severity: 'error',
+      from: {path: '^packages/dev_process/'},
+      to: {path: '^(apps|tooling)/|^packages/(?!dev_process/)[^/]+/'},
     },
     {
       name: 'nothing-imports-apps-or-tooling',

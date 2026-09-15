@@ -6,6 +6,7 @@
   "dependencies": {
     "@pokernext/app": "workspace:*",
     "@pokernext/db": "workspace:*",
+    "@pokernext/dev_process": "workspace:*",
     "@pokernext/domain": "workspace:*",
     "@pokernext/ui": "workspace:*"
   },

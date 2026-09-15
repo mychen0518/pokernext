@@ -17,13 +17,11 @@ export const NO_SESSION_REASON = '尚未登入，登入後才能進入工作區�
 
 /** The refusal sentence for a session that may not enter a workspace. */
 export function refusalReason(
-  reason: WorkspaceEntryRefusal | 'noSession',
+  reason: WorkspaceEntryRefusal,
   requestedName: string,
   ownName: string | undefined,
 ): string {
   switch (reason) {
-    case 'noSession':
-      return NO_SESSION_REASON;
     case 'otherWorkspace':
       return ownName === undefined
         ? `目前的帳號不能進入${requestedName}。`

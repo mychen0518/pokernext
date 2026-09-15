@@ -62,7 +62,14 @@ migration、seed 六個 demo 帳號，並在玩家 host 與工作帳號 host 上
 - 390×844: `player_home_mobile_390.png`, `staff_home_mobile_390.png`,
   `refusal_no_session_mobile_390.png`, `refusal_other_workspace_mobile_390.png`
 - Side by side: `side_by_side_venue_vs_partner_overview.png`,
-  `side_by_side_player_vs_player_home_mobile.png`
+  `side_by_side_admin_vs_partner_overview.png`,
+  `side_by_side_platform_vs_partner_overview.png`,
+  `side_by_side_agent_vs_partner_overview.png`,
+  `side_by_side_player_vs_player_home_mobile.png`,
+  `side_by_side_staff_vs_prototype_staff_tasks.png` (against
+  `prototype_staff_tasks_mobile_390.png`, the prototype's `#/staff/tasks` at
+  390×844 from its seed; reception has no reference image, so the prototype
+  is the spec)
 
 Side-by-side check: desktop frame matches `partner-overview.png` (232px Sidebar
 with brand and workspace name, gold current item with the 3px bar, 64px Topbar
@@ -119,8 +126,14 @@ afterwards.
   `demo_accounts.test.ts` checks a freshly migrated database has no account.
 - `packages/app` (index): `app.sessions.start / end / resolve / home` (the one
   session creation path; resolve re-reads session and account and calls the
-  domain rule on every request) and `app.accounts.list`. Tokens are 32 random
-  bytes (base64url); only the SHA-256 hash is stored.
+  domain rule on every request). Tokens are 32 random bytes (base64url); only
+  the SHA-256 hash is stored. The account listing for the switcher is not on
+  `App`: `listAccountsForRoleSwitcher` from `@pokernext/app/dev`, which
+  dependency-cruiser allows only from `apps/web/dev_tools/role_switcher.tsx`
+  and tests. `@pokernext/app/routing` re-exports `WORKSPACES`,
+  `hostOfWorkspace`, `LOCAL_HOST_NAMES` and `DEFAULT_DEMO_PORT` from the
+  domain without loading the database, for `next.config.ts`, `proxy.ts` and
+  demo tooling.
 - `packages/app/demo.ts`: `ensureDemoAccounts({databaseUrl})`, fixed ids so
   reruns and parallel runs create nothing new. Tests use
   `given(app).demoAccountsEnsured()`, `given(app).demoAccount(workspace)`,
@@ -132,25 +145,32 @@ afterwards.
   the session's home or shows the refusal page), `lib/pages/workspace_home.tsx`
   (resolve → shell or refusal), `lib/shells/desktop_workspace_shell.tsx`,
   `lib/sign_out_action.ts`, `dev_tools/` (role switcher).
-- `tooling/demo/main.ts` → `lib/run_demo.ts`; root script `demo`.
+- `tooling/demo/main.ts` → `lib/run_demo.ts`; root script `demo`. Port and
+  host origins come from `lib/demo_hosts.ts`; waiting for Next and stopping
+  its process tree from `packages/dev_process`, shared with the apps/web
+  e2e server.
 
 **Decisions:**
 
 - Build-time removal. (1) `#role_switcher` is a package `imports` alias in
   `apps/web/package.json`; `next.config.ts` exports a phase function and, in
-  every phase except `PHASE_DEVELOPMENT_SERVER`, sets
-  `turbopack.resolveAlias['#role_switcher']` to
-  `dev_tools/role_switcher_removed.tsx`, which renders null and imports nothing.
+  every phase except `PHASE_DEVELOPMENT_SERVER`, points
+  `#role_switcher` at `dev_tools/role_switcher_removed.tsx` (renders null,
+  imports nothing) through `turbopack.resolveAlias` and webpack's
+  `resolve.alias` alike.
   (2) The switch endpoint is `app/dev/role-switch/route.dev.ts`;
   `dev.ts`/`dev.tsx` are page extensions only in the development server, so
   production has no such route. Nothing in the production bundle can start a
   session for an arbitrary account: `sessions.start` is only called by the
   removed route.
-- Build test `apps/web/tests/production_build.test.ts` (part of
-  `pnpm test:unit`, about 25 s): `next build` into `.next/production-build-test`
-  and asserts no output file contains `pn-dev-role-switcher`, `dev/role-switch`
-  or the demo id prefix `5e3d0000-de30-4000`, after checking the markers still
-  exist in source and the shell copy exists in the output. Red checks: importing
+- Build test `apps/web/tests/production_bundles_exclude_dev_tools.test.ts`
+  (part of `pnpm test:unit`): `next build` once with Turbopack and once with
+  webpack, each into `.next/production-build-test-<bundler>`, and asserts no
+  output file contains `pn-dev-role-switcher`, `dev/role-switch`, the
+  `@pokernext/app/dev` listing marker `pn-dev-account-listing` or the demo id
+  prefix `5e3d0000-de30-4000`, after checking the markers still exist in
+  source and the shell copy exists in the output. Red checks (first version,
+  Turbopack only): importing
   `../../dev_tools/role_switcher` directly in `workspace_home.tsx` failed two
   tests (marker in 3 files, route path in 12); importing `@pokernext/app/demo`
   in the stub failed the demo test (4 files). Both reverted.
@@ -192,11 +212,12 @@ afterwards.
 
 **Open issues / notes for later tickets:**
 
-- AuditLog on a refused resolve belongs to ticket 03 (comment in
-  `packages/app/lib/sessions.ts`).
-- `app.accounts.list` has no actor or authorization; only the development
-  switcher calls it. Ticket 03 should put account listings behind the domain
-  rule.
+- Every refused session start, workspace entry and end now writes a minimal
+  AuditLog entry (migration `0002_audit_log.sql`); ticket 03 extends it.
+- `listAccountsForRoleSwitcher` (`@pokernext/app/dev`) has no actor or
+  authorization; only the development switcher calls it, and it refuses to
+  run in production. Ticket 03 should put real account listings behind the
+  domain rule.
 - Player BottomNav links all point at `/player` until ticket 13 adds pages.
 - The player and staff shells have no `h1`; ticket 13 / 22 bring page titles.
 - ui components that take handlers but have no hooks (`Sidebar`, `AppHeader`,
@@ -226,3 +247,23 @@ afterwards.
 - The shared `body` rule moved from `apps/web/lib/root_layout.css` (deleted) to
   `@pokernext/ui/base.css`, which `apps/web/lib/root_layout.tsx` imports after
   `tokens.css`; the kitchen-sink imports the same file.
+- Workspace routes: `apps/web/lib/workspace_routes.ts` keeps only path, name
+  and breadcrumb per `Workspace` (a missing workspace does not compile); the
+  workspace set and the serving host come from the domain through
+  `@pokernext/app/routing` (`WORKSPACES`, `hostOfWorkspace`). The local host
+  names and demo port are `LOCAL_HOST_NAMES` / `DEFAULT_DEMO_PORT` everywhere,
+  and `next.config.ts` takes `allowedDevOrigins` from `lib/hosts.ts`.
+  dependency-cruiser rules `routing-entry-stays-light` and
+  `web-config-and-proxy-stay-light` keep config and proxy off the database.
+- `DesktopWorkspaceShell` takes `route` and `actor` objects;
+  `RefusalPage` props are a union (`noSession`, or an entry refusal with the
+  requested and optional own workspace). Rendered pages are unchanged.
+- Side-by-side coverage: every desktop shell against `partner-overview.png`
+  and the reception shell against the prototype's `#/staff/tasks` (paths in
+  the screenshot list above). The admin, platform and agent shells match the
+  reference frame like venue: 232px Sidebar with brand and their workspace
+  name, gold 工作區首頁 with the bar, Topbar overline breadcrumb and Korea
+  time, UserChip and 登出 at the foot. The reception shell is the phone-width
+  frame with EmptyState only; the prototype's AppHeader, 我的任務 title,
+  segmented Tabs and task list belong to ticket 22. The shells have only an
+  empty state: a ready state does not exist until business tickets add data.

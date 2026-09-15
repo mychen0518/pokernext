@@ -8,6 +8,7 @@
  */
 
 import {listAccountsForRoleSwitcher} from '@pokernext/app/dev';
+import {hostOfWorkspace} from '@pokernext/app/routing';
 import {headers} from 'next/headers';
 
 import {originOf} from '../lib/hosts';
@@ -24,13 +25,13 @@ export async function RoleSwitcher() {
   const protocol = requestHeaders.get('x-forwarded-proto') ?? 'http';
   const accounts = await listAccountsForRoleSwitcher();
   const entries: RoleSwitcherEntry[] = accounts.map(account => {
-    const route = WORKSPACE_ROUTES[account.workspace];
+    const host = hostOfWorkspace(account.workspace);
     return {
       accountId: account.id,
       displayName: account.displayName,
       roleLabel: account.roleLabel,
-      workspaceName: route.name,
-      switchUrl: `${originOf(route.host, hostHeader, protocol)}/dev/role-switch`,
+      workspaceName: WORKSPACE_ROUTES[account.workspace].name,
+      switchUrl: `${originOf(host, hostHeader, protocol)}/dev/role-switch`,
     };
   });
   return <RoleSwitcherDrawer entries={entries} />;

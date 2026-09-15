@@ -7,6 +7,7 @@
     ".": "./index.ts",
     "./demo": "./demo.ts",
     "./dev": "./dev.ts",
+    "./routing": "./routing.ts",
     "./testing": "./testing.ts"
   },
   "dependencies": {
