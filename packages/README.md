@@ -70,8 +70,9 @@ rest in `lib/`.
   demo account implementation.
 - `apps/web/dev_tools/` (the role switcher) is reached only through the
   `#role_switcher` import and `app/dev/**/route.dev.ts`; `next.config.ts`
-  removes both outside `next dev`, and
-  `apps/web/tests/production_build.test.ts` checks the build output.
+  removes both outside `next dev` for Turbopack and webpack alike, and
+  `apps/web/tests/production_bundles_exclude_dev_tools.test.ts` builds with
+  both bundlers and checks the output.
 - Nothing imports `apps/*` or `tooling/*`.
 
 ## Checking

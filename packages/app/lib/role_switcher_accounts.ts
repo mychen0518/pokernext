@@ -13,8 +13,8 @@ import type {AppEnvironment} from './app';
 
 /**
  * Names this development-only listing in its refusal message.
- * `apps/web/tests/production_build.test.ts` asserts production bundles do not
- * contain it.
+ * `apps/web/tests/production_bundles_exclude_dev_tools.test.ts` asserts
+ * production bundles do not contain it.
  */
 const DEV_LISTING_MARKER = 'pn-dev-account-listing';
 
