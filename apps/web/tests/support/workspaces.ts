@@ -5,13 +5,14 @@
  */
 
 import {expect, type Page} from '@playwright/test';
+import {LOCAL_HOST_NAMES} from '@pokernext/app/routing';
 
 const PORT = process.env.E2E_WEB_PORT ?? '3100';
 
 /** The player host of the test server. */
-export const PLAYER_ORIGIN = `http://player.localhost:${PORT}`;
+export const PLAYER_ORIGIN = `http://${LOCAL_HOST_NAMES.player}:${PORT}`;
 /** The work-account host of the test server. */
-export const WORK_ORIGIN = `http://work.localhost:${PORT}`;
+export const WORK_ORIGIN = `http://${LOCAL_HOST_NAMES.work}:${PORT}`;
 
 /** A demo account and where its workspace home is. */
 export interface DemoAccountHome {

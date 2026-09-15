@@ -68,6 +68,8 @@ export default [
         {ignoreMiddleExtensions: true},
       ],
       'no-restricted-syntax': ['error', ...NO_DEFAULT_EXPORT],
+      // Google TypeScript Style: `== null` may catch null and undefined.
+      eqeqeq: ['error', 'always', {null: 'ignore'}],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/ban-ts-comment': [
         'error',

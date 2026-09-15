@@ -74,7 +74,8 @@ rest in `lib/`.
 - `packages/app/routing.ts` (the workspaces, `hostOfWorkspace`,
   `LOCAL_HOST_NAMES`, `DEFAULT_DEMO_PORT`) re-exports `packages/domain` only,
   so `apps/web/next.config.ts` and `proxy.ts` can import it without loading
-  the database or any use-case.
+  the database or any use-case. Those two files and the `lib/hosts.ts` and
+  `lib/workspace_routes.ts` they load reach no other workspace file.
 - `apps/web/dev_tools/` (the role switcher) is reached only through the
   `#role_switcher` import and `app/dev/**/route.dev.ts`; `next.config.ts`
   removes both outside `next dev` for Turbopack and webpack alike, and

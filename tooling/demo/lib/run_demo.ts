@@ -19,19 +19,16 @@ import {
   waitUntilAnswering,
 } from '@pokernext/dev_process';
 
+import {type DemoHostEnvironment, demoOrigins, demoPort} from './demo_hosts';
 import {STOP_MESSAGE, STOP_ON_IPC_ENV} from './demo_ipc';
 
 const WEB_ROOT = fileURLToPath(new URL('../../../apps/web/', import.meta.url));
-const DEFAULT_PORT = 3000;
 /** Next output of the demo, apart from e2e runs and the build test. */
 const DEMO_DIST_DIR = '.next/demo';
 
 /** The environment `pnpm demo` reads. */
-interface DemoEnvironment {
+interface DemoEnvironment extends DemoHostEnvironment {
   readonly DEMO_DATABASE_URL?: string;
-  readonly DEMO_PORT?: string;
-  readonly POKERNEXT_PLAYER_HOST?: string;
-  readonly POKERNEXT_WORK_HOST?: string;
   readonly NODE_ENV?: string;
   readonly POKERNEXT_DEMO_STOP_ON_IPC?: string;
 }
@@ -40,7 +37,7 @@ interface DemoEnvironment {
 export async function runDemo(
   env: DemoEnvironment = process.env,
 ): Promise<void> {
-  const port = Number(env.DEMO_PORT || DEFAULT_PORT);
+  const port = demoPort(env);
   if (await isListening('127.0.0.1', port)) {
     throw new Error(
       `Port ${port} is already in use; stop that process or set DEMO_PORT.`,
@@ -118,11 +115,10 @@ export async function runDemo(
     throw error;
   }
 
-  const playerHost = env.POKERNEXT_PLAYER_HOST || 'player.localhost';
-  const workHost = env.POKERNEXT_WORK_HOST || 'work.localhost';
+  const origins = demoOrigins(env);
   log('');
-  log(`玩家 host:     http://${playerHost}:${port}/`);
-  log(`工作帳號 host: http://${workHost}:${port}/`);
+  log(`玩家 host:     ${origins.player}/`);
+  log(`工作帳號 host: ${origins.work}/`);
   log('Use 切換角色 on either page to sign in as a demo account.');
   log('Press Ctrl+C to stop Next.js and Postgres.');
 

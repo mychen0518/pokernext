@@ -2,15 +2,11 @@
  * @fileoverview Which host a request arrived on. The player workspace and the
  * work-account workspaces are served on different hosts (ADR-0001); the host
  * names come from the environment so production hosts can differ from the
- * local `*.localhost` pair.
+ * domain's local `*.localhost` pair. Imports only `@pokernext/app/routing`,
+ * so `next.config.ts` can load it without the database.
  */
 
-import type {HostKind} from '@pokernext/app';
-
-/** The local player host; Chromium resolves `*.localhost` to loopback. */
-export const DEFAULT_PLAYER_HOST = 'player.localhost';
-/** The local work-account host. */
-export const DEFAULT_WORK_HOST = 'work.localhost';
+import {type HostKind, LOCAL_HOST_NAMES} from '@pokernext/app/routing';
 
 /** The environment variables that name the hosts. */
 export interface HostEnvironment {
@@ -24,8 +20,10 @@ export function configuredHosts(
   env: HostEnvironment = process.env,
 ): Readonly<Record<HostKind, string>> {
   return {
-    player: (env.POKERNEXT_PLAYER_HOST || DEFAULT_PLAYER_HOST).toLowerCase(),
-    work: (env.POKERNEXT_WORK_HOST || DEFAULT_WORK_HOST).toLowerCase(),
+    player: (
+      env.POKERNEXT_PLAYER_HOST || LOCAL_HOST_NAMES.player
+    ).toLowerCase(),
+    work: (env.POKERNEXT_WORK_HOST || LOCAL_HOST_NAMES.work).toLowerCase(),
   };
 }
 
@@ -37,7 +35,7 @@ export function hostKindOf(
   hostHeader: string | null | undefined,
   env: HostEnvironment = process.env,
 ): HostKind | undefined {
-  if (hostHeader === null || hostHeader === undefined) {
+  if (hostHeader == null) {
     return undefined;
   }
   const hostname = hostHeader.replace(/:\d+$/, '').toLowerCase();

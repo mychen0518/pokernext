@@ -21,7 +21,7 @@ The TypeScript rules the reviewer checks by hand (the ones `gts` does not catch 
 - No `@ts-ignore` / `@ts-expect-error` / `@ts-nocheck`.
 - Non-null assertions (`x!`) and `as` casts need a comment explaining why they are safe; `as` syntax only, never angle brackets.
 - Object types are `interface`, not `type` aliases; `T[]` for simple element types, `Array<T>` for complex ones; no `{}` type; no `const enum`; prefer optional fields (`x?: T`) over `x: T | undefined`.
-- `const`/`let` only; `===`; braces on all control flow; `for…of` over arrays; single-quoted strings; template literals for composed strings; explicit semicolons.
+- `const`/`let` only; `===` (`== null` allowed to catch null and undefined); braces on all control flow; `for…of` over arrays; single-quoted strings; template literals for composed strings; explicit semicolons.
 - Throw `new Error()` (or subclasses) only, never strings or objects.
 - Classes: TypeScript `private`/`readonly` modifiers, not `#fields`; parameter properties for constructor injection; getters are pure; no arrow-function class properties; no `this` in static context.
 - Top-level functions are `function` declarations; nested callbacks are arrow functions; no `function` expressions.

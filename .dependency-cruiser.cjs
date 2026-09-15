@@ -201,6 +201,16 @@ module.exports = {
       to: {pathNot: '^packages/domain/'},
     },
     {
+      name: 'web-config-and-proxy-stay-light',
+      comment:
+        'apps/web/next.config.ts and proxy.ts (and the host and route modules they load) reach workspace packages only through packages/app/routing.ts, so config evaluation and the proxy never load the database or a use-case.',
+      severity: 'error',
+      from: {
+        path: '^apps/web/(next\\.config\\.ts|proxy\\.ts|lib/(hosts|workspace_routes)\\.ts)$',
+      },
+      to: {path: '^packages/', pathNot: '^packages/app/routing\\.ts$'},
+    },
+    {
       name: 'app-no-upward-deps',
       comment:
         'packages/app sits below apps/web: it may not import apps, tooling or packages/ui.',

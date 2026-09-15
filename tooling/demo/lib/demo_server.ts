@@ -2,8 +2,7 @@
  * @fileoverview Makes `pnpm demo` available to `demo:diff` and `demo:script`:
  * reuses a demo that already answers on the work-account host, or starts one
  * from the same entry (`main.ts`) and stops it again when done. Also builds
- * the demo's host origins and role-switch URLs from the same environment
- * variables `pnpm demo` reads.
+ * role-switch URLs on the demo's host origins (`demo_hosts.ts`).
  */
 
 import {type ChildProcess, spawn} from 'node:child_process';
@@ -20,6 +19,11 @@ import {
 } from '@pokernext/dev_process';
 
 import type {HostKind, SignInAs} from './diff_pages';
+import {
+  type DemoHostEnvironment,
+  demoOrigins,
+  type DemoOrigins,
+} from './demo_hosts';
 import {STOP_MESSAGE, STOP_ON_IPC_ENV} from './demo_ipc';
 
 const REPO_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
@@ -32,18 +36,6 @@ const DEMO_MAIN = fileURLToPath(new URL('../main.ts', import.meta.url));
 const DEMO_READY_TIMEOUT_MILLISECONDS = READY_TIMEOUT_MILLISECONDS + 120_000;
 const STOP_TIMEOUT_MILLISECONDS = 60_000;
 
-/** The environment variables `pnpm demo` reads for its hosts and port. */
-export interface DemoHostEnvironment {
-  /** Every other variable, passed on to a demo started here. */
-  readonly [name: string]: string | undefined;
-  readonly DEMO_PORT?: string;
-  readonly POKERNEXT_PLAYER_HOST?: string;
-  readonly POKERNEXT_WORK_HOST?: string;
-}
-
-/** The two host origins of the demo, e.g. `http://work.localhost:3000`. */
-export type DemoOrigins = Readonly<Record<HostKind, string>>;
-
 /** A demo this process can use. */
 export interface DemoServer {
   readonly origins: DemoOrigins;
@@ -51,17 +43,6 @@ export interface DemoServer {
   readonly startedHere: boolean;
   /** Stops the demo if this process started it; otherwise does nothing. */
   stop(): Promise<void>;
-}
-
-/** Returns the demo's player and work-account origins. */
-export function demoOrigins(
-  env: DemoHostEnvironment = process.env,
-): DemoOrigins {
-  const port = demoPort(env);
-  return {
-    player: `http://${env.POKERNEXT_PLAYER_HOST || 'player.localhost'}:${port}`,
-    work: `http://${env.POKERNEXT_WORK_HOST || 'work.localhost'}:${port}`,
-  };
 }
 
 /**
@@ -159,8 +140,4 @@ async function stopDemoProcess(child: ChildProcess): Promise<void> {
     stopProcessTree(child, 'SIGKILL');
     await exited;
   }
-}
-
-function demoPort(env: DemoHostEnvironment): number {
-  return Number(env.DEMO_PORT || 3000);
 }
