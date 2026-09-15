@@ -151,15 +151,15 @@ function findColourLiterals(source: string): string[] {
   return literals;
 }
 
-/** Lists every stylesheet under `dir` ending in `suffix`, recursively. */
-function listStylesheets(dir: string, suffix = '.module.css'): string[] {
+/** Lists every file under `dir` ending in `suffix`, recursively. */
+function listFiles(dir: string, suffix = '.module.css'): string[] {
   return readdirSync(dir, {recursive: true, encoding: 'utf8'})
     .filter(file => file.endsWith(suffix))
     .map(file => join(dir, file));
 }
 
-describe('component styles', () => {
-  it('reports hard-coded colours, fonts, spacing and radii', () => {
+describe('Design tokens in the design system', () => {
+  it('a stylesheet that hard-codes a colour, font, spacing, radius, shadow or gradient is reported', () => {
     const css = `
       .a { color: #fff; background: rgba(0, 0, 0, 0.5); }
       .b { border-color: red; font-family: Georgia, serif; }
@@ -183,7 +183,7 @@ describe('component styles', () => {
     ]);
   });
 
-  it('reports colour literals in markup and script', () => {
+  it('markup or script that hard-codes a colour is reported', () => {
     const source = `
       <rect fill="#121314"/><g fill='white'/>
       const style = {color: 'rgb(0, 0, 0)'};
@@ -197,7 +197,7 @@ describe('component styles', () => {
     ]);
   });
 
-  it('accepts tokens, zero, keywords and 1px borders', () => {
+  it('a stylesheet using only tokens, zero, keywords and 1px borders passes', () => {
     const css = `
       .a { color: var(--pn-text); background: transparent; margin: 0; }
       .b { border: 1px solid var(--pn-border); padding: 0 var(--pn-space-6); }
@@ -213,10 +213,10 @@ describe('component styles', () => {
     expect(findLiteralDesignValues(css)).toEqual([]);
   });
 
-  it('use only design tokens for colour, font, spacing, radius, shadow and tracking', () => {
+  it('every component and kitchen-sink stylesheet takes its colours, type, spacing, radii, shadows and tracking from tokens', () => {
     const files = [
-      ...listStylesheets(LIB_DIR),
-      ...listStylesheets(KITCHEN_SINK_DIR, '.css'),
+      ...listFiles(LIB_DIR),
+      ...listFiles(KITCHEN_SINK_DIR, '.css'),
       BASE_STYLESHEET,
     ];
     expect(files.length).toBeGreaterThan(0);
@@ -228,10 +228,10 @@ describe('component styles', () => {
     expect(violations).toEqual([]);
   });
 
-  it('paint components and kitchen-sink markup and images with tokens, never a colour literal', () => {
+  it('components and kitchen-sink pages paint every colour with a token', () => {
     const files = [
-      ...listStylesheets(LIB_DIR, '.tsx'),
-      ...listStylesheets(LIB_DIR, '.ts'),
+      ...listFiles(LIB_DIR, '.tsx'),
+      ...listFiles(LIB_DIR, '.ts'),
       ...[/\.tsx?$/, /\.svg$/, /\.html$/].flatMap(pattern =>
         readdirSync(KITCHEN_SINK_DIR, {recursive: true, encoding: 'utf8'})
           .filter(file => pattern.test(file))
@@ -247,8 +247,8 @@ describe('component styles', () => {
     expect(violations).toEqual([]);
   });
 
-  it('give a shadow only to Modal and Drawer', () => {
-    const shadowed = listStylesheets(LIB_DIR).filter(file =>
+  it('only Modal and Drawer cast a shadow', () => {
+    const shadowed = listFiles(LIB_DIR).filter(file =>
       /box-shadow\s*:\s*var\(--pn-shadow-overlay\)/.test(
         readFileSync(file, 'utf8'),
       ),

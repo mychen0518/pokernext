@@ -134,7 +134,7 @@ function findOverlaps(boxes: readonly TextBox[]): string[] {
 }
 
 for (const state of STATES) {
-  test(`every control on the player home (${state}) is at least 44 by 44 px`, async ({
+  test(`a member can tap every control on the player home (${state}): each is at least 44 by 44 px`, async ({
     page,
   }) => {
     await openKitchenSinkPage(page, 'player-home', {state});

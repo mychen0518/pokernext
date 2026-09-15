@@ -18,7 +18,7 @@ const INTERACTIVE =
   'input:not(:disabled), select:not(:disabled), textarea:not(:disabled), ' +
   '[tabindex="0"]';
 
-test('Tab reaches every interactive element with a 2px gold outline', async ({
+test('a keyboard user reaches every base control with Tab and sees a 2px gold outline', async ({
   page,
 }) => {
   await openKitchenSinkPage(page, 'base');

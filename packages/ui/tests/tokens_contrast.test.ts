@@ -47,12 +47,12 @@ function contrastRatio(foreground: string, background: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-describe('design token contrast', () => {
-  it('matches the WCAG reference ratio for white on black', () => {
+describe('Text contrast on cards', () => {
+  it('white on black has the WCAG reference contrast of 21:1', () => {
     expect(contrastRatio('#ffffff', '#000000')).toBeCloseTo(21, 5);
   });
 
-  it('keeps primary text readable on a card surface', () => {
+  it('a member can read primary text on a card', () => {
     const ratio = contrastRatio(
       readHexToken('--pn-text'),
       readHexToken('--pn-surface'),
@@ -60,7 +60,7 @@ describe('design token contrast', () => {
     expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
   });
 
-  it('keeps secondary text readable on a card surface', () => {
+  it('a member can read secondary text on a card', () => {
     const ratio = contrastRatio(
       readHexToken('--pn-text-2'),
       readHexToken('--pn-surface'),

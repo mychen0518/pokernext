@@ -51,7 +51,7 @@ test('a partner switches the overview tabs with the arrow keys', async ({
   await expect(table.getByText('CHEN, ALEX')).toBeVisible();
 });
 
-test('the tab list is a single Tab stop on the selected tab', async ({
+test('a partner tabbing through the case page stops once in the tabs, on the selected tab', async ({
   page,
 }) => {
   await openKitchenSinkPage(page, 'case');
