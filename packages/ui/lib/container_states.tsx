@@ -8,6 +8,7 @@ import {CircleAlert} from 'lucide-react';
 import type {ReactNode} from 'react';
 
 import {Button} from './button';
+import {classNames} from './class_names';
 import styles from './container_states.module.css';
 import {ICON_SIZE, ICON_STROKE_WIDTH} from './icon';
 import {StatusDot} from './status_dot';
@@ -53,7 +54,10 @@ interface SkeletonBarProps {
 /** Renders one grey placeholder line of a skeleton row. */
 export function SkeletonBar({size = 'medium'}: SkeletonBarProps) {
   return (
-    <span className={`${styles['bar']} ${styles[size]}`} aria-hidden="true" />
+    <span
+      className={classNames(styles['bar'], styles[size])}
+      aria-hidden="true"
+    />
   );
 }
 

@@ -5,6 +5,7 @@
 
 import type {ReactNode} from 'react';
 
+import {classNames} from './class_names';
 import styles from './status_dot.module.css';
 import type {Tone} from './tone';
 
@@ -18,7 +19,7 @@ export interface StatusDotProps {
 /** Renders a status as a coloured dot plus its text label. */
 export function StatusDot({tone, children}: StatusDotProps) {
   return (
-    <span className={`${styles['status-dot']} ${styles[tone]}`}>
+    <span className={classNames(styles['status-dot'], styles[tone])}>
       <span className={styles['dot']} aria-hidden="true" />
       {children}
     </span>

@@ -5,6 +5,7 @@
 
 import type {ReactNode} from 'react';
 
+import {classNames} from './class_names';
 import styles from './page_grid.module.css';
 
 /**
@@ -27,7 +28,7 @@ export interface PageGridProps {
  */
 export function PageGrid({variant, children}: PageGridProps) {
   return (
-    <div className={`${styles['page-grid']} ${styles[variant]}`}>
+    <div className={classNames(styles['page-grid'], styles[variant])}>
       {children}
     </div>
   );

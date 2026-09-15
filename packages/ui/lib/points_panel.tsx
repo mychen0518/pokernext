@@ -3,6 +3,7 @@
  * left, reserved points on the right, in the `25,000 分` format of §5.
  */
 
+import {classNames} from './class_names';
 import styles from './points_panel.module.css';
 
 /** Props for {@link PointsPanel}. */
@@ -27,16 +28,16 @@ export function PointsPanel({available, reserved}: PointsPanelProps) {
       <dl className={styles['figures']}>
         <div className={styles['figure']}>
           <dt className={styles['label']}>可用積分</dt>
-          <dd className={`${styles['value']} ${styles['available']}`}>
+          <dd className={classNames(styles['value'], styles['available'])}>
             <span className={styles['number']}>
               {POINTS_FORMAT.format(available)}
             </span>{' '}
             <span className={styles['unit']}>分</span>
           </dd>
         </div>
-        <div className={`${styles['figure']} ${styles['secondary']}`}>
+        <div className={classNames(styles['figure'], styles['secondary'])}>
           <dt className={styles['label']}>已保留</dt>
-          <dd className={`${styles['value']} ${styles['reserved']}`}>
+          <dd className={classNames(styles['value'], styles['reserved'])}>
             <span className={styles['number']}>
               {POINTS_FORMAT.format(reserved)}
             </span>{' '}

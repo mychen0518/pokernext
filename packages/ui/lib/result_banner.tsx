@@ -7,6 +7,7 @@
 import {CircleCheck, CircleX, Info} from 'lucide-react';
 import type {ReactNode} from 'react';
 
+import {classNames} from './class_names';
 import {ICON_SIZE, ICON_STROKE_WIDTH} from './icon';
 import styles from './result_banner.module.css';
 
@@ -44,7 +45,7 @@ export function ResultBanner({
     referenceLabel !== undefined || referenceId !== undefined;
   return (
     <div
-      className={`${styles['result-banner']} ${styles[tone]}`}
+      className={classNames(styles['result-banner'], styles[tone])}
       role={tone === 'error' ? 'alert' : 'status'}
     >
       <p className={styles['outcome']}>

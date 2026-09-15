@@ -5,6 +5,7 @@
 
 import type {ReactNode} from 'react';
 
+import {classNames} from './class_names';
 import styles from './badge.module.css';
 import type {Tone} from './tone';
 
@@ -18,6 +19,8 @@ export interface BadgeProps {
 /** Renders a short status or tag as a tinted, outlined label. */
 export function Badge({tone, children}: BadgeProps) {
   return (
-    <span className={`${styles['badge']} ${styles[tone]}`}>{children}</span>
+    <span className={classNames(styles['badge'], styles[tone])}>
+      {children}
+    </span>
   );
 }
