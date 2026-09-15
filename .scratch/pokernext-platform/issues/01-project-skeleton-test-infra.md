@@ -133,3 +133,8 @@ cluster 與 `DATABASE_URL` 兩條路徑都跑過）；`next build` 成功。
 - commit 的 `Refs` 行用 `.scratch/pokernext-platform/issues/01`：完整檔名
   超過 commitlint 的 72 欄上限。
 - 未加 CONTEXT.md 詞彙（Notes 中為選配）。未做任何畫面，所以沒有 UI 截圖。
+
+### 2026-09-15 review fixes
+
+- 「CI 上一條指令跑完全部測試」: `.github/workflows/ci.yml` now has two jobs that each run one command, `pnpm check` (typecheck, lint, boundaries, `pnpm test` = unit and every e2e suite). `windows-latest` uses the embedded Postgres test cluster and runs the packages/ui screenshot comparisons against the committed `win32` baselines; `ubuntu-latest` uses a `postgres:16` service through `DATABASE_URL`, and the screenshot specs skip there with a reason. Both install Playwright Chromium first (Linux with `--with-deps`). Locally `pnpm check` passed: Vitest 21 files / 112 tests, packages/ui Playwright 37 passed / 27 skipped, apps/web Playwright 11 passed / 3 skipped. CI itself could not be run from the worktree.
+- 「每個測試的名稱是一句業務句子」: the technical names in `packages/ui/tests` were renamed; `tooling/demo/tests` titles were already sentences and are unchanged.

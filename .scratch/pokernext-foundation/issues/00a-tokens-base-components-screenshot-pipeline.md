@@ -111,3 +111,11 @@ Flow for later UI tickets is in `packages/ui/README.md`
 **Observation:** `--pn-danger` text (danger Button, error line) is about
 3.9:1 on `--pn-bg`, under 4.5:1; DESIGN.md §6 only gates `--pn-text` and
 `--pn-text-2`, so it is left as specified.
+
+### 2026-09-15 review fixes
+
+- Button states: the `data-state="hover" | "focus-visible"` pinning (catalogue-only CSS and JSDoc on `Button`) is removed. The base page renders plain buttons in the hover and focus-visible columns, and `tests/kitchen_sink_base.spec.ts` forces the real `:hover` and `:focus-visible` on them through CDP `CSS.forcePseudoState` before the screenshot. Baselines unchanged; without the forcing the comparison fails (about 23,000 pixels), so all five states are still captured.
+- Class names: every multi-class list in `lib/` and the token catalogue goes through `classNames()`; no template-string joins remain.
+- Screenshot baselines are `win32` only, so the three screenshot specs call `skipScreenshotsWithoutBaselines()` (`tests/kitchen_sink.ts`, `SCREENSHOT_BASELINE_PLATFORMS`) and skip with that reason on other OSes; keyboard, layout and accessibility specs still run there. CI compares screenshots in its Windows job (see ticket 01).
+- `index.ts` stays the root catalogue of components despite 「No barrels」; the reason is recorded in `packages/ui/README.md`.
+- Test names in `packages/ui/tests` are business sentences now (for example 「only Modal and Drawer cast a shadow」).
