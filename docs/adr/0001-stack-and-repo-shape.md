@@ -51,7 +51,9 @@ SQLite 無法忠實驗證。session 與認證自建，不用認證函式庫或�
 - repo 形狀：`apps/web`、`packages/ui`、`packages/domain`、`packages/app`、
   `packages/db`、`packages/ports`、`tooling/demo`。每個 package 採
   `/setup-ts-deep-modules` 的深模組規則：只從根目錄檔案對外，`lib/` 與 `tests/`
-  為私有。
+  為私有。另有開發用的 `packages/dev_process`（啟動、等候、停止本機伺服器行程），
+  dependency-cruiser 只允許 `tooling/` 與測試引用，正式程式碼不引用，也不引用其他
+  workspace package。
 - 客觀狀態由來源事件衍生（`projectTrip` 之類的純函式），沒有可寫的總狀態或行程
   階段欄位；`transition(state, event)` 只用於由人推動的案件流程（異動案件）。
   原型的線性行程階段鏈不採用。

@@ -28,3 +28,13 @@
 - [ ] 差額預覽每列的判定同時有文字與列色；有任何阻擋錯誤時「核准整批入帳」不可按
 
 **Notes:** G06：天城真實範本與活動日切點未定，用去識別化樣本檔（正常／更正／重複／錯會員四種）。G12：交付時間不作正式排程。
+
+## Comments
+
+- 2026-09-15（foundation code review 修正）：`@pokernext/ports/testing` 已有
+  每日積分 `.xlsx` 樣本四種（正常、更正 v2、重複、錯會員）。以
+  `loadPointsWorkbookSample` 載入，以
+  `pnpm --filter @pokernext/ports samples:generate` 重產。PRD 只定欄位，儲存
+  格版面、表頭文字、日期與時區寫法、格式版本值（`v1`）都是暫定（G06、G12、G17
+  未定案）；「錯會員」暫定為「會員編號屬於護照姓名以外的另一人」。維護者決定維持
+  暫定格式，本票定案時一併改樣本。

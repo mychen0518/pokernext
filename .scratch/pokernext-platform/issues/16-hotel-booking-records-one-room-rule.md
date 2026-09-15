@@ -25,3 +25,14 @@
 - [ ] 本人一間房：同一會員同一晚跨兩個行程各送一筆有效住宿（併發測試）只有一筆成功，另一筆被資料庫約束拒絕；同行者不占本人晚數
 - [ ] 酒店、車輛、玩家確認各自有狀態；房已訂車未確認時整趟顯示部分完成
 - [ ] 預訂單四狀態各有 Badge 色（待核對 warning／有效 success／已被替代 neutral／已取消 danger）且文字必備
+
+## Comments
+
+- 2026-09-15（foundation code review 修正）：`@pokernext/ports/testing` 已有
+  酒店確認 PDF 樣本檔，依 PRD 5.6.7 的 A 被 B 替代、C 接續 B，加同號改版與作廢
+  無替代，放在
+  `packages/ports/lib/testing/samples/hotel_confirmations/`。以
+  `loadHotelConfirmationSample` 載入，以
+  `pnpm --filter @pokernext/ports samples:generate` 重產。PRD 5.6 未定 PDF
+  版面，樣本的欄位標籤是暫定的；維護者決定維持暫定格式，本票定案真實版面時一併改
+  樣本產生器與樣本。

@@ -23,3 +23,11 @@
 - [ ] 我的積分頁四個數字（可用／帳面／已保留／來源截止）各有 label，無入帳時整區為 EmptyState 而非 0
 
 **Notes:** G17：正式截止點與真實期初餘額由天城交付；本票用去識別化樣本檔。
+
+## Comments
+
+- 2026-09-15（foundation code review 修正）：`@pokernext/ports/testing` 已有期
+  初餘額 `.xlsx` 樣本（只有正常一種），以 `loadPointsWorkbookSample` 載入。PRD
+  R15-17-02 的期初格式沒有格式版本欄位，G17 也未定案，儲存格版面與表頭是暫定的；
+  維護者決定維持暫定格式，本票依天城交付的真實格式改樣本產生器
+  （`packages/ports/lib/testing/samples/generate_samples.ts`）與樣本。

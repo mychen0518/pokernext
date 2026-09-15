@@ -22,3 +22,13 @@
 - [ ] 只用 DESIGN.md token 與元件；首頁結構為 HeroTripCard → StatusStrip → PointsPanel → ContactRow，一屏只有一顆 Button/primary 或 outline-gold
 - [ ] 空狀態一律 EmptyState 含原因文案，不出現 0、空表格或空的 Hero 圖
 - [ ] 交付附 Playwright 截圖（390×844，五個頁面各 empty 與 ready 兩態）並與參考圖並排自查
+
+## Comments
+
+- 2026-09-15（foundation 00c 決策）：`HeroTripCard` 目前在 kitchen-sink 用深
+  色平面佔位圖（`packages/ui/kitchen_sink/pages/jeju_night_placeholder.ts`，顏色取
+  自 token），因為原型只有彩色漸層而 DESIGN.md 禁用。維護者決定正式首頁的 Hero 照
+  片由本票選定：需有授權、提供替代文字（純裝飾用 `alt=""`），並更新截圖基準圖。
+- 2026-09-15：首頁「可用積分」依 PRD 5.7.4、6.7.1 與第 25 票為帳面餘額減有效保
+  留（Alex：帳面 30,000、保留 25,000 → 可用 5,000 分）；帳面餘額放在「我的積分」
+  頁（第 23、25 票），見 DESIGN.md §3.1 與 00c 的 Comments。
