@@ -279,6 +279,10 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
+    optionalDependencies:
+      '@embedded-postgres/windows-x64':
+        specifier: 16.9.0-beta.15
+        version: 16.9.0-beta.15
 
   packages/dev_process: {}
 

@@ -4,8 +4,10 @@
  * embedded-postgres.
  */
 
+import {spawn} from 'node:child_process';
 import {existsSync} from 'node:fs';
-import {mkdir, rm} from 'node:fs/promises';
+import {mkdir, readFile, rm} from 'node:fs/promises';
+import {platform} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -22,6 +24,9 @@ import {
 } from './config';
 
 const REPO_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+
+/** How long `pg_ctl` waits for the server to start or stop. */
+const PG_CTL_TIMEOUT_SECONDS = 120;
 
 /** A database server this process may have started. */
 export interface DatabaseServer {
@@ -80,12 +85,23 @@ async function startLocalCluster(
       log.push(String(message));
     },
   });
+  const serverFlags = [
+    '-p',
+    String(settings.port),
+    ...Object.entries(settings.serverSettings).flatMap(([setting, value]) => [
+      '-c',
+      `${setting}=${value}`,
+    ]),
+  ];
   try {
     if (!existsSync(join(databaseDir, 'PG_VERSION'))) {
       // initdb refuses a non-empty directory left by an interrupted init.
       await rm(databaseDir, {recursive: true, force: true});
       await mkdir(databaseDir, {recursive: true});
       await cluster.initialise();
+    }
+    if (platform() === 'win32') {
+      return await startWithPgCtl(databaseDir, serverFlags, log);
     }
     await cluster.start();
   } catch (error: unknown) {
@@ -96,6 +112,60 @@ async function startLocalCluster(
     );
   }
   return () => cluster.stop();
+}
+
+/**
+ * Starts the cluster through `pg_ctl` on Windows and returns its stopper.
+ * embedded-postgres spawns `postgres.exe` directly, which Postgres refuses
+ * under an administrator token (GitHub's Windows runners run as one);
+ * `pg_ctl` drops to a restricted token first. Stopping with `pg_ctl stop`
+ * also shuts down cleanly instead of `taskkill /f`, so no stale
+ * `postmaster.pid` is left behind.
+ */
+async function startWithPgCtl(
+  databaseDir: string,
+  serverFlags: readonly string[],
+  log: string[],
+): Promise<() => Promise<void>> {
+  const {pg_ctl: pgCtl} = await import('@embedded-postgres/windows-x64');
+  const logFile = `${databaseDir}.log`;
+  await runPgCtl(pgCtl, [
+    'start',
+    '-D',
+    databaseDir,
+    '-l',
+    logFile,
+    '-w',
+    '-t',
+    String(PG_CTL_TIMEOUT_SECONDS),
+    '-o',
+    serverFlags.join(' '),
+  ]).catch(async (error: unknown) => {
+    log.push(await readFile(logFile, 'utf8').catch(() => ''));
+    throw error;
+  });
+  return async () => {
+    await runPgCtl(pgCtl, ['stop', '-D', databaseDir, '-m', 'fast', '-w']);
+  };
+}
+
+/**
+ * Runs `pg_ctl` and resolves when it exits successfully. Its output is not
+ * piped: the server it launches would inherit the pipes and keep them open,
+ * so the call would never finish. The server writes to the `-l` log instead.
+ */
+function runPgCtl(pgCtl: string, args: readonly string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(pgCtl, args, {stdio: 'ignore', windowsHide: true});
+    child.on('error', reject);
+    child.on('exit', code => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`pg_ctl ${args[0]} exited with code ${code}`));
+      }
+    });
+  });
 }
 
 /** Creates the purpose's database on the local cluster if it is missing. */
