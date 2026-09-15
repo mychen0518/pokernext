@@ -34,34 +34,51 @@ packages/domain、packages/app use-case 層、Postgres 16），本票以該 ADR
 
 **基礎設施放在哪裡**
 
-- 應用服務入口：`apps/web/app/api/health/route.ts`（`POST` 以 `requestKey`
-  記錄一次健康檢查並讀回，201 新紀錄／200 既有紀錄／400 拒絕；
-  `GET [?requestKey=]` 列出紀錄）。它只呼叫 `@pokernext/app`；單一 app 實例在
+- 應用服務入口：`apps/web/app/api/health/route.ts`，只有 `GET /api/health`
+  探針：`healthCheck.probe()` 以自己的 key 寫入一筆健康檢查再讀回，成功回
+  200 `healthy`、失敗回 503 `unhealthy`，不列出任何紀錄、不收輸入（`POST`
+  回 405）。它只呼叫 `@pokernext/app`；單一 app 實例在
   `apps/web/lib/runtime_app.ts`，由 `createAppFromEnvironment()` 建立。
 - use-case 層：`@pokernext/app`（`packages/app/index.ts`）匯出 `createApp`、
-  `createAppFromEnvironment`、`App`（目前只有 `healthCheck.record／list`）、
-  `PortNotConfiguredError`。尚無真實 adapter 的外部埠在正式組裝裡是會丟出
-  `PortNotConfiguredError` 的佔位，由各埠的票替換。
+  `createAppFromEnvironment`、`App`（`healthCheck.record／probe`、
+  `sessions`）、`PortNotConfiguredError`。`createApp` 把整組依賴（資料庫、
+  時鐘、外部埠）交給每一組 use-case。尚無真實 adapter 的外部埠在正式組裝裡是
+  會丟出 `PortNotConfiguredError` 的佔位，由各埠的票替換。列出健康檢查紀錄
+  不是 use-case；測試經 test app 的 `healthCheckRecords()` 觀察。
 - 資料庫：`@pokernext/db`。所有連線設定都在 `packages/db/lib/config.ts`。
   - `@pokernext/db`：`resolveDatabaseUrl(purpose)`、`connectDatabase()`、
-    stores。
+    stores。應用（`'app'`）只用 `DATABASE_URL`，沒設就丟錯並提示用
+    `pnpm demo`；測試（`'test'`）以 `DATABASE_URL` 覆寫本機測試 cluster；
+    `pnpm demo`（`'demo'`）只讀 `DEMO_DATABASE_URL`，否則用本機 demo cluster，
+    再把該資料庫以 `DATABASE_URL` 交給 `next dev`。
   - `@pokernext/db/migrate`：`migrateDatabase(url)`。
   - `@pokernext/db/local_cluster`：`startDatabaseServer('test' | 'demo')`，給
     `tooling/demo`（00d）用；正式程式碼不會載入 embedded-postgres。
   - `@pokernext/db/testing`：template 與每個測試的複製資料庫。
   - migration 由 drizzle-kit 產生並提交在 `packages/db/migrations/`；
-    `health_checks.request_key` 的唯一約束在 migration 裡。
+    `health_checks.request_key` 的唯一約束在 migration 裡。`0002_audit_log.sql`
+    加入只可附加的 `audit_log`（時間由 app 時鐘寫入），session 被拒時由
+    use-case 在同一次呼叫寫入；測試經 test app 的 `auditLog()` 讀取。第 03
+    票擴充。
 - 外部埠：`@pokernext/ports` 放 `Clock` 與六個埠的介面（`ExternalPorts`）。
   `@pokernext/ports/testing` 放 `ControllableClock`、六個假實作與
   `createFakePorts(clock)`：
   - `FakePointsWorkbookSource`：`injectFormatVersionMismatch`、
     `injectSameVersionDifferentContent`、`injectMissingRows`、
-    `injectBlockingErrors`。
+    `injectBlockingErrors`；`provideSample(name)` 提供提交的樣本 Excel。
   - `FakeHotelConfirmationSource`：`injectSameNumberDifferentContent`、
-    `injectVoidedWithoutReplacement`、`injectMissing`。
-  - `FakeOcrProvider`：`injectResponseAfter30Seconds`、
-    `injectTimeoutOver2Minutes`、`injectRecognitionFailure`、
-    `injectLateResult`，延遲都走可控時鐘。
+    `injectVoidedWithoutReplacement`、`injectMissing`；`provideSample(name)`
+    提供提交的樣本 PDF。
+  - 樣本檔（虛構資料）在 `packages/ports/lib/testing/samples/`：每日積分
+    Excel 四種（正常、更正、重複、錯誤會員）與期初 Excel，依 PRD
+    6.3.2／6.3.3 與 R15-17 欄位；酒店確認 PDF 依 PRD 5.6.7 的 A/B/C 例、同號
+    改版、作廢無替代。`loadPointsWorkbookSample`／
+    `loadHotelConfirmationSample` 讀取；
+    `pnpm --filter @pokernext/ports samples:generate` 由定義重建。
+  - `FakeOcrProvider`：`injectTimeoutOver30Seconds`（超過 30 秒手動填寫窗、
+    仍在 2 分鐘嘗試內回應）、`injectTimeoutOver2Minutes`（嘗試內不回應）、
+    `injectRecognitionFailure`、`injectLateResult`（2 分鐘後才到），延遲都走
+    可控時鐘。
   - `FakeKeyManagementService`（真的以 AES-256-GCM 包裝 DEK）：
     `injectCannotWrapDataKey`、`injectCannotDecrypt`、
     `makeKeyVersionUnavailable`、`injectCrossRegionUnavailable`。
@@ -69,7 +86,11 @@ packages/domain、packages/app use-case 層、Postgres 16），本票以該 ADR
     `injectAllChannelsFail`；`delivered` 是可觀察的送達紀錄。
   - `FakeEdgeProtection`：`injectFalseBlock`、`injectOutage`、
     `injectChallenge`、`injectResponseInterrupted`（來源已處理、呼叫端拿不到回
-    應，供重試測試用）。
+    應，供重試測試用）。`withFakeEdge(edge, origin)` 把它做成 HTTP 中介層，包住
+    `fetch` 或 route handler：擋下、挑戰、中斷服務由邊緣直接回應不到來源，
+    回應中斷則到達來源後 reject（`EdgeResponseInterrupted`）。
+    `apps/web/tests/health.spec.ts` 經它對執行中的伺服器探測，apps/web 測試
+    從 `@pokernext/app/testing` 取得。
   - 失敗注入可帶 `{times: n}` 只套用 n 次，否則持續到 `restore()`。
 - 測試入口：`@pokernext/app/testing`：
   - `createTestApp(options)`：複製的資料庫＋假外部埠＋`ControllableClock`；
@@ -112,7 +133,8 @@ pnpm --filter @pokernext/db exec drizzle-kit generate --name <change>  # 改 sch
 - HTTP 測試：Playwright 會先啟動 `webServer` 才跑 globalSetup，所以
   `apps/web/tests/support/web_server.ts` 在 globalSetup 裡自己啟動測試 cluster、
   複製一個資料庫、以該 `DATABASE_URL` 跑 `next dev`（預設 127.0.0.1:3100，
-  `E2E_WEB_PORT` 可改），結束時關掉 Next、刪庫、停 cluster。
+  `E2E_WEB_PORT` 可改），結束時關掉 Next、刪庫、停 cluster。等待就緒與停止
+  程序樹用 `packages/dev_process`（與 `tooling/demo` 共用）。
 
 **CI**：`.github/workflows/ci.yml`（ubuntu、`postgres:16` service、
 `DATABASE_URL`）跑

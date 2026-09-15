@@ -176,3 +176,12 @@ of the report: `.scratch/pokernext-foundation/screenshots/00e/report.png`.
   except `*.webm`, and still ignores `latest.webm`; `.gitattributes` marks
   `*.webm` (and `*.png`) binary. RUNBOOK 「每批固定收尾」 step 6 says to commit
   `<batch>.webm`.
+- Process handling: `lib/demo_server.ts` and `lib/run_demo.ts` now share
+  `packages/dev_process` with the apps/web e2e server (`waitUntilAnswering`,
+  `answersOk` on loopback with the `Host` header, `stopProcessTree`,
+  `isListening`) instead of three copies. The started demo still gets
+  300 s to answer, now written as the shared 180 s `next dev` wait plus
+  120 s for Postgres and migrations; health polls run every 500 ms (were
+  1 s). Port and origins come from `lib/demo_hosts.ts`, which defaults to
+  the domain's `LOCAL_HOST_NAMES` and `DEFAULT_DEMO_PORT` through
+  `@pokernext/app/routing`.
