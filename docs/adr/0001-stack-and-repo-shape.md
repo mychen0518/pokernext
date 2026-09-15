@@ -10,7 +10,7 @@ status: proposed
 
 - 六個獨立前端：被拒，六端讀同一份紀錄投影，拆開會複製狀態邏輯。
 - 把規則寫在 server actions／API route：被拒，`/tdd` 需要能在無 HTTP 的 seam 測領域規則，且第 01 票要求 use-case 層。
-- SQLite 過渡：被拒（理由如上）；本機以 Docker Postgres 起。
+- SQLite 過渡：被拒（理由如上）。本機開發不依賴 Docker：`tooling/demo` 用 `embedded-postgres`（真實 Postgres 16 二進位，首次執行自動下載）啟動資料庫；CI 與正式環境用一般 Postgres。
 
 ## Consequences
 

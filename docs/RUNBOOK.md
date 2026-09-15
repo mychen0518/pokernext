@@ -4,8 +4,8 @@
 
 ## 0. 環境（一次）
 
-- Node 22、pnpm 9、Docker Desktop（Postgres 16）、git、Claude Code。
-- 在 `C:\Project\AI\POKERNEXT_Claude` 執行 `git init`，先 commit 目前所有文件（docs、.scratch、原型）。之後每一步的 `/code-review` 都需要一個可指的 commit。
+- Node 22+、pnpm 9、git、Claude Code CLI。資料庫由 `embedded-postgres` 自動下載，不需要 Docker。缺工具時執行 `scripts/step0b-install-tools.cmd`。
+- 在 `C:\Project\AI\POKERNEXT_Claude` 執行 `scripts/step0-git-init.cmd`（git init 並 commit 目前所有文件）。之後每一步都有對應的 `scripts/stepN-*.cmd` 啟動器，雙擊即可。之後每一步的 `/code-review` 都需要一個可指的 commit。
 - 開 Claude Code：`claude` 於 repo 根目錄。skills 已在 `.claude/skills/`（symlink 到 `.agents/skills/`），輸入 `/` 應看到 `to-tickets`、`implement-spec` 等。
 - 先跑一次 `/git-guardrails-claude-code` 與 `/setup-pre-commit`。給 setup-pre-commit 的指示：`lint 與 format 用 gts（Google TypeScript Style），另加 commitlint 檢查 commit 訊息符合 docs/CODING_STANDARDS.md 引用的 Git Commit Message 規則；pre-commit 跑 typecheck + gts lint + depcruise。`
 
