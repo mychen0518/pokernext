@@ -1,0 +1,85 @@
+/* DataTable (DESIGN.md §4). */
+
+.scroll {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.table {
+  border-collapse: collapse;
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  width: 100%;
+}
+
+.header {
+  background-color: var(--pn-surface-2);
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  font-weight: 400;
+  height: 48px;
+  line-height: var(--pn-type-body-sm-line);
+  padding: 0 var(--pn-space-3);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.header:first-child,
+.cell:first-child {
+  padding-left: var(--pn-space-4);
+}
+
+.header:first-child {
+  border-radius: var(--pn-radius-sm) 0 0 var(--pn-radius-sm);
+}
+
+.header:last-child {
+  border-radius: 0 var(--pn-radius-sm) var(--pn-radius-sm) 0;
+}
+
+.dense .row {
+  height: 48px;
+}
+
+.regular .row {
+  height: 64px;
+}
+
+.row {
+  border-bottom: 1px solid var(--pn-border);
+}
+
+.row:hover {
+  background-color: var(--pn-surface-3);
+}
+
+.cell {
+  padding: 0 var(--pn-space-3);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.cell:first-child .primary {
+  font-weight: 600;
+}
+
+.primary,
+.secondary {
+  display: block;
+}
+
+.mono {
+  font-family: var(--pn-type-mono-family);
+  font-size: var(--pn-type-mono-size);
+  line-height: var(--pn-type-mono-line);
+}
+
+.secondary {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  line-height: var(--pn-type-body-sm-line);
+}

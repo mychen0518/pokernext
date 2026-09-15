@@ -1,0 +1,13 @@
+/*
+ * Text kept for screen readers but not drawn, such as nav labels in the
+ * collapsed Sidebar rail and Stepper status words.
+ */
+
+.visually-hidden {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

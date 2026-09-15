@@ -1,0 +1,114 @@
+/* ListPanel and ListItem (DESIGN.md §4). */
+
+.list-panel {
+  background-color: var(--pn-surface);
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius-md);
+  box-sizing: border-box;
+  color: var(--pn-text);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.search {
+  border-bottom: 1px solid var(--pn-border);
+  padding: var(--pn-space-4);
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  align-items: center;
+  border-bottom: 1px solid var(--pn-border);
+  border-left: 3px solid transparent;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  gap: var(--pn-space-3);
+  min-height: 104px;
+  padding: var(--pn-space-4) var(--pn-space-4) var(--pn-space-4)
+    var(--pn-space-5);
+}
+
+.item:hover:not(.selected) {
+  background-color: var(--pn-surface-3);
+}
+
+.item:focus-visible {
+  outline: var(--pn-focus-ring);
+  outline-offset: calc(-1 * var(--pn-focus-offset));
+}
+
+.selected {
+  background-color: var(--pn-gold-tint);
+  border-left-color: var(--pn-gold);
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--pn-space-1);
+  min-width: 0;
+}
+
+.title-row,
+.meta-row {
+  align-items: center;
+  display: flex;
+  gap: var(--pn-space-3);
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--pn-type-title-sm-family);
+  font-size: var(--pn-type-title-sm-size);
+  font-weight: var(--pn-type-title-sm-weight);
+  line-height: var(--pn-type-title-sm-line);
+}
+
+.person {
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+}
+
+.reference {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-mono-family);
+  font-size: var(--pn-type-mono-size);
+  line-height: var(--pn-type-mono-line);
+}
+
+.time {
+  color: var(--pn-text-3);
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  line-height: var(--pn-type-label-line);
+  white-space: nowrap;
+}
+
+.chevron {
+  color: var(--pn-text-2);
+  flex: none;
+}
+
+.selected .chevron {
+  color: var(--pn-gold-bright);
+}
+
+.skeleton-item {
+  border-bottom: 1px solid var(--pn-border);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-3);
+  justify-content: center;
+  min-height: 104px;
+  padding: var(--pn-space-4) var(--pn-space-5);
+}

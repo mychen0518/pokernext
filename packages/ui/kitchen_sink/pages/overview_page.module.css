@@ -1,0 +1,37 @@
+/* Layout of the 總覽頁 kitchen-sink page. */
+
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-4);
+  padding-top: var(--pn-space-5);
+}
+
+.recent {
+  border-top: 1px solid var(--pn-border);
+  margin-top: var(--pn-space-6);
+  padding-top: var(--pn-space-4);
+}
+
+.section-header {
+  align-items: center;
+  display: flex;
+  gap: var(--pn-space-3);
+  margin-bottom: var(--pn-space-2);
+}
+
+.section-title {
+  font-family: var(--pn-type-title-md-family);
+  font-size: var(--pn-type-title-md-size);
+  font-weight: var(--pn-type-title-md-weight);
+  line-height: var(--pn-type-title-md-line);
+  margin: 0;
+}
+
+.section-meta {
+  color: var(--pn-text-3);
+  flex: 1;
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  line-height: var(--pn-type-label-line);
+}

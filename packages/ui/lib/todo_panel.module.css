@@ -1,0 +1,109 @@
+/* TodoPanel and TodoCard (DESIGN.md §4). */
+
+.todo-panel {
+  background-color: var(--pn-surface);
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius-md);
+  box-sizing: border-box;
+  color: var(--pn-text);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-4);
+  min-width: 0;
+  padding: var(--pn-space-5);
+}
+
+.header {
+  align-items: center;
+  display: flex;
+  gap: var(--pn-space-3);
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--pn-type-title-md-family);
+  font-size: var(--pn-type-title-md-size);
+  font-weight: var(--pn-type-title-md-weight);
+  line-height: var(--pn-type-title-md-line);
+  margin: 0;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-4);
+}
+
+.todo-card {
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-3);
+  padding: var(--pn-space-5);
+}
+
+.card-header {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--pn-space-3);
+}
+
+.icon {
+  color: var(--pn-gold-bright);
+  flex: none;
+}
+
+.card-heading {
+  min-width: 0;
+}
+
+.title-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-2);
+}
+
+.card-title {
+  font-family: var(--pn-type-title-sm-family);
+  font-size: var(--pn-type-title-sm-size);
+  font-weight: var(--pn-type-title-sm-weight);
+  line-height: var(--pn-type-title-sm-line);
+  margin: 0;
+}
+
+.reference {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-mono-family);
+  font-size: var(--pn-type-mono-size);
+  line-height: var(--pn-type-mono-line);
+  margin: 0;
+}
+
+.details {
+  padding-left: calc(var(--pn-space-6) + var(--pn-space-3));
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta {
+  color: var(--pn-text-3);
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  line-height: var(--pn-type-label-line);
+  margin: 0;
+  text-align: right;
+}
+
+.skeleton-card {
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-3);
+  padding: var(--pn-space-5);
+}

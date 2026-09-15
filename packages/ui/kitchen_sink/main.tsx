@@ -17,6 +17,13 @@ function KitchenSink() {
   const page = KITCHEN_SINK_PAGES.find(p => p.id === params.get('page'));
   if (page !== undefined) {
     const Page = page.component;
+    if (page.fullBleed) {
+      return (
+        <div data-kitchen-sink-page={page.id}>
+          <Page params={params} />
+        </div>
+      );
+    }
     return (
       <main className="pn-kitchen-sink" data-kitchen-sink-page={page.id}>
         <Page params={params} />

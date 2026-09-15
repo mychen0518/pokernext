@@ -1,0 +1,70 @@
+/* ResultBanner (DESIGN.md §4). */
+
+.result-banner {
+  align-items: center;
+  background-color: var(--pn-surface);
+  border: 1px solid var(--pn-border);
+  border-radius: var(--pn-radius-md);
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--pn-space-6);
+  min-height: 56px;
+  padding: 0 var(--pn-space-6);
+}
+
+.outcome {
+  align-items: center;
+  display: flex;
+  flex: none;
+  font-family: var(--pn-type-title-sm-family);
+  font-size: var(--pn-type-title-sm-size);
+  font-weight: var(--pn-type-title-sm-weight);
+  gap: var(--pn-space-3);
+  line-height: var(--pn-type-title-sm-line);
+  margin: 0;
+}
+
+.success .outcome {
+  color: var(--pn-success);
+}
+
+.error .outcome {
+  color: var(--pn-danger);
+}
+
+.info .outcome {
+  color: var(--pn-info);
+}
+
+.icon {
+  flex: none;
+}
+
+.reference {
+  align-items: baseline;
+  border-left: 1px solid var(--pn-border);
+  display: flex;
+  gap: var(--pn-space-3);
+  margin: 0;
+  min-width: 0;
+  padding-left: var(--pn-space-6);
+}
+
+.reference-label {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+}
+
+.reference-id {
+  color: var(--pn-text);
+  font-family: var(--pn-type-mono-family);
+  font-size: var(--pn-type-mono-size);
+  line-height: var(--pn-type-mono-line);
+}
+
+.status {
+  flex: none;
+  margin-left: auto;
+}

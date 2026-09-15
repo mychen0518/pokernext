@@ -20,4 +20,10 @@ export interface KitchenSinkPage {
   readonly id: string;
   readonly title: string;
   readonly component: ComponentType<KitchenSinkPageProps>;
+  /**
+   * Renders the page edge to edge without the catalogue padding and
+   * `<main>` wrapper, for pages that bring their own app frame such as a
+   * WorkspaceShell.
+   */
+  readonly fullBleed?: boolean;
 }

@@ -1,0 +1,123 @@
+/* KeyValueList (DESIGN.md §4). */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  min-width: 0;
+}
+
+.row {
+  min-width: 0;
+}
+
+.label {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+}
+
+.value-cell {
+  align-items: center;
+  display: flex;
+  gap: var(--pn-space-3);
+  margin: 0;
+  min-width: 0;
+}
+
+.value {
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--pn-type-mono-family);
+  font-size: var(--pn-type-mono-size);
+  line-height: var(--pn-type-mono-line);
+}
+
+.copy {
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--pn-radius-sm);
+  color: var(--pn-text-2);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  height: 32px;
+  justify-content: center;
+  margin-left: auto;
+  padding: 0;
+  width: 32px;
+}
+
+.copy:hover {
+  color: var(--pn-text);
+}
+
+.copy:focus-visible {
+  outline: var(--pn-focus-ring);
+  outline-offset: 0;
+}
+
+.inline .row {
+  align-items: center;
+  border-bottom: 1px solid var(--pn-border);
+  box-sizing: border-box;
+  column-gap: var(--pn-space-4);
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  min-height: 40px;
+  padding: var(--pn-space-1) 0;
+}
+
+.inline .row:last-child {
+  border-bottom: 0;
+}
+
+.stacked {
+  gap: var(--pn-space-2);
+}
+
+.stacked .row {
+  display: flex;
+  flex-direction: column;
+}
+
+.stacked .label {
+  color: var(--pn-text-3);
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  line-height: var(--pn-type-label-line);
+}
+
+.compact {
+  gap: var(--pn-space-1);
+}
+
+.compact .row {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.compact .label,
+.compact .value {
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  line-height: var(--pn-type-body-sm-line);
+}
+
+.compact .label::after {
+  content: '：';
+}
+
+.compact .mono {
+  font-family: var(--pn-type-mono-family);
+}

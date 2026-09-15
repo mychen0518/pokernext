@@ -1,0 +1,77 @@
+/* DetailPanel (DESIGN.md §4). */
+
+.detail-panel {
+  min-width: 0;
+}
+
+.header {
+  border-bottom: 1px solid var(--pn-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-1);
+  padding: var(--pn-space-5) var(--pn-space-6) var(--pn-space-4);
+}
+
+.title-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-3);
+}
+
+.title {
+  font-family: var(--pn-type-title-md-family);
+  font-size: var(--pn-type-title-md-size);
+  font-weight: var(--pn-type-title-md-weight);
+  line-height: var(--pn-type-title-md-line);
+  margin: 0;
+}
+
+.reference {
+  align-items: baseline;
+  color: var(--pn-text-2);
+  display: flex;
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  gap: var(--pn-space-3);
+  line-height: var(--pn-type-body-sm-line);
+  margin: 0;
+}
+
+.reference-id {
+  color: var(--pn-text);
+  font-family: var(--pn-type-mono-family);
+  font-size: var(--pn-type-mono-size);
+  line-height: var(--pn-type-mono-line);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-6);
+}
+
+.footer {
+  align-items: center;
+  border-top: 1px solid var(--pn-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-4);
+  justify-content: space-between;
+  margin-top: var(--pn-space-6);
+  padding-top: var(--pn-space-6);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pn-space-3);
+}
+
+.meta {
+  color: var(--pn-text-3);
+  font-family: var(--pn-type-label-family);
+  font-size: var(--pn-type-label-size);
+  line-height: var(--pn-type-label-line);
+  margin: 0;
+}

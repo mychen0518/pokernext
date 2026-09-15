@@ -41,8 +41,19 @@ pnpm --filter @pokernext/ui kitchen-sink          # http://127.0.0.1:5173/
 KITCHEN_SINK_PORT=5199 pnpm --filter @pokernext/ui kitchen-sink
 ```
 
-Pages are addressed by query: `/?page=base` (tokens and base components).
-`/` lists every registered page.
+Pages are addressed by query. `/` lists every registered page.
+
+| Page | Shows |
+| --- | --- |
+| `/?page=base` | Tokens and base components (00a). |
+| `/?page=overview` | 總覽頁 in the venue workspace shell (00b). |
+| `/?page=operation` | 作業頁 in the venue workspace shell (00b). |
+| `/?page=case` | 案件頁 in the venue workspace shell (00b). |
+| `/?page=desktop-states` | Loading, empty, error and ready of every desktop data container (00b). |
+
+`overview` and `case` also take `&state=loading|empty|error` to switch their
+data containers. Demo data for these pages lives in
+`kitchen_sink/fixtures/partner_workspace.ts`, never in `lib/`.
 
 Button hover and focus-visible are pinned for screenshots with
 `data-state="hover"` or `data-state="focus-visible"` on the `Button`.
@@ -58,7 +69,10 @@ Button hover and focus-visible are pinned for screenshots with
 Playwright starts the kitchen-sink itself on `KITCHEN_SINK_PORT` (default
 5173) and never reuses a server that is already running, so set a free port
 when another worktree is testing at the same time. Every spec runs in two
-projects: `desktop` (1440×1024) and `mobile` (390×844).
+projects: `desktop` (1440×1024) and `mobile` (390×844). Desktop-workspace
+specs skip the mobile project and set 1280 or 1024 widths per test; their
+layout and keyboard checks are in `desktop_workspace_layout.spec.ts` and
+`desktop_workspace_keyboard.spec.ts`.
 
 Baselines live in `tests/screenshots/<spec file>/<name>-<project>-<platform>.png`
 and are committed. A test fails when more than 200 pixels (or 1% of the
@@ -75,7 +89,9 @@ changed PNG in the diff, and commit them with the change that caused them.
    `params.get('state')` for `?page=player-home&state=empty`. Use the
    catalogue pieces in `kitchen_sink/layout.tsx` if they fit.
 2. Append `{id, title, component}` to `KITCHEN_SINK_PAGES` in
-   `kitchen_sink/page_registry.ts`.
+   `kitchen_sink/page_registry.ts`. Add `fullBleed: true` when the page
+   brings its own app frame (such as `WorkspaceShell`) and must not get the
+   catalogue padding and `<main>` wrapper.
 3. Add `tests/kitchen_sink_<name>.spec.ts`: open the page with
    `openKitchenSinkPage(page, '<id>', {state: 'empty'})` from
    `tests/kitchen_sink.ts` and call `toHaveScreenshot('<name>.png')`. For

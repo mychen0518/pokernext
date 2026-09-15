@@ -101,10 +101,12 @@
 }
 
 .loading .label,
+.loading .icon,
 .loading .chevron {
   opacity: 0;
 }
 
+.icon,
 .chevron {
   flex: none;
 }

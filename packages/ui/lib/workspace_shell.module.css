@@ -1,0 +1,28 @@
+/* WorkspaceShell (DESIGN.md §3.2). */
+
+.shell {
+  background-color: var(--pn-bg);
+  color: var(--pn-text);
+  display: grid;
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  grid-template-columns: auto minmax(0, 1fr);
+  line-height: var(--pn-type-body-line);
+  min-height: 100vh;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.content {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--pn-space-6);
+  min-width: 0;
+  padding: var(--pn-space-8);
+}

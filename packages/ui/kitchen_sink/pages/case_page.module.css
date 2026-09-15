@@ -1,0 +1,50 @@
+/* Layout of the 案件頁 kitchen-sink page. */
+
+.tab-panel {
+  padding-top: var(--pn-space-6);
+}
+
+.request-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-2);
+}
+
+.request {
+  display: grid;
+  gap: var(--pn-space-6);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-4);
+}
+
+.section-title {
+  font-family: var(--pn-type-title-sm-family);
+  font-size: var(--pn-type-title-sm-size);
+  font-weight: var(--pn-type-title-sm-weight);
+  line-height: var(--pn-type-title-sm-line);
+  margin: 0;
+}
+
+.result {
+  align-items: start;
+  display: grid;
+  gap: var(--pn-space-6);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+.result-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pn-space-3);
+}
+
+@media (max-width: 1024px) {
+  .result {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

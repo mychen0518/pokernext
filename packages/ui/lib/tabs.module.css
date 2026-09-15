@@ -1,0 +1,73 @@
+/* Tabs, underline variant (DESIGN.md §4). */
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  overflow-x: auto;
+  position: relative;
+}
+
+/* The 1px base line, drawn under the tabs so the gold underline covers it. */
+.list::after {
+  background-color: var(--pn-border);
+  bottom: 0;
+  content: '';
+  height: 1px;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.tab {
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  box-sizing: border-box;
+  color: var(--pn-text-2);
+  cursor: pointer;
+  display: inline-flex;
+  flex: none;
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  gap: var(--pn-space-2);
+  height: 48px;
+  line-height: var(--pn-type-body-line);
+  padding: 0 var(--pn-space-5);
+  position: relative;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.tab:hover {
+  color: var(--pn-text);
+}
+
+.tab:focus-visible {
+  outline: var(--pn-focus-ring);
+  outline-offset: calc(-1 * var(--pn-focus-offset));
+}
+
+.selected,
+.selected:hover {
+  border-bottom-color: var(--pn-gold);
+  color: var(--pn-gold-bright);
+  font-weight: 600;
+}
+
+.count {
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: var(--pn-type-body-sm-line);
+}
+
+.panel {
+  min-width: 0;
+}

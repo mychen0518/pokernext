@@ -16,16 +16,22 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   variant?: CardVariant;
   /** Optional title row, normally a {@link CardHeader}. */
   header?: ReactNode;
+  /**
+   * Optional `label`-size meta line under a divider at the bottom of the
+   * card, such as a scan time or last update with its time zone.
+   */
+  meta?: ReactNode;
   children?: ReactNode;
 }
 
 /**
  * Renders a DESIGN.md `Card`: no shadow, 6px radius, padded body
- * (24px on desktop, 20px on mobile).
+ * (24px on desktop, 20px on mobile) and an optional meta line.
  */
 export function Card({
   variant = 'default',
   header,
+  meta,
   className,
   children,
   ...rest
@@ -35,6 +41,9 @@ export function Card({
     <section {...rest} className={classes}>
       {header}
       <div className={styles['body']}>{children}</div>
+      {meta === undefined ? undefined : (
+        <footer className={styles['meta']}>{meta}</footer>
+      )}
     </section>
   );
 }

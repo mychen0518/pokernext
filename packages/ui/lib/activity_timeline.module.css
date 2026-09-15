@@ -1,0 +1,93 @@
+/* ActivityTimeline (DESIGN.md §4). */
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  align-items: center;
+  border-bottom: 1px solid var(--pn-border);
+  column-gap: var(--pn-space-4);
+  display: grid;
+  grid-template-columns: 16px 56px 120px 136px minmax(0, 1fr);
+  min-height: 52px;
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+/* Line, dot, line: the lines of neighbouring rows join across the divider. */
+.rail {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+}
+
+.rail-line {
+  background-color: var(--pn-border-strong);
+  flex: 1;
+  width: 1px;
+}
+
+.item:first-child .rail-line:first-child,
+.item:last-child .rail-line:last-child {
+  visibility: hidden;
+}
+
+.dot {
+  background-color: var(--pn-success);
+  border-radius: var(--pn-radius-round);
+  flex: none;
+  height: 8px;
+  width: 8px;
+}
+
+.time {
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: var(--pn-type-body-sm-line);
+}
+
+.event {
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  font-weight: 600;
+  line-height: var(--pn-type-body-line);
+}
+
+.reference {
+  font-family: var(--pn-type-mono-family);
+  font-size: var(--pn-type-mono-size);
+  line-height: var(--pn-type-mono-line);
+  white-space: nowrap;
+}
+
+.description {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  line-height: var(--pn-type-body-sm-line);
+  padding: var(--pn-space-3) 0;
+}
+
+.skeleton-row {
+  align-items: center;
+  border-bottom: 1px solid var(--pn-border);
+  display: grid;
+  gap: var(--pn-space-4);
+  grid-template-columns: 1fr 3fr;
+  min-height: 52px;
+}
+
+.skeleton-row:last-child {
+  border-bottom: 0;
+}
