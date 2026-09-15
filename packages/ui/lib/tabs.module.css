@@ -1,4 +1,4 @@
-/* Tabs, underline variant (DESIGN.md §4). */
+/* Tabs, underline and segmented variants (DESIGN.md §4). */
 
 .tabs {
   display: flex;
@@ -8,37 +8,21 @@
 
 .list {
   display: flex;
-  overflow-x: auto;
   position: relative;
-}
-
-/* The 1px base line, drawn under the tabs so the gold underline covers it. */
-.list::after {
-  background-color: var(--pn-border);
-  bottom: 0;
-  content: '';
-  height: 1px;
-  left: 0;
-  position: absolute;
-  right: 0;
 }
 
 .tab {
   align-items: center;
   background-color: transparent;
   border: 0;
-  border-bottom: 2px solid transparent;
   box-sizing: border-box;
   color: var(--pn-text-2);
   cursor: pointer;
   display: inline-flex;
-  flex: none;
   font-family: var(--pn-type-body-family);
   font-size: var(--pn-type-body-size);
   gap: var(--pn-space-2);
-  height: 48px;
   line-height: var(--pn-type-body-line);
-  padding: 0 var(--pn-space-5);
   position: relative;
   white-space: nowrap;
   z-index: 1;
@@ -53,10 +37,7 @@
   outline-offset: calc(-1 * var(--pn-focus-offset));
 }
 
-.selected,
-.selected:hover {
-  border-bottom-color: var(--pn-gold);
-  color: var(--pn-gold-bright);
+.selected {
   font-weight: 600;
 }
 
@@ -70,4 +51,62 @@
 
 .panel {
   min-width: 0;
+}
+
+/* Underline: in-page tabs over a 1px base line. */
+
+.underline .list {
+  overflow-x: auto;
+}
+
+/* The 1px base line, drawn under the tabs so the gold underline covers it. */
+.underline .list::after {
+  background-color: var(--pn-border);
+  bottom: 0;
+  content: '';
+  height: 1px;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.underline .tab {
+  border-bottom: 2px solid transparent;
+  flex: none;
+  height: 48px;
+  padding: 0 var(--pn-space-5);
+}
+
+.underline .selected,
+.underline .selected:hover {
+  border-bottom-color: var(--pn-gold);
+  color: var(--pn-gold-bright);
+}
+
+/* Segmented: equal segments in a surface-2 track, phone only. */
+
+.segmented .list {
+  background-color: var(--pn-surface-2);
+  border-radius: var(--pn-radius-md);
+  gap: var(--pn-space-1);
+  padding: var(--pn-space-1);
+}
+
+.segmented .tab {
+  border-radius: var(--pn-radius-sm);
+  flex: 1 1 0;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0 var(--pn-space-3);
+}
+
+.segmented .selected,
+.segmented .selected:hover {
+  background-color: var(--pn-gold);
+  color: var(--pn-text-inverse);
+}
+
+.segmented .tab:focus-visible {
+  outline-offset: var(--pn-focus-offset);
 }

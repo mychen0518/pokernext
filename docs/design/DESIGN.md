@@ -190,7 +190,7 @@
 | `KpiRow` / `KpiTile` | — | icon 32 金色 + label `body-sm` + 數字 `display-md`；tile 之間 1px 垂直分隔線；不用卡片底。 |
 | `StatusDot` | `success` / `warning` / `danger` / `info` / `neutral` | 8px 圓點 + 文字（同色）；文字必備。 |
 | `Badge` | 同 StatusDot 五色 | 高 22px、`--pn-radius-sm`、1px 同色邊框、底色用對應 `-tint`、字 12px。 |
-| `Tabs` | `underline`（頁內）、`segmented`（僅手機） | 高 48px；目前項文字 `--pn-gold-bright` 600 + 2px 金底線；可帶計數（`body-sm` 600，與標籤同色）。鍵盤：整列只佔一個 Tab 停點（目前項），← → 切換並選取（頭尾循環），Home / End 到第一／最後一項。 |
+| `Tabs` | `underline`（頁內）、`segmented`（僅手機） | underline：高 48px；目前項文字 `--pn-gold-bright` 600 + 2px 金底線；可帶計數（`body-sm` 600，與標籤同色）。segmented：`--pn-surface-2` 底軌、`--pn-radius-md`、內距與段距 `--pn-space-1`；各段平分寬度、高至少 44px（觸控區）、`--pn-radius-sm`、文字 `body` `--pn-text-2`；目前段 `--pn-gold` 底 + `--pn-text-inverse` 600（目前位置，不算金底按鈕），無底線。鍵盤（兩種變體相同）：整列只佔一個 Tab 停點（目前項），← → 切換並選取（頭尾循環），Home / End 到第一／最後一項。 |
 | `SearchInput` | — | 高 48px、`--pn-surface-2` 底、1px `--pn-border-strong`、左 icon、右清除鍵；placeholder `--pn-text-3`。 |
 | `Input` / `Select` / `DateInput` / `Textarea` | 帶前綴（如貨幣）版本 | 同 SearchInput 規格；label 在左（桌面 label/value 表單）或在上（手機）；錯誤狀態邊框 `--pn-danger` + 底下一行錯誤文字；Textarea 右下字數 `label`。 |
 | `Checkbox` | — | 20px、選取時金底深色勾；用於「本人核對一致」這類確認。 |

@@ -1,7 +1,7 @@
 /**
- * @fileoverview `Tabs` from DESIGN.md §4, `underline` variant: in-page tabs
- * with optional counts, following the WAI-ARIA tabs pattern (one Tab stop,
- * arrow keys move and select).
+ * @fileoverview `Tabs` from DESIGN.md §4: `underline` in-page tabs with
+ * optional counts and `segmented` phone tabs, both following the WAI-ARIA
+ * tabs pattern (one Tab stop, arrow keys move and select).
  */
 
 'use client';
@@ -12,6 +12,12 @@ import type {KeyboardEvent, ReactNode} from 'react';
 import {classNames} from './class_names';
 import {moveRovingFocus} from './roving_focus';
 import styles from './tabs.module.css';
+
+/**
+ * Look of a tab list: `underline` for in-page tabs, `segmented` for equal
+ * segments on a phone.
+ */
+export type TabsVariant = 'underline' | 'segmented';
 
 /** One tab of a {@link Tabs} list. */
 export interface TabItem {
@@ -25,6 +31,7 @@ export interface TabItem {
 export interface TabsProps {
   /** Accessible name of the tab list, such as 案件狀態. */
   label: string;
+  variant?: TabsVariant;
   items: readonly TabItem[];
   selectedId: string;
   /** Called with the tab chosen by click, arrow keys, Home or End. */
@@ -34,12 +41,13 @@ export interface TabsProps {
 }
 
 /**
- * Renders an underline tab list. Only the selected tab is in the Tab order;
+ * Renders a tab list. Only the selected tab is in the Tab order;
  * ArrowLeft and ArrowRight select the previous or next tab (wrapping), Home
  * and End the first or last.
  */
 export function Tabs({
   label,
+  variant = 'underline',
   items,
   selectedId,
   onSelect,
@@ -63,7 +71,7 @@ export function Tabs({
   }
 
   return (
-    <div className={styles['tabs']}>
+    <div className={classNames(styles['tabs'], styles[variant])}>
       <div
         className={styles['list']}
         role="tablist"

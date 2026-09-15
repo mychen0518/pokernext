@@ -10,6 +10,12 @@
   width: 100%;
 }
 
+/* A phone content width (390px viewport minus 16px gutters). */
+.phone-width {
+  max-width: 100%;
+  width: 358px;
+}
+
 .paragraph {
   margin: 0;
 }
