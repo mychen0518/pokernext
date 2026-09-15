@@ -1,0 +1,73 @@
+/* PointsPanel (DESIGN.md §4). */
+
+.points-panel {
+  box-sizing: border-box;
+  color: var(--pn-text);
+  padding: 0 var(--pn-space-6);
+}
+
+.figures {
+  align-items: flex-end;
+  border-bottom: 1px solid var(--pn-border);
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: var(--pn-space-5) 0;
+  row-gap: var(--pn-space-4);
+}
+
+.figure {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--pn-space-2);
+  min-width: 0;
+}
+
+/* The vertical divider between available and reserved. */
+.secondary {
+  border-left: 1px solid var(--pn-border);
+  padding-left: var(--pn-space-8);
+}
+
+.label {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-body-sm-family);
+  font-size: var(--pn-type-body-sm-size);
+  line-height: var(--pn-type-body-sm-line);
+}
+
+.value {
+  align-items: baseline;
+  column-gap: var(--pn-space-1);
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.number {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.available {
+  font-family: var(--pn-type-display-lg-family);
+  font-size: var(--pn-type-display-lg-size);
+  font-weight: var(--pn-type-display-lg-weight);
+  line-height: var(--pn-type-display-lg-line);
+}
+
+.reserved {
+  color: var(--pn-text-2);
+  font-family: var(--pn-type-display-md-family);
+  font-size: var(--pn-type-display-md-size);
+  font-weight: var(--pn-type-display-md-weight);
+  line-height: var(--pn-type-display-md-line);
+}
+
+.unit {
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  font-weight: var(--pn-type-body-weight);
+  line-height: var(--pn-type-body-line);
+}
