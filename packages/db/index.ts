@@ -12,9 +12,6 @@ export type {
   SessionEnding,
   SessionRecord,
   SessionStore,
-  StoredAccountKind,
-  StoredHostKind,
-  StoredWorkspace,
 } from './lib/accounts';
 export {connectDatabase} from './lib/database';
 export type {ConnectOptions, Database} from './lib/database';

@@ -10,6 +10,7 @@
     "./testing": "./testing.ts"
   },
   "dependencies": {
+    "@pokernext/domain": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "embedded-postgres": "16.9.0-beta.15",
     "pg": "^8.23.0"

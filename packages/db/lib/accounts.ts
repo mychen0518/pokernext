@@ -4,27 +4,21 @@
  * `packages/app` use-cases; this file only stores and reads rows.
  */
 
+// The stored kinds, workspaces and hosts are the domain's own types; the CHECK
+// constraints in the migrations repeat their values, and
+// tests/migration_workspaces_match_domain.test.ts keeps the two in step.
+import type {AccountKind, HostKind, Workspace} from '@pokernext/domain';
 import {and, asc, eq, isNull} from 'drizzle-orm';
 import type {NodePgDatabase} from 'drizzle-orm/node-postgres';
 
 import {accounts, sessions} from './schema';
 
-/** The kinds the `accounts_kind_known` constraint accepts. */
-export type StoredAccountKind = 'member' | 'work';
-
-/** The workspaces the `accounts_workspace_known` constraint accepts. */
-export type StoredWorkspace =
-  'player' | 'venue' | 'admin' | 'platform' | 'staff' | 'agent';
-
-/** The hosts the `sessions_host_kind_known` constraint accepts. */
-export type StoredHostKind = 'player' | 'work';
-
 /** A stored account. */
 export interface AccountRecord {
   readonly id: string;
-  readonly kind: StoredAccountKind;
+  readonly kind: AccountKind;
   readonly displayName: string;
-  readonly workspace: StoredWorkspace;
+  readonly workspace: Workspace;
   readonly roleLabel: string;
   readonly createdAt: Date;
 }
@@ -33,7 +27,7 @@ export interface AccountRecord {
 export interface SessionRecord {
   readonly tokenHash: string;
   readonly accountId: string;
-  readonly hostKind: StoredHostKind;
+  readonly hostKind: HostKind;
   readonly createdAt: Date;
 }
 
@@ -46,7 +40,7 @@ export interface ActiveSessionRecord {
 /** Asks to end the active session with this token hash on this host. */
 export interface SessionEnding {
   readonly tokenHash: string;
-  readonly hostKind: StoredHostKind;
+  readonly hostKind: HostKind;
   readonly endedAt: Date;
 }
 
@@ -154,7 +148,7 @@ export function createSessionStore(db: NodePgDatabase): SessionStore {
           tokenHash: row.tokenHash,
           accountId: row.accountId,
           // Safe: the sessions_host_kind_known constraint admits only these.
-          hostKind: row.hostKind as StoredHostKind,
+          hostKind: row.hostKind as HostKind,
           createdAt: row.createdAt,
         },
         account: toAccountRecord(row.account),
@@ -182,8 +176,8 @@ function toAccountRecord(row: AccountRow): AccountRecord {
   return {
     ...row,
     // Safe: the accounts_kind_known constraint admits only these values.
-    kind: row.kind as StoredAccountKind,
+    kind: row.kind as AccountKind,
     // Safe: the accounts_workspace_known constraint admits only these values.
-    workspace: row.workspace as StoredWorkspace,
+    workspace: row.workspace as Workspace,
   };
 }
