@@ -10,6 +10,15 @@ export {
   startTestDatabaseServer,
 } from '@pokernext/db/testing';
 export type {TestDatabase, TestDatabaseServer} from '@pokernext/db/testing';
+// For HTTP-level tests (apps/web may not import @pokernext/ports/testing):
+// the fake Cloudflare edge as middleware in front of `fetch`.
+export {
+  EdgeResponseInterrupted,
+  FAKE_EDGE_OUTCOME_HEADER,
+  FakeEdgeProtection,
+  withFakeEdge,
+} from '@pokernext/ports/testing';
+export type {HttpHandler} from '@pokernext/ports/testing';
 export type {AuditEntry} from './lib/audit_log';
 export {
   ConcurrencyViolation,

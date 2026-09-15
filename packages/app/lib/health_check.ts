@@ -14,8 +14,9 @@
 
 import {randomUUID} from 'node:crypto';
 
-import type {Database, HealthCheckRecord} from '@pokernext/db';
-import type {Clock} from '@pokernext/ports';
+import type {HealthCheckRecord} from '@pokernext/db';
+
+import type {AppDependencies} from './app_dependencies';
 
 /** The longest request key accepted. */
 const MAX_REQUEST_KEY_LENGTH = 200;
@@ -71,9 +72,10 @@ export interface HealthCheckUseCases {
 
 /** Builds the health-check use-cases over their collaborators. */
 export function createHealthCheckUseCases(
-  database: Database,
-  clock: Clock,
+  dependencies: AppDependencies,
 ): HealthCheckUseCases {
+  const {database, clock} = dependencies;
+
   async function recordAndReadBack(
     requestKey: string,
   ): Promise<HealthCheckRecorded> {

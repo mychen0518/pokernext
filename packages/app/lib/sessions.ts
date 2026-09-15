@@ -9,7 +9,7 @@
 
 import {createHash} from 'node:crypto';
 
-import type {ActiveSessionRecord, Database} from '@pokernext/db';
+import type {ActiveSessionRecord} from '@pokernext/db';
 import {
   decideSessionEnd,
   decideSessionStart,
@@ -21,9 +21,9 @@ import {
   type WorkspaceEntryDecision,
   type WorkspaceEntryRefusal,
 } from '@pokernext/domain';
-import type {Clock} from '@pokernext/ports';
 
 import {type AccountSummary, toAccountSummary} from './accounts';
+import type {AppDependencies} from './app_dependencies';
 import {createAuditTrail} from './audit_log';
 import {
   type AccountId,
@@ -141,9 +141,9 @@ export interface SessionUseCases {
 
 /** Builds the session use-cases over their collaborators. */
 export function createSessionUseCases(
-  database: Database,
-  clock: Clock,
+  dependencies: AppDependencies,
 ): SessionUseCases {
+  const {database, clock} = dependencies;
   const audit = createAuditTrail(database, clock);
 
   function findActive(

@@ -3,13 +3,9 @@
  * ports. Real wiring and test wiring both go through {@link createApp}.
  */
 
-import {
-  connectDatabase,
-  type Database,
-  resolveDatabaseUrl,
-} from '@pokernext/db';
-import type {Clock, ExternalPorts} from '@pokernext/ports';
+import {connectDatabase, resolveDatabaseUrl} from '@pokernext/db';
 
+import type {AppDependencies} from './app_dependencies';
 import {
   createHealthCheckUseCases,
   type HealthCheckUseCases,
@@ -18,12 +14,7 @@ import {createSessionUseCases, type SessionUseCases} from './sessions';
 import {SYSTEM_CLOCK} from './system_clock';
 import {createUnconfiguredPorts} from './unconfigured_ports';
 
-/** What the use-cases run on. */
-export interface AppDependencies {
-  readonly database: Database;
-  readonly clock: Clock;
-  readonly ports: ExternalPorts;
-}
+export type {AppDependencies} from './app_dependencies';
 
 /** The application: every use-case, grouped by capability. */
 export interface App {
@@ -33,13 +24,15 @@ export interface App {
   close(): Promise<void>;
 }
 
-/** Builds the application from explicit dependencies. */
+/**
+ * Builds the application from explicit dependencies. Every group of
+ * use-cases receives all of them, the injected external ports included.
+ */
 export function createApp(dependencies: AppDependencies): App {
-  const {database, clock} = dependencies;
   return {
-    healthCheck: createHealthCheckUseCases(database, clock),
-    sessions: createSessionUseCases(database, clock),
-    close: () => database.close(),
+    healthCheck: createHealthCheckUseCases(dependencies),
+    sessions: createSessionUseCases(dependencies),
+    close: () => dependencies.database.close(),
   };
 }
 

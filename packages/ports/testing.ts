@@ -7,6 +7,12 @@
 
 export {ControllableClock} from './lib/testing/controllable_clock';
 export type {ControllableClockOptions} from './lib/testing/controllable_clock';
+export {
+  EdgeResponseInterrupted,
+  FAKE_EDGE_OUTCOME_HEADER,
+  withFakeEdge,
+} from './lib/testing/fake_edge_middleware';
+export type {HttpHandler} from './lib/testing/fake_edge_middleware';
 export {FakeEdgeProtection} from './lib/testing/fake_edge_protection';
 export {FakeHotelConfirmationSource} from './lib/testing/fake_hotel_confirmation_source';
 export type {HotelConfirmationContent} from './lib/testing/fake_hotel_confirmation_source';

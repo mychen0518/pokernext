@@ -50,7 +50,9 @@ rest in `lib/`.
 - `packages/ui/kitchen_sink/` (dev-only component catalogue) is imported only
   from inside itself, never from `packages/ui`'s entry points or `lib/`.
 - `packages/ports/testing.ts` (fakes) is imported only from `tests/` folders
-  and the `@pokernext/app/testing` wiring, never from `apps/web`.
+  and the `@pokernext/app/testing` wiring, never from `apps/web`. HTTP tests
+  in `apps/web/tests/` get the fake edge middleware (`withFakeEdge`) through
+  `@pokernext/app/testing`.
 - `packages/app/testing.ts` (test app, legal-operation builder, concurrency
   tool) is imported only from `tests/` folders; `packages/db/testing.ts`
   (cloned test databases) only from `tests/` folders and that wiring.
