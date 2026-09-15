@@ -6,7 +6,8 @@ behind a small interface. dependency-cruiser enforces the rules below;
 
 ## Layout
 
-Copy `packages/example/` to start a package:
+Start a package in this shape (`packages/ports/` is a small working
+example):
 
 ```text
 packages/<name>/
@@ -48,8 +49,14 @@ rest in `lib/`.
 - `packages/ui` imports no other workspace package.
 - `packages/ui/kitchen_sink/` (dev-only component catalogue) is imported only
   from inside itself, never from `packages/ui`'s entry points or `lib/`.
-- `packages/ports/testing.ts` (fakes) is imported only from `tests/` folders,
-  never from `apps/web`.
+- `packages/ports/testing.ts` (fakes) is imported only from `tests/` folders
+  and the `@pokernext/app/testing` wiring, never from `apps/web`.
+- `packages/app/testing.ts` (test app, legal-operation builder, concurrency
+  tool) is imported only from `tests/` folders; `packages/db/testing.ts`
+  (cloned test databases) only from `tests/` folders and that wiring.
+- A package's `lib/testing/` is reachable only through its own `testing.ts`.
+- `packages/db/local_cluster.ts` (embedded Postgres) is imported only from
+  `tooling/` and tests, so production code never loads embedded-postgres.
 - `packages/app/demo.ts` is imported only from `tooling/demo`.
 - Nothing imports `apps/*` or `tooling/*`.
 

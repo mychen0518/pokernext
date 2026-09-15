@@ -4,6 +4,10 @@
 !.env.example
 dist/
 .next/
+next-env.d.ts
+# Written by `next dev` only when it detects an AI coding agent.
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
 coverage/
 *.log
 .DS_Store
