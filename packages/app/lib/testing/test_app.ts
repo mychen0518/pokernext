@@ -13,6 +13,7 @@ import {
 } from '@pokernext/ports/testing';
 
 import {type App, createApp} from '../app';
+import {type DemoAccountsEnsured, ensureDemoAccountsOn} from '../demo_accounts';
 
 /** How to set up a test app. */
 export interface TestAppOptions extends ControllableClockOptions {
@@ -27,6 +28,11 @@ export interface TestAppOptions extends ControllableClockOptions {
 export interface TestApp extends App {
   readonly clock: ControllableClock;
   readonly ports: FakeExternalPorts;
+  /**
+   * Creates any missing demo account with the demo entry point's
+   * implementation. Tests reach it through `given(app).demoAccount(…)`.
+   */
+  ensureDemoAccounts(): Promise<DemoAccountsEnsured>;
   /** Closes connections and drops the test's database. */
   close(): Promise<void>;
 }
@@ -50,6 +56,7 @@ export async function createTestApp(
     ...app,
     clock,
     ports,
+    ensureDemoAccounts: () => ensureDemoAccountsOn(database, clock),
     close: async () => {
       await app.close();
       await testDatabase.drop();

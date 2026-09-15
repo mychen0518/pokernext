@@ -1,0 +1,10 @@
+/* Document chrome of apps/web. Tokens only (DESIGN.md §2). */
+
+body {
+  background-color: var(--pn-bg);
+  color: var(--pn-text);
+  font-family: var(--pn-type-body-family);
+  font-size: var(--pn-type-body-size);
+  line-height: var(--pn-type-body-line);
+  margin: 0;
+}

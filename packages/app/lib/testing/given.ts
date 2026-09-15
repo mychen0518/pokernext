@@ -7,8 +7,13 @@
 
 import {randomBytes} from 'node:crypto';
 
-import type {App} from '../app';
+import type {HostKind, Workspace} from '@pokernext/domain';
+
+import type {AccountSummary} from '../accounts';
+import type {DemoAccountsEnsured} from '../demo_accounts';
 import type {HealthCheck} from '../health_check';
+import type {SessionStarted} from '../sessions';
+import type {TestApp} from './test_app';
 
 /** Thrown when a use-case refuses a step, so the precondition does not exist. */
 export class PreconditionRefused extends Error {
@@ -33,7 +38,37 @@ export interface HealthCheckRecordedOptions {
  * rule refuses it.
  */
 export class LegalOperations {
-  constructor(private readonly app: App) {}
+  constructor(private readonly app: TestApp) {}
+
+  /**
+   * The six demo accounts exist, created by the same implementation as
+   * `@pokernext/app/demo`; `created` counts the ones this step added.
+   */
+  async demoAccountsEnsured(): Promise<DemoAccountsEnsured> {
+    return this.app.ensureDemoAccounts();
+  }
+
+  /** The demo accounts exist; returns the one in the given workspace. */
+  async demoAccount(workspace: Workspace): Promise<AccountSummary> {
+    const {accounts} = await this.app.ensureDemoAccounts();
+    const account = accounts.find(item => item.workspace === workspace);
+    if (account === undefined) {
+      throw new PreconditionRefused('demoAccount', {workspace, accounts});
+    }
+    return account;
+  }
+
+  /** A session has been started for the account on the host. */
+  async sessionStarted(request: {
+    readonly accountId: string;
+    readonly host: HostKind;
+  }): Promise<SessionStarted> {
+    const outcome = await this.app.sessions.start(request);
+    if (outcome.status === 'refused') {
+      throw new PreconditionRefused('sessionStarted', outcome);
+    }
+    return outcome;
+  }
 
   /** A health check has been recorded. */
   async healthCheckRecorded(
@@ -50,7 +85,7 @@ export class LegalOperations {
 }
 
 /** Starts arranging preconditions on an application: `given(app).…()`. */
-export function given(app: App): LegalOperations {
+export function given(app: TestApp): LegalOperations {
   return new LegalOperations(app);
 }
 

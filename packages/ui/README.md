@@ -14,6 +14,10 @@ import {Button, StatusDot} from '@pokernext/ui';
 - `tokens.css` defines every token as a `--pn-*` custom property. Type tokens
   are split into `--pn-type-<name>-family`, `-size`, `-line` and `-weight`.
 - `index.ts` exports each component and its props type by name.
+- Components that use React hooks start with `'use client'`, so Next.js
+  server components can import `@pokernext/ui`. Components that take an
+  event handler (such as `Sidebar`'s `onSignOut`) must be rendered from a
+  client component when the handler is set.
 - Component styles use `var(--pn-*)` only. A Vitest test fails on any literal
   colour, font family or size, spacing or radius in `lib/**/*.module.css`; if
   a value is missing, add a token to DESIGN.md §2 and `tokens.css` first.

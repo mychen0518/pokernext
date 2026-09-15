@@ -13,6 +13,7 @@ import {fileURLToPath} from 'node:url';
 import type {FullConfig} from '@playwright/test';
 import {
   createTestDatabase,
+  ensureDemoAccountsInDatabase,
   startTestDatabaseServer,
 } from '@pokernext/app/testing';
 
@@ -39,6 +40,8 @@ export async function startWebServer(
 
   const server = await startTestDatabaseServer();
   const database = await createTestDatabase();
+  // The role switcher offers these accounts; created by the demo use-case.
+  await ensureDemoAccountsInDatabase({databaseUrl: database.url});
   const next = spawnNext(hostname, port, database.url);
   const teardown = async () => {
     stopProcessTree(next.child);
@@ -76,6 +79,8 @@ function spawnNext(
       env: {
         ...process.env,
         DATABASE_URL: databaseUrl,
+        // Its own Next output, so `pnpm demo` can run at the same time.
+        NEXT_DIST_DIR: '.next/e2e',
         NEXT_TELEMETRY_DISABLED: '1',
       },
       // A process group on POSIX, so teardown can stop Next's workers too.

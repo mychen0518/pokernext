@@ -8,6 +8,13 @@
       "when": 1789456561733,
       "tag": "0000_health_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789459676906,
+      "tag": "0001_accounts_sessions",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,8 @@
  * in the shared control box.
  */
 
+'use client';
+
 import {useId} from 'react';
 import type {InputHTMLAttributes} from 'react';
 

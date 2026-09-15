@@ -3,6 +3,8 @@
  * search icon on the left and a clear button on the right.
  */
 
+'use client';
+
 import {Search, X} from 'lucide-react';
 import {useRef} from 'react';
 import type {InputHTMLAttributes} from 'react';

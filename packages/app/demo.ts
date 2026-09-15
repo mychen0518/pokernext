@@ -4,4 +4,8 @@
  * this file, so it never reaches a production build.
  */
 
-export {};
+export {ensureDemoAccounts} from './lib/demo_accounts';
+export type {
+  DemoAccountsEnsured,
+  EnsureDemoAccountsOptions,
+} from './lib/demo_accounts';

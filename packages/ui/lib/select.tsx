@@ -3,6 +3,8 @@
  * shared control box, with a chevron in place of the platform arrow.
  */
 
+'use client';
+
 import {ChevronDown} from 'lucide-react';
 import {useId} from 'react';
 import type {ReactNode, SelectHTMLAttributes} from 'react';

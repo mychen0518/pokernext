@@ -3,6 +3,8 @@
  * the character count at the bottom right when a limit is set.
  */
 
+'use client';
+
 import {useId, useState} from 'react';
 import type {ChangeEvent, TextareaHTMLAttributes} from 'react';
 

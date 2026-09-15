@@ -5,6 +5,8 @@
  * listbox pattern: one Tab stop, arrow keys move, Enter or Space selects.
  */
 
+'use client';
+
 import {ChevronRight} from 'lucide-react';
 import {
   Children,
